@@ -1,4 +1,4 @@
-package com.ltnc.auction.domain.auction;
+package com.ltnc.auction.domain.auction.bid;
 
 import java.util.List;
 import java.util.Optional;

@@ -1,14 +1,13 @@
-package com.ltnc.auction.domain.auction;
+package com.ltnc.auction.domain.auction.bid;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 
+import com.ltnc.auction.domain.auction.auc.Auction;
 import com.ltnc.auction.domain.user.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -22,28 +21,24 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@Table(name = "reserved_funds")
-public class ReservedFunds {
+@Table(name = "bids")
+public class Bid {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "auction_id", nullable = false)
     private Auction auction;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bidder_id", nullable = false)
+    private User bidder;
 
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal amount;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ReservedFundStatus status = ReservedFundStatus.HELD;
-
-    @Column(nullable = false)
-    private Instant createdAt = Instant.now();
+    private Instant placedAt = Instant.now();
 }

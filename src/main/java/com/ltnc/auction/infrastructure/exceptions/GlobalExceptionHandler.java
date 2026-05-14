@@ -7,8 +7,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.ltnc.auction.domain.exceptions.AuctionNotFoundException;
+import com.ltnc.auction.domain.exceptions.InvalidAuctionStateException;
+import com.ltnc.auction.domain.exceptions.InvalidBidException;
 import com.ltnc.auction.domain.exceptions.InvalidSessionException;
 import com.ltnc.auction.domain.exceptions.InventoryItemNotFoundException;
+import com.ltnc.auction.domain.exceptions.ItemNotAvailableException;
 import com.ltnc.auction.domain.exceptions.RefreshTokenExpiredException;
 import com.ltnc.auction.domain.exceptions.RefreshTokenNotFoundException;
 import com.ltnc.auction.domain.exceptions.UnauthorizedActionException;
@@ -51,6 +55,26 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnauthorizedActionException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorizedAction(UnauthorizedActionException ex, HttpServletRequest request) {
         return buildErrorResponse(ex, HttpStatus.FORBIDDEN, request);
+    }
+
+    @ExceptionHandler(InvalidAuctionStateException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidAuctionState(InvalidAuctionStateException ex, HttpServletRequest request) {
+        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST, request);
+    }
+    
+    @ExceptionHandler(AuctionNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleAuctionNotFound(AuctionNotFoundException ex, HttpServletRequest request) {
+        return buildErrorResponse(ex, HttpStatus.NOT_FOUND, request);
+    }
+    
+    @ExceptionHandler(ItemNotAvailableException.class)
+    public ResponseEntity<ErrorResponse> handleItemNotAvailable(ItemNotAvailableException ex, HttpServletRequest request) {
+        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(InvalidBidException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidBid(InvalidBidException ex, HttpServletRequest request) {
+        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST, request);
     }
 
     private ResponseEntity<ErrorResponse> buildErrorResponse(Exception ex, HttpStatus status, HttpServletRequest request) {

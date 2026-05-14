@@ -1,6 +1,7 @@
-package com.ltnc.auction.domain.auction;
+package com.ltnc.auction.domain.auction.auc;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 
 import com.ltnc.auction.domain.inventory.Item;
@@ -36,7 +37,7 @@ public class Auction {
     private User seller;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "item_id", nullable = false)
+    @JoinColumn(name = "item_id", nullable = true)
     private Item item;
 
     @Column(nullable = false, precision = 15, scale = 2)
@@ -64,4 +65,10 @@ public class Auction {
 
     @Column(nullable = false)
     private Integer bidCount = 0;
+
+    public void recalculateMinBidIncrement() {
+        this.minBidIncrement = this.currentPrice
+                .multiply(BigDecimal.valueOf(0.05))
+                .setScale(2, RoundingMode.HALF_UP);
+    }
 }

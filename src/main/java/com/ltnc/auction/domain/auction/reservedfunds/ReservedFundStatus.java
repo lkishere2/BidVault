@@ -1,4 +1,4 @@
-package com.ltnc.auction.domain.auction;
+package com.ltnc.auction.domain.auction.reservedfunds;
 
 public enum ReservedFundStatus {
     HELD,
