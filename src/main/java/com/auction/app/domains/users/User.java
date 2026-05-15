@@ -2,6 +2,7 @@ package com.auction.app.domains.users;
 
 import com.auction.app.domains.feedback.Feedback;
 import com.auction.app.domains.products.Product;
+import com.auction.app.domains.transaction.Transaction;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -92,6 +93,9 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Feedback> myFeedback;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Transaction> transactions;
 
     @Column(name = "balance", nullable = false, precision = 19, scale = 2, columnDefinition = "numeric(19,2) default 0.00")
     private BigDecimal balance = BigDecimal.ZERO;
