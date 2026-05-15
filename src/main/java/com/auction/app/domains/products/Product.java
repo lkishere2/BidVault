@@ -1,6 +1,5 @@
 package com.auction.app.domains.products;
 
-import com.auction.app.domains.tag.Tag;
 import com.auction.app.domains.users.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -13,22 +12,21 @@ import java.util.Set;
 @Getter
 @Entity
 @Table(name = "products")
-
 public class Product {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "productName", nullable = false)
+    @Column(name = "product_name", nullable = false)
     private String productName;
 
-    @Column(name = "productLowestPrice", nullable = false)
+    @Column(name = "price", nullable = false)
     private Long price;
 
-    @Column(name = "productQuantity", nullable = false)
+    @Column(name = "quantity", nullable = false)
     private int quantity;
 
-    //add tag to product
     @ElementCollection(targetClass = Tag.class)
     @CollectionTable(name = "product_tags", joinColumns = @JoinColumn(name = "product_id"))
     @Enumerated(EnumType.STRING)
@@ -38,4 +36,5 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User owner;
+
 }

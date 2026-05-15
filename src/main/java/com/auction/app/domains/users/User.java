@@ -3,7 +3,6 @@ package com.auction.app.domains.users;
 import com.auction.app.domains.products.Product;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -34,6 +33,13 @@ public class User implements UserDetails {
 
     @Column(name = "password", nullable = false)
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    private Provider provider;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private Role role = Role.USER;
 
     @Column(name = "verification_code")
     private String verificationCode;
@@ -83,6 +89,7 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Product> myStorage;
 
-    @Column(name = "balance",nullable = false)
-    private BigDecimal balance=BigDecimal.ZERO;
+    @Column(name = "balance", nullable = false)
+    private BigDecimal balance = BigDecimal.ZERO;
+
 }

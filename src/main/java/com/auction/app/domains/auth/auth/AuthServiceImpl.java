@@ -3,6 +3,8 @@ package com.auction.app.domains.auth.auth;
 import com.auction.app.domains.auth.email.EmailService;
 import com.auction.app.domains.auth.refreshToken.RefreshToken;
 import com.auction.app.domains.auth.refreshToken.RefreshTokenService;
+import com.auction.app.domains.users.Provider;
+import com.auction.app.domains.users.Role;
 import com.auction.app.domains.users.User;
 import com.auction.app.domains.users.UserRepository;
 import com.auction.app.infrastructure.security.JwtService;
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -40,33 +44,38 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void register(RegisterRequest request, HttpServletRequest httpRequest) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email already registered");
+        }
+
         User newUser = User.builder()
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .email(request.getEmail())
+                .provider(Provider.LOCAL)
                 .verificationCode(generateVerificationCode())
                 .verificationExpiration(LocalDateTime.now().plusMinutes(15))
                 .enabled(false)
                 .build();
-        sendVerificationEmail(newUser);
         userRepository.save(newUser);
+        sendVerificationEmail(newUser);
     }
 
     @Override
     public AuthResponse login(LoginRequest request, HttpServletRequest httpRequest) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
-
-        if (!user.isEnabled()) {
-            throw new RuntimeException("Account is not verified. Please verify your account.");
-        }
-
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
                         request.getPassword()
                 )
         );
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+
+        if (!user.isEnabled()) {
+            throw new RuntimeException("Account is not verified. Please verify your account.");
+        }
 
         String accessToken = jwtService.generateToken(user);
         String refreshToken = refreshTokenService.generateRefreshToken(user, httpRequest);
@@ -157,8 +166,15 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void requestPasswordReset(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isEmpty()) {
+            return;
+        }
+
+        User user = optionalUser.get();
+        if (user.getProvider().equals(Provider.GOOGLE)) {
+            throw new RuntimeException("This account use Google sign in, please log in with Google");
+        }
 
         if (!user.isEnabled()) {
             throw new RuntimeException("Account is not verified. Please verify your account.");
