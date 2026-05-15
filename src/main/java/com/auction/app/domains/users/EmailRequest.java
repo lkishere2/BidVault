@@ -6,9 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 
-
-public class UserRequest {
-    private long id;
-    private String username;
+public class EmailRequest {
     private String email;
 }

@@ -1,58 +1,80 @@
 package com.auction.app.domains.users;
 
 import jakarta.transaction.Transactional;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
 @Service
+public class UserServiceImpl implements UserService {
 
-public class UserServiceImpl implements  UserService {
+    @Autowired
+    private UserRepository userRepository;
 
+    @Override
+    public UserResponse getCurrentUserInfo() {
+        // Get the current user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
 
-@Autowired
-private UserRepository  userRepository;
-@Override
-public UserResponse getUserInfo(Long id) {
-    User user = userRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Can't find User with ID: " + id));
-
-    // Đổ dữ liệu ra Response
-    UserResponse response = new UserResponse();
-    response.setUsername(user.getUsername());
-    response.setEmail(user.getEmail());
-    response.setBalance(user.getBalance());
-
-    return response;
-
-}
-
-@Override
-@Transactional // data save safely
-public UserResponse updateUser(UserRequest userRequest) {
-        // use ID from request to find user
-        User user = userRepository.findById(userRequest.getId())
-                .orElseThrow(() -> new RuntimeException("User does not exist"));
-
-        // update information , id,and balance can't be here
-        // check name , if not null , set name , if null ,name unchanged
-        if (userRequest.getUsername() != null && !userRequest.getUsername().isEmpty()) {
-        user.setUsername(userRequest.getUsername());
-        }
-
-        //check email if not null , set email , if null , name changed
-        if (userRequest.getEmail() != null && !userRequest.getEmail().isEmpty()) {
-        user.setEmail(userRequest.getEmail());
-        }
-
-        // save
-        userRepository.save(user);
-
-        // return latest version for client
-        UserResponse response = new UserResponse();
-        response.setUsername(user.getUsername());
-        response.setEmail(user.getEmail());
-        response.setBalance(user.getBalance());
-
-        return response;
+        // Return the response
+        UserResponse userResponse = new UserResponse();
+        userResponse.setUsername(currentUser.getUsername());
+        userResponse.setEmail(currentUser.getEmail());
+        userResponse.setBalance(currentUser.getBalance());
+        return userResponse;
     }
+
+    @Override
+    @Transactional
+    public UserResponse updateUsername(UsernameRequest usernameRequest) {
+        // Get current user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
+
+        // Set username for them
+        currentUser.setUsername(usernameRequest.getUsername());
+        userRepository.save(currentUser);
+
+        // Return the response
+        UserResponse userResponse = new UserResponse();
+        userResponse.setUsername(currentUser.getUsername());
+        userResponse.setEmail(currentUser.getEmail());
+        userResponse.setBalance(currentUser.getBalance());
+        return userResponse;
+    }
+    @Override
+    @Transactional
+    public UserResponse updateEmail(EmailRequest emailRequest) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
+        UserResponse userResponse = new UserResponse();
+        currentUser.setEmail(emailRequest.getEmail());
+        userRepository.save(currentUser);
+        userResponse.setUsername(currentUser.getUsername());
+        userResponse.setBalance(currentUser.getBalance());
+        userResponse.setEmail(currentUser.getEmail());
+        return userResponse;
+    }
+    @Override
+    @Transactional
+    public UserResponse updatePassword(PasswordRequest passwordRequest) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
+        UserResponse userResponse = new UserResponse();
+        currentUser.setPassword(passwordRequest.getPassword());
+        userRepository.save(currentUser);
+        userResponse.setUsername(currentUser.getUsername());
+        userResponse.setBalance(currentUser.getBalance());
+        userResponse.setEmail(currentUser.getEmail());
+        return userResponse;
+    }
+
+
+
+
+
+
+
 }

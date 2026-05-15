@@ -1,5 +1,6 @@
 package com.auction.app.domains.users;
 
+import jakarta.validation.constraints.Email;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -19,15 +20,24 @@ public class UserController {
         return ResponseEntity.ok(currentUser);
     }
 
-    @GetMapping("/{id}")// get the information where id is , is only C
-    // get user information(name , email , balance)
-    public UserResponse getProfile(@PathVariable long id){
-        return userService.getUserInfo(id);
+    @GetMapping("/information/")
+    public UserResponse getCurrentUserInformation() {
+        return userService.getCurrentUserInfo();
     }
 
-    @PostMapping("/update/") //add path , can change the data
-    public UserResponse updateProfile(@RequestBody UserRequest  userRequest){
-        return userService.updateUser(userRequest);
+    @PatchMapping("/updateName/") //update name
+    public UserResponse updateProfile(@RequestBody UsernameRequest  userRequest){
+        return userService.updateUsername(userRequest);
+    }
+
+    @PatchMapping("/updateEmail/")
+    public UserResponse updateEmail(@RequestBody EmailRequest  userRequest){
+        return userService.updateEmail(userRequest);
+
+    }
+    @PatchMapping("/udatePassword")
+    public UserResponse updatePassword(@RequestBody PasswordRequest  userRequest){
+        return userService.updatePassword(userRequest);
     }
 
 }
