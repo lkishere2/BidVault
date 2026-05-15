@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -12,13 +13,13 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Override
     public UserResponse getCurrentUserInfo() {
-        // Get the current user
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = (User) authentication.getPrincipal();
+        User currentUser = getCurrentUser();
 
-        // Return the response
         UserResponse userResponse = new UserResponse();
         userResponse.setUsername(currentUser.getUsername());
         userResponse.setEmail(currentUser.getEmail());
@@ -28,53 +29,50 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponse updateUsername(UsernameRequest usernameRequest) {
-        // Get current user
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = (User) authentication.getPrincipal();
-
-        // Set username for them
-        currentUser.setUsername(usernameRequest.getUsername());
-        userRepository.save(currentUser);
-
-        // Return the response
-        UserResponse userResponse = new UserResponse();
-        userResponse.setUsername(currentUser.getUsername());
-        userResponse.setEmail(currentUser.getEmail());
-        userResponse.setBalance(currentUser.getBalance());
-        return userResponse;
+    public void updateUsername(UsernameRequest usernameRequest) {
+        User currentUser = getCurrentUser();
+        userRepository.updateUsername(currentUser.getId(), usernameRequest.getUsername());
     }
+
     @Override
     @Transactional
-    public UserResponse updateEmail(EmailRequest emailRequest) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = (User) authentication.getPrincipal();
-        UserResponse userResponse = new UserResponse();
-        currentUser.setEmail(emailRequest.getEmail());
-        userRepository.save(currentUser);
-        userResponse.setUsername(currentUser.getUsername());
-        userResponse.setBalance(currentUser.getBalance());
-        userResponse.setEmail(currentUser.getEmail());
-        return userResponse;
+    public void updateEmail(EmailRequest emailRequest) {
+        User currentUser = getCurrentUser();
+
+        String newEmail = emailRequest.getEmail();
+
+        if (newEmail.equals(currentUser.getEmail())) {
+            throw new RuntimeException("New email must be different from current email");
+        }
+        if (userRepository.existsByEmail(newEmail)) {
+            throw new RuntimeException("Email is already in use");
+        }
+
+        userRepository.updateEmail(currentUser.getId(), newEmail);
     }
+
     @Override
     @Transactional
-    public UserResponse updatePassword(PasswordRequest passwordRequest) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = (User) authentication.getPrincipal();
-        UserResponse userResponse = new UserResponse();
-        currentUser.setPassword(passwordRequest.getPassword());
-        userRepository.save(currentUser);
-        userResponse.setUsername(currentUser.getUsername());
-        userResponse.setBalance(currentUser.getBalance());
-        userResponse.setEmail(currentUser.getEmail());
-        return userResponse;
+    public void updatePassword(PasswordRequest passwordRequest) {
+        User currentUser = getCurrentUser();
+
+        if (currentUser.getProvider() == Provider.GOOGLE) {
+            throw new RuntimeException("This account uses Google Sign-In and does not have a local password");
+        }
+
+        if (!passwordEncoder.matches(passwordRequest.getCurrentPassword(), currentUser.getPassword())) {
+            throw new RuntimeException("Current password is incorrect");
+        }
+
+        if (passwordRequest.getCurrentPassword().equals(passwordRequest.getNewPassword())) {
+            throw new RuntimeException("New password must be different from current password");
+        }
+
+        userRepository.updatePassword(currentUser.getId(), passwordEncoder.encode(passwordRequest.getNewPassword()));
     }
 
-
-
-
-
-
-
+    private User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return (User) authentication.getPrincipal();
+    }
 }

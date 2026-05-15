@@ -1,12 +1,13 @@
 package com.auction.app.domains.users;
 
-import jakarta.validation.constraints.Email;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+@RestController
 @RequestMapping("/users")
 public class UserController {
 
@@ -20,24 +21,26 @@ public class UserController {
         return ResponseEntity.ok(currentUser);
     }
 
-    @GetMapping("/information/")
-    public UserResponse getCurrentUserInformation() {
-        return userService.getCurrentUserInfo();
+    @GetMapping("/info")
+    public ResponseEntity<UserResponse> getCurrentUserInformation() {
+        return ResponseEntity.ok(userService.getCurrentUserInfo());
     }
 
-    @PatchMapping("/updateName/") //update name
-    public UserResponse updateProfile(@RequestBody UsernameRequest  userRequest){
-        return userService.updateUsername(userRequest);
+    @PatchMapping("/update-username")
+    public ResponseEntity<Void> updateUsername(@Valid @RequestBody UsernameRequest userRequest) {
+        userService.updateUsername(userRequest);
+        return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/updateEmail/")
-    public UserResponse updateEmail(@RequestBody EmailRequest  userRequest){
-        return userService.updateEmail(userRequest);
-
-    }
-    @PatchMapping("/udatePassword")
-    public UserResponse updatePassword(@RequestBody PasswordRequest  userRequest){
-        return userService.updatePassword(userRequest);
+    @PatchMapping("/update-email")
+    public ResponseEntity<Void> updateEmail(@Valid @RequestBody EmailRequest userRequest) {
+        userService.updateEmail(userRequest);
+        return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/update-password")
+    public ResponseEntity<Void> updatePassword(@Valid @RequestBody PasswordRequest userRequest) {
+        userService.updatePassword(userRequest);
+        return ResponseEntity.noContent().build();
+    }
 }

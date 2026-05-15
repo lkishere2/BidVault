@@ -1,6 +1,5 @@
 package com.auction.app.domains.products;
 
-import com.auction.app.domains.tag.Tag;
 import lombok.Getter;
 import lombok.Setter;
 
