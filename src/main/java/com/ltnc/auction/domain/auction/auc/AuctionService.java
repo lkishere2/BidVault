@@ -38,8 +38,15 @@ public class AuctionService {
         Item item = itemStorageRepository.findByIdAndOwnerUserId(request.itemId(), sellerId)
                 .orElseThrow(() -> new ItemNotAvailableException("Item not found in your inventory"));
 
+        boolean hasActiveOrUpcomingAuction = auctionRepository.existsByItem_IdAndStatusIn(
+                item.getId(), List.of(AuctionStatus.UPCOMING, AuctionStatus.ACTIVE));
+
+        if (hasActiveOrUpcomingAuction) {
+            throw new ItemNotAvailableException("Item is already listed in another active or upcoming auction");
+        }
+
         if (item.getStatus() != ItemStatus.AVAILABLE) {
-            throw new ItemNotAvailableException("Item is already listed in another auction");
+            item.setStatus(ItemStatus.AVAILABLE);
         }
 
         item.setStatus(ItemStatus.LISTED);

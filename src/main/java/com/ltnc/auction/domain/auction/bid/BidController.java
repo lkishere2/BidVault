@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ltnc.auction.domain.auction.auc.AuctionResponse;
+import com.ltnc.auction.domain.auction.auc.AuctionService;
 import com.ltnc.auction.domain.user.User;
 
 import jakarta.validation.Valid;
@@ -22,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class BidController {
 
     private final BidService bidService;
+    private final AuctionService auctionService;
 
     @PostMapping("/{auctionId}/bid")
     public ResponseEntity<Void> placeBid(
@@ -36,5 +39,15 @@ public class BidController {
     public ResponseEntity<List<BidResponse>> getBidHistory(
             @PathVariable Long auctionId) {
         return ResponseEntity.ok(bidService.getBidHistory(auctionId));
+    }
+
+    @GetMapping("/bids/me")
+    public ResponseEntity<List<AuctionResponse>> getAuctionsBidOn(
+            @AuthenticationPrincipal User user) {
+        List<Long> auctionIds = bidService.getAuctionsBiddenByUser(user.getUserId());
+        List<AuctionResponse> auctions = auctionIds.stream()
+                .map(auctionService::getAuction)
+                .toList();
+        return ResponseEntity.ok(auctions);
     }
 }

@@ -204,10 +204,6 @@ public class BidService {
     }
 
     public List<Long> getAuctionsBiddenByUser(Long userId) {
-        return bidRepository.findByBidderUserId(userId)
-                .stream()
-                .map(bid -> bid.getAuction().getId())
-                .distinct()
-                .toList();
+        return bidRepository.findDistinctAuctionIdsByBidderUserId(userId);
     }
 }
