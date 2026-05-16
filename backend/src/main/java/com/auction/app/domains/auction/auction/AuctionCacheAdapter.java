@@ -1,6 +1,8 @@
 package com.auction.app.domains.auction.auction;
 
 import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -17,47 +19,55 @@ public class AuctionCacheAdapter {
     private static final String STATE_PREFIX = "auction:state:";
     private static final String QUEUE_PREFIX = "auction:queue:";
 
+    // Maintain cache for 24 hours after the auction's exact end time
+    private static final Duration POST_AUCTION_RETENTION = Duration.ofDays(1);
+
     public void cacheAuctionState(Long auctionId, AuctionState state) {
-        redisTemplate.opsForValue().set(
-            STATE_PREFIX + auctionId,
-            state,
-            Duration.ofDays(7)
-        );
+        redisTemplate.opsForValue().set(getStateKey(auctionId), state, calculateTtl(state));
     }
 
     public AuctionState getAuctionState(Long auctionId) {
-        return (AuctionState) redisTemplate.opsForValue()
-                .get(STATE_PREFIX + auctionId);
+        return (AuctionState) redisTemplate.opsForValue().get(getStateKey(auctionId));
     }
 
     public void updateAuctionState(Long auctionId, AuctionState state) {
-        Long ttl = redisTemplate.getExpire(STATE_PREFIX + auctionId);
-        redisTemplate.opsForValue().set(
-            STATE_PREFIX + auctionId,
-            state,
-            Duration.ofSeconds(ttl != null && ttl > 0 ? ttl : 604800)
-        );
-    }
-
-    public void clearAuctionState(Long auctionId) {
-        redisTemplate.delete(STATE_PREFIX + auctionId);
+        // Optimization: Instead of performing a separate network call to getExpire(),
+        // we recalculate the TTL dynamically in Java. This cuts Redis I/O in half for every bid processed.
+        cacheAuctionState(auctionId, state);
     }
 
     public void enqueueBid(Long auctionId, PendingBid bid) {
-        redisTemplate.opsForList().rightPush(QUEUE_PREFIX + auctionId, bid);
+        redisTemplate.opsForList().rightPush(getQueueKey(auctionId), bid);
     }
 
     public PendingBid dequeueBid(Long auctionId) {
-        return (PendingBid) redisTemplate.opsForList()
-                .leftPop(QUEUE_PREFIX + auctionId);
-    }
-
-    public void clearBidQueue(Long auctionId) {
-        redisTemplate.delete(QUEUE_PREFIX + auctionId);
+        return (PendingBid) redisTemplate.opsForList().leftPop(getQueueKey(auctionId));
     }
 
     public void clearAuctionCache(Long auctionId) {
-        clearAuctionState(auctionId);
-        clearBidQueue(auctionId);
+        // Delete both keys in a single network round-trip
+        redisTemplate.delete(List.of(getStateKey(auctionId), getQueueKey(auctionId)));
+    }
+
+    // Helpers
+
+    private String getStateKey(Long auctionId) {
+        return STATE_PREFIX + auctionId;
+    }
+
+    private String getQueueKey(Long auctionId) {
+        return QUEUE_PREFIX + auctionId;
+    }
+
+    private Duration calculateTtl(AuctionState state) {
+        Instant now = Instant.now();
+
+        // Safety fallback: If the auction is somehow already in the past,
+        // prevent a negative Duration from being passed to Redis (which causes immediate deletion/errors).
+        if (state.getEndTime().isBefore(now)) {
+            return POST_AUCTION_RETENTION;
+        }
+
+        return Duration.between(now, state.getEndTime()).plus(POST_AUCTION_RETENTION);
     }
 }

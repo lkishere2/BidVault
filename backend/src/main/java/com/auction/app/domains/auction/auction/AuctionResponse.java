@@ -2,60 +2,70 @@ package com.auction.app.domains.auction.auction;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Set;
 
-import com.auction.app.domains.inventory.ItemCategories;
+import com.auction.app.domains.products.Tag;
+import lombok.Builder;
+import lombok.Data;
 
-public record AuctionResponse(
-    Long id,
-    String sellerLabel,
-    Long itemId,
-    String itemName,
-    ItemCategories itemCategory,
-    BigDecimal startingPrice,
-    BigDecimal currentPrice,
-    BigDecimal minBidIncrement,
-    Instant startTime,
-    Instant endTime,
-    AuctionStatus status,
-    String winnerLabel,
-    Integer bidCount
-) {
-    // from DB only — UPCOMING/ENDED/CANCELLED
+@Data
+@Builder
+public class AuctionResponse {
+
+    private Long id;
+    private String sellerLabel;
+    private Long productId;
+    private String productName;
+    private Set<Tag> productTags;
+    private Integer auctionedQuantity;
+    private BigDecimal startingPrice;
+    private BigDecimal currentPrice;
+    private BigDecimal minBidIncrement;
+    private Instant startTime;
+    private Instant endTime;
+    private AuctionStatus status;
+    private String winnerLabel;
+    private Integer bidCount;
+
+    // Map from DB Entity to Response
     public static AuctionResponse from(Auction auction) {
-        return new AuctionResponse(
-            auction.getId(),
-            auction.getSeller().getDisplayUsername() + " #" + auction.getSeller().getUserId(),
-            auction.getItem().getId(),
-            auction.getItem().getName(),
-            auction.getItem().getCategory(),
-            auction.getStartingPrice(),
-            auction.getCurrentPrice(),
-            auction.getMinBidIncrement(),
-            auction.getStartTime(),
-            auction.getEndTime(),
-            auction.getStatus(),
-            auction.getWinner() != null
-                ? auction.getWinner().getDisplayUsername() + " #" + auction.getWinner().getUserId()
-                : null,
-            auction.getBidCount()
-        );
+        return AuctionResponse.builder()
+                .id(auction.getId())
+                .sellerLabel(auction.getSeller().getDisplayName() + " #" + auction.getSeller().getId())
+                .productId(auction.getProduct().getId())
+                .productName(auction.getProduct().getProductName())
+                .productTags(auction.getProduct().getTags())
+                .auctionedQuantity(auction.getAuctionedQuantity())
+                .startingPrice(auction.getStartingPrice())
+                .currentPrice(auction.getCurrentPrice())
+                .minBidIncrement(auction.getMinBidIncrement())
+                .startTime(auction.getStartTime())
+                .endTime(auction.getEndTime())
+                .status(auction.getStatus())
+                .winnerLabel(auction.getWinner() != null
+                        ? auction.getWinner().getDisplayName() + " #" + auction.getWinner().getId()
+                        : null)
+                .bidCount(auction.getBidCount())
+                .build();
     }
 
+    // Map from Cache Entity to Response
     public static AuctionResponse fromWithState(Auction auction, AuctionState state) {
-        return new AuctionResponse(
-            auction.getId(),
-            auction.getSeller().getDisplayUsername() + " #" + auction.getSeller().getUserId(),
-            auction.getItem().getId(),
-            auction.getItem().getName(),
-            auction.getItem().getCategory(),
-            auction.getStartingPrice(),
-            state.getCurrentPrice(),
-            state.getMinBidIncrement(),
-            auction.getStartTime(),
-            state.getEndTime(),
-            state.getStatus(),
-            state.getWinnerLabel(),
-            state.getBidCount()
-        );
+        return AuctionResponse.builder()
+                .id(auction.getId())
+                .sellerLabel(auction.getSeller().getDisplayName() + " #" + auction.getSeller().getId())
+                .productId(auction.getProduct().getId())
+                .productName(auction.getProduct().getProductName())
+                .productTags(auction.getProduct().getTags())
+                .auctionedQuantity(auction.getAuctionedQuantity())
+                .startingPrice(auction.getStartingPrice())
+                .currentPrice(state.getCurrentPrice())
+                .minBidIncrement(state.getMinBidIncrement())
+                .startTime(auction.getStartTime())
+                .endTime(state.getEndTime())
+                .status(state.getStatus())
+                .winnerLabel(state.getWinnerLabel())
+                .bidCount(state.getBidCount())
+                .build();
     }
 }

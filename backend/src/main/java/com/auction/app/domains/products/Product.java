@@ -1,9 +1,9 @@
 package com.auction.app.domains.products;
 
+import com.auction.app.domains.auction.auction.Auction;
 import com.auction.app.domains.users.users.User;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -12,6 +12,9 @@ import java.util.Set;
 
 @Setter
 @Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "products")
 public class Product {
@@ -38,6 +41,9 @@ public class Product {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User owner;
+
+    @OneToOne(mappedBy = "product")
+    private Auction auction;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

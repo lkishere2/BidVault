@@ -20,5 +20,5 @@ public class BidNotificationPayload {
     private Instant endTime;
     private boolean extended;
     private Integer bidCount;
-    private boolean ended; // ← add this flag to indicate auction end
+    private boolean ended;
 }

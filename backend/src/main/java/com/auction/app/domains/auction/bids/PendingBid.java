@@ -1,5 +1,6 @@
 package com.auction.app.domains.auction.bids;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.Instant;
 
@@ -12,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PendingBid {
+public class PendingBid implements Serializable {
     private Long auctionId;
     private Long bidderId;
     private String bidderLabel;

@@ -1,5 +1,6 @@
 package com.auction.app.domains.users.users;
 
+import com.auction.app.domains.auction.auction.Auction;
 import com.auction.app.domains.feedback.Feedback;
 import com.auction.app.domains.products.Product;
 import com.auction.app.domains.transaction.Transaction;
@@ -96,6 +97,12 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Transaction> transactions;
+
+    @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL)
+    private List<Auction> myAuction;
+
+    @OneToMany(mappedBy = "winner", cascade = CascadeType.ALL)
+    private List<Auction> myReward;
 
     @Column(name = "balance", nullable = false, precision = 19, scale = 2, columnDefinition = "numeric(19,2) default 0.00")
     @Builder.Default

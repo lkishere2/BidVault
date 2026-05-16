@@ -2,21 +2,30 @@ package com.auction.app.domains.auction.bids;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public record BidResponse(
-    Long bidId,
-    Long auctionId,
-    String bidderLabel,
-    BigDecimal amount,
-    Instant placedAt
-) {
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class BidResponse {
+
+    private Long bidId;
+    private Long auctionId;
+    private String bidderLabel;
+    private BigDecimal amount;
+    private Instant placedAt;
+
     public static BidResponse from(Bid bid) {
-        return new BidResponse(
-            bid.getId(),
-            bid.getAuction().getId(),
-            bid.getBidder().getDisplayUsername() + " #" + bid.getBidder().getUserId(),
-            bid.getAmount(),
-            bid.getPlacedAt()
-        );
+        return BidResponse.builder()
+                .bidId(bid.getId())
+                .auctionId(bid.getAuction().getId())
+                .bidderLabel(bid.getBidder().getDisplayName() + " #" + bid.getBidder().getId())
+                .amount(bid.getAmount())
+                .placedAt(bid.getPlacedAt())
+                .build();
     }
 }
