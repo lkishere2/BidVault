@@ -1,11 +1,13 @@
 package com.auction.app.domains.products;
 
+import com.auction.app.domains.products.exceptions.ProductNotFoundException;
 import com.auction.app.domains.users.users.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -52,9 +54,9 @@ public class ProductServiceImpl implements ProductService {
     // Helpers
     private Product findProductAndValidateUser(long id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new ProductNotFoundException("Product not found."));
         if (!product.getOwner().getId().equals(currentUser().getId())) {
-            throw new RuntimeException("Unauthorized: You do not own this product.");
+            throw new AccessDeniedException("Unauthorized: You do not own this product.");
         }
         return product;
     }

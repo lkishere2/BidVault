@@ -2,7 +2,6 @@ package com.auction.app.domains.products;
 
 import lombok.Data;
 
-import java.math.BigDecimal;
 import java.util.Set;
 
 @Data

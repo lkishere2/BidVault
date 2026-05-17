@@ -2,7 +2,6 @@ package com.auction.app.domains.products;
 
 import lombok.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
 
