@@ -1,6 +1,5 @@
-package com.auction.app.infrastructure.config;
+package com.auction.app.infrastructure.security;
 
-import com.auction.app.infrastructure.security.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

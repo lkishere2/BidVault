@@ -174,6 +174,7 @@ public class AuthServiceImpl implements AuthService {
 
         user.setVerificationCode(generateVerificationCode());
         user.setVerificationExpiration(LocalDateTime.now().plusMinutes(15));
+        user.setRequestPasswordReset(true);
         sendVerificationEmail(user);
         userRepository.save(user);
     }
@@ -183,6 +184,9 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(verifyRequest.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        if (!user.isRequestPasswordReset()) {
+            throw new RuntimeException("You are not request to reset password, try again later");
+        }
         if (user.getVerificationExpiration().isBefore(LocalDateTime.now())) {
             throw new RuntimeException("Verification code expired");
         }

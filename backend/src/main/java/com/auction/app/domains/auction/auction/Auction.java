@@ -60,6 +60,9 @@ public class Auction {
     @Column(nullable = false)
     private Integer bidCount = 0;
 
+    @Column(nullable = false)
+    private boolean extended = false;
+
     public void recalculateMinBidIncrement() {
         this.minBidIncrement = this.currentPrice
                 .multiply(BigDecimal.valueOf(0.05))

@@ -1,6 +1,6 @@
 package com.auction.app.domains.products;
 
-import io.lettuce.core.dynamic.annotation.Param;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,5 +23,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                                        @Param("tags") Set<Tag> tags,
                                        Pageable pageable);
 
-    Optional<Product> findByIdAndOwnerUserId(Long id, Long currentUserId);
+    @Query("SELECT p FROM Product p WHERE p.id = :id AND p.owner.id = :currentUserId")
+    Optional<Product> findByIdAndOwnerUserId(@Param("id") Long id, @Param("currentUserId") Long currentUserId);
 }

@@ -20,10 +20,14 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
     @Query("SELECT a FROM Auction a JOIN FETCH a.seller JOIN FETCH a.product WHERE a.status = :status")
     List<Auction> findByStatusWithDetails(@Param("status") AuctionStatus status);
 
-    @Query("SELECT a FROM Auction a JOIN FETCH a.seller JOIN FETCH a.product WHERE a.seller.userId = :sellerId")
-    List<Auction> findBySellerUserIdWithDetails(@Param("sellerId") Long sellerId);
+    @Query("SELECT a FROM Auction a JOIN FETCH a.seller JOIN FETCH a.product WHERE a.seller.id = :sellerId")
+    List<Auction> findBySellerIdWithDetails(@Param("sellerId") Long sellerId);
 
     boolean existsByProduct_IdAndStatusIn(Long productId, List<AuctionStatus> statuses);
+
+    // Lightweight — only IDs, no joins, used by BidQueueProcessor
+    @Query("SELECT a.id FROM Auction a WHERE a.status = :status")
+    List<Long> findIdsByStatus(@Param("status") AuctionStatus status);
 
     @Query("SELECT a FROM Auction a JOIN FETCH a.seller JOIN FETCH a.product WHERE a.status = :status AND a.startTime < :now")
     List<Auction> findUpcomingToActivate(@Param("status") AuctionStatus status, @Param("now") Instant now);

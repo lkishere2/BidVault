@@ -10,6 +10,7 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("api/v1/inventory")
+@io.swagger.v3.oas.annotations.tags.Tag(name = "Product")
 public class ProductController {
 
     @Autowired

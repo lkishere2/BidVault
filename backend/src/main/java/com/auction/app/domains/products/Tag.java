@@ -2,6 +2,7 @@ package com.auction.app.domains.products;
 
 public enum Tag {
     ELECTRONICS,
+    FOOD,
     COLLECTIBLES,
     FASHION,
     JEWELRY,

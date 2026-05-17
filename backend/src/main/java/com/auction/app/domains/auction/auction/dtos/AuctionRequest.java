@@ -1,4 +1,4 @@
-package com.auction.app.domains.auction.auction;
+package com.auction.app.domains.auction.auction.dtos;
 
 import java.math.BigDecimal;
 import java.time.Instant;

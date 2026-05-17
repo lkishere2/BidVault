@@ -1,6 +1,10 @@
 package com.auction.app.domains.auction.auction;
 
 import java.util.List;
+
+import com.auction.app.domains.auction.auction.dtos.AuctionRequest;
+import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/v1/auctions")
 @RequiredArgsConstructor
+@Tag(name = "Auction")
 public class AuctionController {
     private final AuctionService auctionService;
 

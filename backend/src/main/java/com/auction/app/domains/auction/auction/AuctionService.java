@@ -2,6 +2,10 @@ package com.auction.app.domains.auction.auction;
 
 import java.util.List;
 
+import com.auction.app.domains.auction.auction.dtos.AuctionRequest;
+import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
+import com.auction.app.domains.auction.auction.dtos.AuctionState;
+import com.auction.app.domains.auction.auction.redis.AuctionCacheAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -28,10 +32,18 @@ public class AuctionService {
             throw new RuntimeException("End time must be after start time");
         }
 
-        // Validate the product
+        // Verify if the product is in user's inventory
         User currentSeller = getCurrentUser();
         Product product = productRepository.findByIdAndOwnerUserId(request.getProductId(), currentSeller.getId())
                 .orElseThrow(() -> new RuntimeException("Product not found in your inventory"));
+
+        // We can only create auction with one type of product once at a time
+        // Also, we verify that if the auction is UPCOMING or ACTIVE
+        boolean hasActiveOrUpcomingAuction = auctionRepository.existsByProduct_IdAndStatusIn(
+                product.getId(), List.of(AuctionStatus.UPCOMING, AuctionStatus.ACTIVE));
+        if (hasActiveOrUpcomingAuction) {
+            throw new RuntimeException("Product is already listed in another active or upcoming auction");
+        }
 
         // Validate the quantity
         if (request.getQuantity() > product.getQuantity()) {
@@ -40,85 +52,85 @@ public class AuctionService {
             );
         }
 
-        // Update new quantity in the storage
+        // After that, we update the item in our storage
         product.setQuantity(product.getQuantity() - request.getQuantity());
         productRepository.save(product);
 
-        // Create new entity and save to DB
+        // Create new auction, and save to DB
         Auction auction = mapToEntity(request, currentSeller, product);
         Auction saved = auctionRepository.save(auction);
 
-        // Cache the lightweight version to the cache (AuctionState)
+        // We use a helper here to convert DB's entity -> Redis's entity
+        // And save that with auction id as a key and state as a value
         cacheAuctionState(saved);
 
-        // Return the response
+        // Return the response to the user
         return AuctionResponse.from(saved);
     }
 
     @Transactional
     public AuctionResponse cancelAuction(Long auctionId) {
-        // Find the entity from DB
+        // To cancel the auction, first we need to check if that auction exist or not
         Auction auction = auctionRepository.findByIdWithDetails(auctionId)
                 .orElseThrow(() -> new RuntimeException("Auction not found"));
 
-        // Check authority
+        // After that, we need to verify if the current user is the one who hold the auction
         User currentSeller = getCurrentUser();
         if (!auction.getSeller().getId().equals(currentSeller.getId())) {
             throw new RuntimeException("You are not the seller of this auction");
         }
 
-        // We can only cancle UPCOMING auction only
+        // We can only cancel UPCOMING auction only
+        // When it's ACTIVE, the money go on, and we shouldn't cancel that
         if (auction.getStatus() != AuctionStatus.UPCOMING) {
             throw new RuntimeException("Only UPCOMING auctions can be cancelled");
         }
 
-        // Update quantity to product
+        // Update the storage
         Product product = auction.getProduct();
         product.setQuantity(product.getQuantity() + auction.getAuctionedQuantity());
         productRepository.save(product);
 
-        // Set new status for auction
+        // Change the status of the auction to CANCELLED
         auction.setStatus(AuctionStatus.CANCELLED);
         Auction saved = auctionRepository.save(auction);
 
-        // Clear the cache
+        // Clear the cache here for RAM saving
         auctionCacheAdapter.clearAuctionCache(auctionId);
 
-        // Return the response
+        // Return the response to the user
         return AuctionResponse.from(saved);
     }
 
+    // TODO: Ok, so the problem here is that we still hit the DB
+    // We cannot fetch immediately from cache because the response depends on DB's Entity
+    // I might think another solution later, lol
     public AuctionResponse getAuction(Long auctionId) {
-        // Fetch the data from DB first
+        // First, we verify if the auction exist
         Auction auction = auctionRepository.findByIdWithDetails(auctionId)
                 .orElseThrow(() -> new RuntimeException("Auction not found"));
 
-        // Check the cache for real-time state (bids, current price)
+        // We fetch from cache first for fast retrievement
         AuctionState state = auctionCacheAdapter.getAuctionState(auctionId);
 
-        // If cache is active, enrich the DB entity data with the real-time cache state
         if (state != null && state.getStatus() == AuctionStatus.ACTIVE) {
             return AuctionResponse.fromWithState(auction, state);
         }
 
-        // Fallback if cache is missing, expired, or inactive (uses DB state)
+        // If the cache miss, then map from DB's entity to response
         return AuctionResponse.from(auction);
     }
 
     public List<AuctionResponse> getActiveAuctions() {
-        return auctionRepository.findByStatusWithDetails(AuctionStatus.ACTIVE)
-                .stream()
-                .map(auction -> {
-                    AuctionState state = auctionCacheAdapter.getAuctionState(auction.getId());
-                    return state != null
-                            ? AuctionResponse.fromWithState(auction, state)
-                            : AuctionResponse.from(auction);
-                })
-                .toList();
+        return getAuctionsByStatus(AuctionStatus.ACTIVE);
     }
 
     public List<AuctionResponse> getUpcomingAuctions() {
-        return auctionRepository.findByStatusWithDetails(AuctionStatus.UPCOMING)
+        return getAuctionsByStatus(AuctionStatus.UPCOMING);
+    }
+
+    private List<AuctionResponse> getAuctionsByStatus(AuctionStatus status) {
+        return auctionRepository.findByStatusWithDetails(status)
                 .stream()
                 .map(auction -> {
                     AuctionState state = auctionCacheAdapter.getAuctionState(auction.getId());
@@ -131,7 +143,7 @@ public class AuctionService {
 
     public List<AuctionResponse> getMyAuctions() {
         User currentSeller = getCurrentUser();
-        return auctionRepository.findBySellerUserIdWithDetails(currentSeller.getId())
+        return auctionRepository.findBySellerIdWithDetails(currentSeller.getId())
                 .stream()
                 .map(auction -> {
                     AuctionState state = auctionCacheAdapter.getAuctionState(auction.getId());
@@ -145,6 +157,7 @@ public class AuctionService {
     public void cacheAuctionState(Auction auction) {
         AuctionState state = AuctionState.builder()
                 .auctionId(auction.getId())
+                .sellerId(auction.getSeller().getId())
                 .currentPrice(auction.getCurrentPrice())
                 .minBidIncrement(auction.getMinBidIncrement())
                 .endTime(auction.getEndTime())

@@ -1,13 +1,14 @@
-package com.auction.app.domains.auction.auction;
+package com.auction.app.domains.auction.auction.redis;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
+import com.auction.app.domains.auction.auction.dtos.AuctionState;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
-import com.auction.app.domains.auction.bids.PendingBid;
+import com.auction.app.domains.auction.bids.dtos.PendingBid;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,8 +19,6 @@ public class AuctionCacheAdapter {
 
     private static final String STATE_PREFIX = "auction:state:";
     private static final String QUEUE_PREFIX = "auction:queue:";
-
-    // Maintain cache for 24 hours after the auction's exact end time
     private static final Duration POST_AUCTION_RETENTION = Duration.ofDays(1);
 
     public void cacheAuctionState(Long auctionId, AuctionState state) {
@@ -31,8 +30,6 @@ public class AuctionCacheAdapter {
     }
 
     public void updateAuctionState(Long auctionId, AuctionState state) {
-        // Optimization: Instead of performing a separate network call to getExpire(),
-        // we recalculate the TTL dynamically in Java. This cuts Redis I/O in half for every bid processed.
         cacheAuctionState(auctionId, state);
     }
 
@@ -44,12 +41,13 @@ public class AuctionCacheAdapter {
         return (PendingBid) redisTemplate.opsForList().leftPop(getQueueKey(auctionId));
     }
 
-    public void clearAuctionCache(Long auctionId) {
-        // Delete both keys in a single network round-trip
-        redisTemplate.delete(List.of(getStateKey(auctionId), getQueueKey(auctionId)));
+    public PendingBid peekBid(Long auctionId) {
+        return (PendingBid) redisTemplate.opsForList().index(getQueueKey(auctionId), 0);
     }
 
-    // Helpers
+    public void clearAuctionCache(Long auctionId) {
+        redisTemplate.delete(List.of(getStateKey(auctionId), getQueueKey(auctionId)));
+    }
 
     private String getStateKey(Long auctionId) {
         return STATE_PREFIX + auctionId;
@@ -61,13 +59,9 @@ public class AuctionCacheAdapter {
 
     private Duration calculateTtl(AuctionState state) {
         Instant now = Instant.now();
-
-        // Safety fallback: If the auction is somehow already in the past,
-        // prevent a negative Duration from being passed to Redis (which causes immediate deletion/errors).
         if (state.getEndTime().isBefore(now)) {
             return POST_AUCTION_RETENTION;
         }
-
         return Duration.between(now, state.getEndTime()).plus(POST_AUCTION_RETENTION);
     }
 }
