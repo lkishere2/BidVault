@@ -1,11 +1,15 @@
-import './App.css'
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import HomePage from './pages/general/home/HomePage';
+import './App.css';
 
 function App() {
   return (
-    <div className="min-h-screen bg-white text-black dark:bg-slate-950 dark:text-white">
-
-    </div>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
