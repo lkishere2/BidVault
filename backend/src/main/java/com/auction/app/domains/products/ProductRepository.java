@@ -15,11 +15,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query(value = "SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.tags " +
             "WHERE p.owner.id = :ownerId " +
-            "AND (:keyword IS NULL OR LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "AND (CAST(:keyword AS string) IS NULL OR LOWER(p.productName) LIKE :keyword) " +
             "AND (:tags IS NULL OR EXISTS (SELECT 1 FROM p.tags t WHERE t IN :tags))",
             countQuery = "SELECT COUNT(p) FROM Product p " +
                     "WHERE p.owner.id = :ownerId " +
-                    "AND (:keyword IS NULL OR LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+                    "AND (CAST(:keyword AS string) IS NULL OR LOWER(p.productName) LIKE :keyword) " +
                     "AND (:tags IS NULL OR EXISTS (SELECT 1 FROM p.tags t WHERE t IN :tags))")
     Page<Product> findByKeywordAndTags(@Param("ownerId") Long ownerId,
                                        @Param("keyword") String keyword,
