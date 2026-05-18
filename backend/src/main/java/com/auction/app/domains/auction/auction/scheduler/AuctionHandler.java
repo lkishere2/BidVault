@@ -204,7 +204,7 @@ public class AuctionHandler {
                     // Winner doesn't own this product yet — create a new entry
                     Product newProduct = new Product();
                     newProduct.setProductName(soldProduct.getProductName());
-                    newProduct.setPrice(soldProduct.getPrice());
+                    newProduct.setDescription(soldProduct.getDescription());
                     newProduct.setQuantity(0);
                     newProduct.setTags(soldProduct.getTags());
                     newProduct.setOwner(winner);

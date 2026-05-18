@@ -5,7 +5,6 @@ import com.auction.app.domains.users.users.User;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,8 +25,8 @@ public class Product {
     @Column(name = "product_name", nullable = false)
     private String productName;
 
-    @Column(name = "price", nullable = false, precision = 19, scale = 2)
-    private BigDecimal price;
+    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
+    private String description;
 
     @Column(name = "quantity", nullable = false)
     private int quantity;
@@ -36,6 +35,7 @@ public class Product {
     @CollectionTable(name = "product_tags", joinColumns = @JoinColumn(name = "product_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "tag_name")
+    @Builder.Default
     private Set<Tag> tags = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -46,8 +46,7 @@ public class Product {
     private Auction auction;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 }
