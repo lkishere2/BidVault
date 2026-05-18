@@ -131,7 +131,7 @@ public class TransactionServiceImpl implements TransactionService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return (User) authentication.getPrincipal();
     }
-
+    // send to user
     private TransactionResponse mapToResponse(Transaction transaction) {
         return TransactionResponse.builder()
                 .amount(transaction.getAmount())
@@ -140,7 +140,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .createdAt(transaction.getCreatedAt())
                 .build();
     }
-
+    //send to admin
     private ClientRequest mapToClientRequest(Transaction transaction) {
         User user = transaction.getUser();
 
