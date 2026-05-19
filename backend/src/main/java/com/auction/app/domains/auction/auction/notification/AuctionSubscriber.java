@@ -23,14 +23,11 @@ public class AuctionSubscriber implements MessageListener {
     @Override
     public void onMessage(@NonNull Message message, byte[] pattern) {
         try {
-            BidNotificationPayload payload = objectMapper.readValue(
-                    message.getBody(), BidNotificationPayload.class);
-
+            BidNotificationPayload payload = objectMapper.readValue(message.getBody(), BidNotificationPayload.class);
             String destination = "/topic/auction/" + payload.getAuctionId();
             messagingTemplate.convertAndSend(destination, payload);
 
-            log.info("WebSocket push → {} — price ${}",
-                    destination, payload.getCurrentPrice());
+            log.info("WebSocket push → {} — price ${}", destination, payload.getCurrentPrice());
 
         } catch (Exception e) {
             log.error("Failed to process Redis pub/sub message: {}", e.getMessage());

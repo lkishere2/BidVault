@@ -68,13 +68,13 @@ public class AuctionPublisher {
                 auction.getId(), auction.getEndTime());
     }
 
-    public void publishAuctionEnded(Long auctionId, String winnerLabel, BigDecimal finalPrice, Integer bidCount) {
+    public void publishAuctionEnded(Long auctionId, String winnerLabel, BigDecimal finalPrice, Integer bidCount, Instant endTime) {
         BidNotificationPayload payload = BidNotificationPayload.builder()
                 .auctionId(auctionId)
                 .currentPrice(finalPrice)
                 .minNextBid(BigDecimal.ZERO)
                 .bidderLabel(winnerLabel != null ? winnerLabel : "No winner")
-                .endTime(Instant.now())
+                .endTime(endTime)
                 .extended(false)
                 .bidCount(bidCount)
                 .ended(true)

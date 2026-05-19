@@ -42,9 +42,6 @@ public class BidController {
     @GetMapping("/bids/me")
     public ResponseEntity<List<AuctionResponse>> getAuctionsBidOn() {
         List<Long> auctionIds = bidService.getAuctionsBiddenByCurrentUser();
-        List<AuctionResponse> auctions = auctionIds.stream()
-                .map(auctionService::getAuction)
-                .toList();
-        return ResponseEntity.ok(auctions);
+        return ResponseEntity.ok(auctionService.getAuctionsBidOnByCurrentUser(auctionIds));
     }
 }

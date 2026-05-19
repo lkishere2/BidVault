@@ -7,6 +7,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+import com.auction.app.domains.auction.auction.dtos.AuctionResponse; // Updated Import
 import com.auction.app.domains.auction.bids.dtos.BidNotificationPayload;
 import com.auction.app.domains.auction.bids.dtos.BidRequest;
 import com.auction.app.domains.auction.bids.dtos.BidResponse;
@@ -19,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.auction.app.domains.auction.auction.Auction;
 import com.auction.app.domains.auction.auction.redis.AuctionCacheAdapter;
 import com.auction.app.domains.auction.auction.AuctionRepository;
-import com.auction.app.domains.auction.auction.dtos.AuctionState;
 import com.auction.app.domains.auction.auction.AuctionStatus;
 import com.auction.app.domains.users.users.User;
 import com.auction.app.domains.users.users.UserRepository;
@@ -42,15 +42,20 @@ public class BidService {
 
     @Transactional
     public void placeBid(Long auctionId, BidRequest request) {
-        User bidder = getCurrentUser();
-        AuctionState state = getActiveAuctionState(auctionId);
+
+        User bidder = currentUser();
+        AuctionResponse response = getActiveAuctionResponse(auctionId);
+
+        // Extract sellerId from the label (Format: "DisplayName #123")
+        String sellerLabel = response.getSellerLabel();
+        Long sellerId = Long.valueOf(sellerLabel.substring(sellerLabel.lastIndexOf("#") + 1));
 
         // Use sellerId from cache — no DB hit needed
-        if (state.getSellerId().equals(bidder.getId())) {
+        if (sellerId.equals(bidder.getId())) {
             throw new RuntimeException("You cannot bid on your own auction");
         }
 
-        validateBidAmount(request.getAmount(), state);
+        validateBidAmount(request.getAmount(), response);
         validateSpendableBalance(bidder, request.getAmount());
 
         Auction auction = auctionRepository.findById(auctionId)
@@ -90,10 +95,10 @@ public class BidService {
         Bid bid = bidRepository.findById(pendingBid.getBidId())
                 .orElseThrow(() -> new RuntimeException("Bid record not found"));
 
-        AuctionState state = auctionCacheAdapter.getAuctionState(auctionId);
+        AuctionResponse response = auctionCacheAdapter.getAuctionResponse(auctionId);
 
         // Auction no longer active or bid amount no longer meets minimum — REFUND
-        if (!isBidEligible(state, pendingBid.getAmount())) {
+        if (!isBidEligible(response, pendingBid.getAmount())) {
             bid.setStatus(BidStatus.REFUNDED);
             bidRepository.save(bid);
             log.info("Bid #{} rejected after dequeue — marked REFUNDED. auction #{}", bid.getId(), auctionId);
@@ -118,15 +123,14 @@ public class BidService {
         bid.setStatus(BidStatus.HELD);
         bidRepository.save(bid);
 
-        boolean isExtended = applySniperProtection(state);
+        boolean isExtended = applySniperProtection(response);
         BigDecimal newIncrement = calculateIncrement(pendingBid.getAmount());
 
-        state.setCurrentPrice(pendingBid.getAmount());
-        state.setMinBidIncrement(newIncrement);
-        state.setBidCount(state.getBidCount() + 1);
-        state.setWinnerId(pendingBid.getBidderId());
-        state.setWinnerLabel(pendingBid.getBidderLabel());
-        auctionCacheAdapter.updateAuctionState(auctionId, state);
+        response.setCurrentPrice(pendingBid.getAmount());
+        response.setMinBidIncrement(newIncrement);
+        response.setBidCount(response.getBidCount() + 1);
+        response.setWinnerLabel(pendingBid.getBidderLabel()); // Removed winnerId, just label is enough for UI
+        auctionCacheAdapter.updateAuctionResponse(auctionId, response);
 
         log.info("Bid #{} promoted to HELD — auction #{}, price ${}, bidder #{}",
                 bid.getId(), auctionId, pendingBid.getAmount(), pendingBid.getBidderId());
@@ -136,9 +140,9 @@ public class BidService {
                 .currentPrice(pendingBid.getAmount())
                 .minNextBid(pendingBid.getAmount().add(newIncrement))
                 .bidderLabel(pendingBid.getBidderLabel())
-                .endTime(state.getEndTime())
+                .endTime(response.getEndTime())
                 .extended(isExtended)
-                .bidCount(state.getBidCount())
+                .bidCount(response.getBidCount())
                 .build());
     }
 
@@ -150,20 +154,20 @@ public class BidService {
     }
 
     public List<Long> getAuctionsBiddenByCurrentUser() {
-        return bidRepository.findDistinctAuctionIdsByBidderId(getCurrentUser().getId());
+        return bidRepository.findDistinctAuctionIdsByBidderId(currentUser().getId());
     }
 
     // Helpers
-    private AuctionState getActiveAuctionState(Long auctionId) {
-        AuctionState state = auctionCacheAdapter.getAuctionState(auctionId);
-        if (state == null || state.getStatus() != AuctionStatus.ACTIVE) {
-            throw new RuntimeException("Auction not found or not active");
+    private AuctionResponse getActiveAuctionResponse(Long auctionId) {
+        AuctionResponse response = auctionCacheAdapter.getAuctionResponse(auctionId);
+            if (response == null || response.getStatus() != AuctionStatus.ACTIVE) {
+                throw new RuntimeException("Auction not found or not active");
         }
-        return state;
+        return response;
     }
 
-    private void validateBidAmount(BigDecimal amount, AuctionState state) {
-        BigDecimal minimumBid = state.getCurrentPrice().add(state.getMinBidIncrement());
+    private void validateBidAmount(BigDecimal amount, AuctionResponse response) {
+        BigDecimal minimumBid = response.getCurrentPrice().add(response.getMinBidIncrement());
         if (amount.compareTo(minimumBid) < 0) {
             throw new RuntimeException("Bid must be at least " + minimumBid + " (current price + 5%)");
         }
@@ -175,9 +179,9 @@ public class BidService {
         }
     }
 
-    private boolean isBidEligible(AuctionState state, BigDecimal amount) {
-        if (state == null || state.getStatus() != AuctionStatus.ACTIVE) return false;
-        BigDecimal minimumBid = state.getCurrentPrice().add(state.getMinBidIncrement());
+    private boolean isBidEligible(AuctionResponse response, BigDecimal amount) {
+        if (response == null || response.getStatus() != AuctionStatus.ACTIVE) return false;
+        BigDecimal minimumBid = response.getCurrentPrice().add(response.getMinBidIncrement());
         return amount.compareTo(minimumBid) >= 0;
     }
 
@@ -201,11 +205,11 @@ public class BidService {
                 });
     }
 
-    private boolean applySniperProtection(AuctionState state) {
+    private boolean applySniperProtection(AuctionResponse response) {
         Instant now = Instant.now();
-        if (Duration.between(now, state.getEndTime()).getSeconds() < SNIPER_PROTECTION_SECONDS) {
-            state.setEndTime(now.plusSeconds(SNIPER_PROTECTION_SECONDS));
-            log.info("Auction #{} extended by 2 minutes", state.getAuctionId());
+        if (Duration.between(now, response.getEndTime()).getSeconds() < SNIPER_PROTECTION_SECONDS) {
+            response.setEndTime(now.plusSeconds(SNIPER_PROTECTION_SECONDS));
+            log.info("Auction #{} extended by 2 minutes", response.getId());
             return true;
         }
         return false;
@@ -215,7 +219,7 @@ public class BidService {
         return amount.multiply(INCREMENT_PERCENTAGE).setScale(2, RoundingMode.HALF_UP);
     }
 
-    private User getCurrentUser() {
+    private User currentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return (User) authentication.getPrincipal();
     }
