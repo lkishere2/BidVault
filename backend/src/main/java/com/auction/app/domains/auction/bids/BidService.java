@@ -29,6 +29,7 @@ import com.auction.app.domains.users.users.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+// TODO: Double check the bid service
 @Service
 @RequiredArgsConstructor
 @Slf4j
