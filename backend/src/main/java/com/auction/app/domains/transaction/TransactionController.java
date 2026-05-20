@@ -52,7 +52,12 @@ public class TransactionController {
         return ResponseEntity.ok(requests);
     }
 
-
+    @PostMapping("/deposit")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> acceptTransaction(@RequestBody ClientRequest clientRequest) {
+        transactionService.acceptTransaction(clientRequest);
+        return ResponseEntity.noContent().build();
+    }
 
     @PutMapping("/cancel/{id}")
     @PreAuthorize("hasRole('ADMIN')")

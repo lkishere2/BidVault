@@ -1,8 +1,10 @@
 package com.auction.app.domains.feedback;
 
+import com.auction.app.domains.feedback.exceptions.FeedBackNotFoundException;
 import com.auction.app.domains.users.users.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -59,10 +61,10 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     private Feedback findAndValidateCurrentUser(Long id) {
         Feedback feedback = feedbackRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Feedback not found"));
+                .orElseThrow(() -> new FeedBackNotFoundException("Feedback not found"));
 
         if (!feedback.getClient().getId().equals(currentUser().getId())) {
-            throw new RuntimeException("Unauthorized: You cannot delete this feedback.");
+            throw new AccessDeniedException("Unauthorized: You cannot delete this feedback.");
         }
 
         return feedback;
