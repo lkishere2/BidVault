@@ -132,7 +132,9 @@ class ProductRepositoryTest {
     void findByKeywordAndTags_WhenTagsFilterApplied_ShouldReturnMatchingProducts() {
         Pageable pageable = PageRequest.of(0, 10);
         Set<Tag> searchTags = Set.of(Tag.ELECTRONICS);
+
         Page<Product> result = productRepository.findByKeywordAndTags(testOwner.getId(), null, searchTags, pageable);
+
         assertThat(result.getContent()).hasSize(2);
         assertThat(result.getContent()).extracting(Product::getProductName)
                 .containsExactlyInAnyOrder("iPhone 15 Pro", "Gaming Laptop");
