@@ -1,5 +1,6 @@
 package com.auction.app.domains.products;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -27,15 +28,13 @@ public class ProductController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<ProductResponse> addProduct(@RequestBody ProductRequest productRequest) {
+    public ResponseEntity<ProductResponse> addProduct(@RequestBody @Valid ProductRequest productRequest) {
         ProductResponse response = productService.addProduct(productRequest);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<ProductResponse> editProduct(
-            @PathVariable Long id,
-            @RequestBody ProductRequest productRequest) {
+    public ResponseEntity<ProductResponse> editProduct(@PathVariable Long id, @RequestBody @Valid ProductRequest productRequest) {
         ProductResponse response = productService.editProduct(id, productRequest);
         return ResponseEntity.ok(response);
     }
