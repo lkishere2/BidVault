@@ -25,7 +25,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public Page<ProductResponse> getStorage(int page, int size, String keyword, Set<Tag> tags) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        return productRepository.findByKeywordAndTags(currentUser().getId(), keyword, tags, pageable)
+        return productRepository.findByKeywordAndTags(currentUser().getId(), normalizeKeyword(keyword), normalizeTags(tags), pageable)
                 .map(this::mapToResponse);
     }
 
@@ -102,5 +102,19 @@ public class ProductServiceImpl implements ProductService {
     private User currentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return (User) authentication.getPrincipal();
+    }
+
+    private String normalizeKeyword(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return null;
+        }
+        return "%" + keyword.trim().toLowerCase() + "%";
+    }
+
+    private Set<Tag> normalizeTags(Set<Tag> tags) {
+        if (tags == null || tags.isEmpty()) {
+            return null;
+        }
+        return tags;
     }
 }

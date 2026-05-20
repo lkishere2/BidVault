@@ -33,9 +33,11 @@ class ProductRepositoryTest {
     private UserRepository userRepository;
 
     private User testOwner;
+    private User otherOwner;
     private Product product1;
     private Product product2;
     private Product product3;
+    private Product otherOwnerProduct;
 
     @BeforeEach
     void setUp() {
@@ -48,6 +50,15 @@ class ProductRepositoryTest {
                 .build();
 
         testOwner = userRepository.saveAndFlush(testOwner);
+
+        otherOwner = User.builder()
+                .username("otheruser")
+                .email("otheruser@example.com")
+                .password("securePassword123")
+                .enabled(true)
+                .build();
+
+        otherOwner = userRepository.saveAndFlush(otherOwner);
 
         product1 = Product.builder()
                 .productName("iPhone 15 Pro")
@@ -73,9 +84,18 @@ class ProductRepositoryTest {
                 .owner(testOwner)
                 .build();
 
+        otherOwnerProduct = Product.builder()
+                .productName("Other Owner Laptop")
+                .description("Should not appear in test owner's storage")
+                .quantity(1)
+                .tags(new HashSet<>(Set.of(Tag.ELECTRONICS)))
+                .owner(otherOwner)
+                .build();
+
         productRepository.saveAndFlush(product1);
         productRepository.saveAndFlush(product2);
         productRepository.saveAndFlush(product3);
+        productRepository.saveAndFlush(otherOwnerProduct);
     }
 
     @AfterEach
@@ -95,12 +115,15 @@ class ProductRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Product> result = productRepository.findByKeywordAndTags(testOwner.getId(), null, null, pageable);
         assertThat(result.getContent()).hasSize(3);
+        assertThat(result.getContent())
+                .extracting(Product::getProductName)
+                .doesNotContain("Other Owner Laptop");
     }
 
     @Test
     void findByKeywordAndTags_WhenKeywordFilterApplied_ShouldReturnMatchingProducts() {
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Product> result = productRepository.findByKeywordAndTags(testOwner.getId(), "laptop", null, pageable);
+        Page<Product> result = productRepository.findByKeywordAndTags(testOwner.getId(), "%laptop%", null, pageable);
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().getFirst().getProductName()).isEqualTo("Gaming Laptop");
     }
@@ -121,11 +144,19 @@ class ProductRepositoryTest {
     void findByKeywordAndTags_WhenBothKeywordAndTagsFilterApplied_ShouldReturnMatchingProducts() {
         Pageable pageable = PageRequest.of(0, 10);
         Set<Tag> searchTags = Set.of(Tag.ELECTRONICS);
-
-        Page<Product> result = productRepository.findByKeywordAndTags(testOwner.getId(), "iphone", searchTags, pageable);
-
+        Page<Product> result = productRepository.findByKeywordAndTags(testOwner.getId(), "%iphone%", searchTags, pageable);
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().getFirst().getProductName()).isEqualTo("iPhone 15 Pro");
+    }
+
+    @Test
+    void findByKeywordAndTags_WhenPageSizeIsTwo_ShouldReturnRequestedPageOnly() {
+        Pageable pageable = PageRequest.of(0, 2);
+
+        Page<Product> result = productRepository.findByKeywordAndTags(testOwner.getId(), null, null, pageable);
+
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getTotalElements()).isEqualTo(3);
     }
 
     // --- Edge Cases (4 Tests) ---
@@ -147,7 +178,7 @@ class ProductRepositoryTest {
     @Test
     void findByKeywordAndTags_WhenKeywordDoesNotExist_ShouldReturnEmptyPage() {
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Product> result = productRepository.findByKeywordAndTags(testOwner.getId(), "NonExistentKey", null, pageable);
+        Page<Product> result = productRepository.findByKeywordAndTags(testOwner.getId(), "%nonexistentkey%", null, pageable);
         assertThat(result.getContent()).isEmpty();
     }
 
@@ -189,6 +220,12 @@ class ProductRepositoryTest {
     @Test
     void findByIdAndOwnerUserId_WhenCurrentUserIdIsNotFound_ShouldReturnEmptyOptional() {
         Optional<Product> result = productRepository.findByIdAndOwnerUserId(product1.getId(), 999L);
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void findByIdAndOwnerUserId_WhenProductBelongsToAnotherUser_ShouldReturnEmptyOptional() {
+        Optional<Product> result = productRepository.findByIdAndOwnerUserId(otherOwnerProduct.getId(), testOwner.getId());
         assertThat(result).isEmpty();
     }
 
