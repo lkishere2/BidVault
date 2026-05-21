@@ -38,7 +38,7 @@ public class AuctionHandler {
     private final AuctionService auctionService;
     private final AuctionPublisher publisher;
 
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(fixedRate = 100000)
     public void activateUpcomingAuctions() {
 
         List<Auction> toActivate = auctionRepository.findUpcomingToActivate(AuctionStatus.UPCOMING, Instant.now());
@@ -58,7 +58,7 @@ public class AuctionHandler {
     }
 
     // Same logic as the active
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(fixedRate = 100000)
     public void endActiveAuctions() {
 
         List<Auction> toEnd = auctionRepository.findActiveToEnd(AuctionStatus.ACTIVE, Instant.now());
