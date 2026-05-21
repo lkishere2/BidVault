@@ -14,7 +14,7 @@ import java.util.Set;
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("SELECT DISTINCT p FROM Product p " +
-            "JOIN FETCH p.tags t " +
+            "LEFT JOIN FETCH p.tags t " +
             "WHERE p.owner.id = :ownerId " +
             "AND (:keyword IS NULL OR LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
             "AND (:tags IS NULL OR t IN :tags)")

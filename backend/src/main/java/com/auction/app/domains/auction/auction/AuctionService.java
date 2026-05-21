@@ -11,6 +11,7 @@ import com.auction.app.domains.auction.auction.exception.*;
 import com.auction.app.domains.auction.auction.redis.AuctionCacheAdapter;
 import com.auction.app.domains.products.exceptions.ProductNotFoundException;
 import com.auction.app.domains.transaction.exceptions.AuthorizedException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuctionService {
 
     private final AuctionRepository auctionRepository;
@@ -79,13 +81,16 @@ public class AuctionService {
         return AuctionResponse.from(saved);
     }
 
+    @Transactional(readOnly = true)
     public AuctionResponse getAuction(Long auctionId) {
 
-        // We fetch from cache first for fast retrievement
         AuctionResponse cached = auctionCacheAdapter.getAuctionResponse(auctionId);
         if (cached != null) {
+            log.info("Auction has been cached for {}", auctionId);
             return cached;
         }
+
+        log.info("Cache miss, fallback to DB");
 
         // If the cache miss, then map from DB's entity to response
         Auction auction = auctionRepository.findByIdWithDetails(auctionId)
