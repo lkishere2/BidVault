@@ -29,6 +29,7 @@ jobs:
         cache: maven
         
     - name: Build with Maven
+      working-directory: ./backend
       run: mvn -B verify --file pom.xml
       env:
         # Database
