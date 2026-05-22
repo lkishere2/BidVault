@@ -3,6 +3,7 @@ package com.auction.app.domains.auction.auction.dtos;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Set;
 
 import com.auction.app.domains.auction.auction.Auction;
@@ -42,7 +43,7 @@ public class AuctionResponse implements Serializable {
                 .sellerLabel(auction.getSeller().getDisplayName() + " #" + auction.getSeller().getId())
                 .productId(auction.getProduct().getId())
                 .productName(auction.getProduct().getProductName())
-                .productTags(auction.getProduct().getTags())
+                .productTags(new HashSet<>(auction.getProduct().getTags()))
                 .productDescription(auction.getProduct().getDescription())
                 .productImageUrl(auction.getProduct().getProductImageUrl())
                 .auctionedQuantity(auction.getAuctionedQuantity())

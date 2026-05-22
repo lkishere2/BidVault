@@ -256,4 +256,12 @@ public class BidService {
     private BigDecimal calculateIncrement(BigDecimal amount) {
         return amount.multiply(INCREMENT_PERCENTAGE).setScale(2, RoundingMode.HALF_UP);
     }
+
+    private User currentUser() {
+        Authentication authentication = (Authentication) SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            throw new RuntimeException("Not authenticated");
+        }
+        return (User) authentication.getPrincipal();
+    }
 }

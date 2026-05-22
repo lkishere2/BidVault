@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
@@ -8,13 +8,13 @@ import { authApi } from '../../api/authApi';
 
 interface LoginBoxProps {
     onError: (title: string, message: string, email?: string, isUnverified?: boolean) => void;
+    onSuccess: (user: { username: string; initials: string }) => void;
 }
 
-export default function LoginBox({ onError }: LoginBoxProps) {
+export default function LoginBox({ onError, onSuccess }: LoginBoxProps) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -28,8 +28,15 @@ export default function LoginBox({ onError }: LoginBoxProps) {
             localStorage.setItem('accessToken', response.data.accessToken);
             localStorage.setItem('refreshToken', response.data.refreshToken);
 
-            // Redirect cleanly back to the Home Route (/)
-            navigate('/home');
+            // Build user display data from the response and bubble up to App.tsx
+            // which owns navigation — it will navigate('/') after setting state
+            const username = response.data.username ?? email.split('@')[0];
+            const initials = username
+                .split(/[\s._-]+/)
+                .slice(0, 2)
+                .map((w: string) => w[0]?.toUpperCase() ?? '')
+                .join('');
+            onSuccess({ username, initials });
         } catch (error: any) {
             // Read backend error message directly from your response body structure
             const errorMsg = error.response?.data?.message || 'Invalid email address or password.';

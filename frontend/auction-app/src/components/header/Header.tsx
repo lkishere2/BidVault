@@ -5,7 +5,6 @@ import LoginButton from './LoginButton';
 import ProfileButton from './ProfileButton';
 
 interface HeaderProps {
-    isLoggedIn: boolean;
     user?: {
         username: string;
         initials: string;
@@ -19,7 +18,7 @@ const NAV_ITEMS = [
     { label: 'Explore', to: '/explore' },
 ];
 
-export default function Header({ isLoggedIn, user, onLogout }: HeaderProps) {
+export default function Header({ user, onLogout }: HeaderProps) {
     const navigate = useNavigate();
 
     return (
@@ -102,7 +101,7 @@ export default function Header({ isLoggedIn, user, onLogout }: HeaderProps) {
                 </nav>
 
                 <div style={{ marginLeft: '16px' }}>
-                    {isLoggedIn && user ? (
+                    {user ? (
                         <ProfileButton
                             username={user.username}
                             initials={user.initials}

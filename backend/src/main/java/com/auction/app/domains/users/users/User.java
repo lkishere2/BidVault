@@ -4,6 +4,7 @@ import com.auction.app.domains.auction.auction.Auction;
 import com.auction.app.domains.feedback.Feedback;
 import com.auction.app.domains.products.Product;
 import com.auction.app.domains.transaction.Transaction;
+import com.auction.app.domains.users.followers.Connection;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -106,6 +107,14 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "winner", cascade = CascadeType.ALL)
     private List<Auction> myReward;
+
+    // People who are following this user
+    @OneToMany(mappedBy = "following", cascade = CascadeType.ALL)
+    private List<Connection> followers;
+
+    // People who this user is currently following
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL)
+    private List<Connection> following;
 
     @Column(name = "balance", nullable = false, precision = 19, scale = 2, columnDefinition = "numeric(19,2) default 0.00")
     @Builder.Default
