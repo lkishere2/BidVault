@@ -1,4 +1,4 @@
-package com.auction.app.domains.auth.auth.exceptions;
+package com.auction.app.domains.auth.exceptions;
 
 public class UserAlreadyExistsException extends RuntimeException {
     public UserAlreadyExistsException(String message) {

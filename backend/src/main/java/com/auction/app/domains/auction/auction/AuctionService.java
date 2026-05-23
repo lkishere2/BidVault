@@ -7,13 +7,11 @@ import java.util.List;
 
 import com.auction.app.domains.auction.auction.dtos.AuctionRequest;
 import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
-import com.auction.app.domains.auction.auction.exception.*;
 import com.auction.app.domains.auction.auction.redis.AuctionCacheAdapter;
+import com.auction.app.domains.auction.exceptions.*;
 import com.auction.app.domains.notifications.NotificationService;
-import com.auction.app.domains.notifications.NotificationType;
 import com.auction.app.domains.products.exceptions.ProductNotFoundException;
 import com.auction.app.domains.transaction.exceptions.AuthorizedException;
-import com.auction.app.domains.users.connection.ConnectionRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

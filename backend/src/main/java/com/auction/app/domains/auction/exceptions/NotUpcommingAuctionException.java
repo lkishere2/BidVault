@@ -1,4 +1,4 @@
-package com.auction.app.domains.auction.auction.exception;
+package com.auction.app.domains.auction.exceptions;
 
 public class NotUpcommingAuctionException extends RuntimeException {
     public NotUpcommingAuctionException(String message) {

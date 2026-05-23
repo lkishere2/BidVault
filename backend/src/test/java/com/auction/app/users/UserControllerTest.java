@@ -19,6 +19,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -29,9 +30,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -190,7 +189,7 @@ class UserControllerTest {
     // METHOD 4: updateEmail (4 Tests)
     // =========================================================================
 
-    // --- Happy Paths (2 Tests) ---
+    // Happy test
 
     @Test
     void updateEmail_WhenRequestIsValid_ShouldReturnNoContent() throws Exception {
@@ -205,15 +204,17 @@ class UserControllerTest {
     }
 
     @Test
-    void updateEmail_WhenEmailFormatIsInvalid_CurrentControllerStillPassesRequestToService() throws Exception {
+    void updateEmail_WhenEmailFormatIsInvalid_ReturnsBadRequest() throws Exception {
+        // Given
         EmailRequest request = createEmailRequest("not-an-email");
 
+        // When
         mockMvc.perform(patch("/api/v1/users/update-email")
-                        .contentType("application/json")
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isBadRequest());
 
-        verify(userService).updateEmail(any(EmailRequest.class));
+        verify(userService, never()).updateEmail(any(EmailRequest.class));
     }
 
     // --- Edge Cases (2 Tests) ---

@@ -1,6 +1,6 @@
 package com.auction.app.domains.transaction;
 
-import com.auction.app.domains.auth.auth.exceptions.UserNotFoundException;
+import com.auction.app.domains.auth.exceptions.UserNotFoundException;
 import com.auction.app.domains.transaction.exceptions.AuthorizedException;
 import com.auction.app.domains.transaction.exceptions.PoorException;
 import com.auction.app.domains.transaction.exceptions.TransactionNotFoundException;

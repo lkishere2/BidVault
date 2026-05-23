@@ -2,7 +2,7 @@ package com.auction.app.infrastructure.exception;
 
 import java.time.Instant;
 
-import com.auction.app.domains.auth.auth.exceptions.*;
+import com.auction.app.domains.auth.exceptions.*;
 import com.auction.app.domains.products.exceptions.ProductNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

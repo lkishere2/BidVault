@@ -1,4 +1,4 @@
-package com.auction.app.domains.auction.auction.exception;
+package com.auction.app.domains.auction.exceptions;
 
 public class AuctionNotFoundException extends RuntimeException {
     public AuctionNotFoundException(String message) {
