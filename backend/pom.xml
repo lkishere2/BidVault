@@ -137,12 +137,8 @@
 			<artifactId>junit-jupiter</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-inline</artifactId>
-			<version>5.2.0</version>
-			<scope>test</scope>
-		</dependency>
+		<!-- mockito-inline REMOVED: redundant with Mockito 5.x bundled in Spring Boot 3.4,
+		     and causes byte-buddy conflicts on Java 21 -->
 	</dependencies>
 
 	<build>
@@ -193,17 +189,20 @@
 				</configuration>
 			</plugin>
 
-			<!-- Surefire Plugin for Testing -->
+			<!-- Surefire Plugin — single declaration, clean JVM flags for Java 21 -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.2.5</version>
 				<configuration>
 					<argLine>
 						-XX:+EnableDynamicAgentLoading
+						-Xshare:off
 						--add-opens java.base/java.lang=ALL-UNNAMED
 					</argLine>
 				</configuration>
 			</plugin>
+
 		</plugins>
 	</build>
 </project>

@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-import { Header } from '../../../components/header';
 import Footer from '../../../components/footer/Footer';
 import Welcome from './Welcome';
 import AuctionPreview from './AuctionPreview';
@@ -38,23 +37,10 @@ export default function HomePage() {
 
     return (
         <div className="min-h-screen bg-white flex flex-col">
-            <div
-                ref={headerRef}
-                style={{
-                    opacity: 0,
-                    transform: 'translateY(-20px)',
-                    position: 'relative',
-                    zIndex: 50
-                }}
-            >
-                <Header isLoggedIn={false} />
-            </div>
-
             <main className="flex-1">
                 <Welcome />
                 <AuctionPreview />
             </main>
-
             <Footer />
         </div>
     );

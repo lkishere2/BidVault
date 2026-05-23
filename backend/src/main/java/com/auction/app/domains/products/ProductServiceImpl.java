@@ -1,5 +1,7 @@
 package com.auction.app.domains.products;
 
+import com.auction.app.domains.products.dtos.ProductRequest;
+import com.auction.app.domains.products.dtos.ProductResponse;
 import com.auction.app.domains.products.exceptions.ProductNotFoundException;
 import com.auction.app.domains.users.users.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +25,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ProductResponse> getStorage(int page, int size, String keyword, Set<Tag> tags) {
+    public Page<ProductResponse> getStorage(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        return productRepository.findByKeywordAndTags(currentUser().getId(), keyword, tags, pageable)
+        return productRepository.findAllUserProducts(currentUser().getId(), pageable)
                 .map(this::mapToResponse);
     }
 
@@ -65,7 +67,8 @@ public class ProductServiceImpl implements ProductService {
         product.setProductName(productRequest.getProductName());
         product.setDescription(productRequest.getDescription());
         product.setQuantity(productRequest.getQuantity());
-        product.setTags(productRequest.getTags());
+        product.setProductImageUrl(productRequest.getProductImageUrl());
+        product.setTags(resolveTags(productRequest.getTags()));
     }
 
     private Product mapToEntity(ProductRequest productRequest, User currentUser) {
@@ -73,7 +76,8 @@ public class ProductServiceImpl implements ProductService {
                 .productName(productRequest.getProductName())
                 .description(productRequest.getDescription())
                 .quantity(productRequest.getQuantity())
-                .tags(productRequest.getTags())
+                .productImageUrl(productRequest.getProductImageUrl())
+                .tags(resolveTags(productRequest.getTags()))
                 .owner(currentUser)
                 .build();
     }
@@ -84,9 +88,17 @@ public class ProductServiceImpl implements ProductService {
                 .productName(product.getProductName())
                 .description(product.getDescription())
                 .quantity(product.getQuantity())
+                .productImageUrl(product.getProductImageUrl())
                 .tags(product.getTags())
                 .createdAt(product.getCreatedAt())
                 .build();
+    }
+
+    private Set<Tag> resolveTags(Set<Tag> tags) {
+        if (tags == null || tags.isEmpty()) {
+            return Set.of(Tag.OTHER);
+        }
+        return tags;
     }
 
     private User currentUser() {
