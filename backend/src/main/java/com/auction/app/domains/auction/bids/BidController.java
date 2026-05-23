@@ -29,7 +29,11 @@ public class BidController {
     private final AuctionService auctionService;
 
     @MessageMapping("/auction/{auctionId}/bid")
-    public void placeBid(@DestinationVariable Long auctionId, @Valid @Payload BidRequest request, Principal principal) {
+    public void placeBid(
+            @DestinationVariable Long auctionId,
+            @Valid @Payload BidRequest request,
+            Principal principal
+    ) {
         bidService.placeBid(auctionId, request, principal);
     }
 

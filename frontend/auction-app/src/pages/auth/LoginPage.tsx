@@ -4,7 +4,11 @@ import LoginBox from './LoginBox';
 import ErrorBox from '../../components/ErrorBox';
 import { authApi } from '../../api/authApi';
 
-export default function LoginPage() {
+interface LoginPageProps {
+    onLoginSuccess: (user: { username: string; initials: string }) => void;
+}
+
+export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
     const [alert, setAlert] = useState<{ title: string; message: string; email?: string; isUnverified: boolean } | null>(null);
     const navigate = useNavigate();
 
@@ -24,9 +28,15 @@ export default function LoginPage() {
         }
     };
 
+    // Bubble up to App.tsx which owns both state + navigation
+    const handleLoginSuccessInternal = (userData: { username: string; initials: string }) => {
+        onLoginSuccess(userData);
+    };
+
     return (
         <main className="w-screen h-screen min-h-screen flex items-center justify-center bg-gray-50 overflow-hidden select-none relative">
-            <LoginBox onError={handleLoginError} />
+            {/* Make sure your LoginBox component accepts an onSuccess prop to pass back the user profile */}
+            <LoginBox onError={handleLoginError} onSuccess={handleLoginSuccessInternal} />
 
             {alert && (
                 <ErrorBox

@@ -1,5 +1,7 @@
 package com.auction.app.domains.products;
 
+import com.auction.app.domains.products.dtos.ProductRequest;
+import com.auction.app.domains.products.dtos.ProductResponse;
 import com.auction.app.domains.products.exceptions.ProductNotFoundException;
 import com.auction.app.domains.users.users.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +25,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ProductResponse> getStorage(int page, int size, String keyword, Set<Tag> tags) {
+    public Page<ProductResponse> getStorage(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        return productRepository.findByKeywordAndTags(currentUser().getId(), keyword, tags, pageable)
+        return productRepository.findAllUserProducts(currentUser().getId(), pageable)
                 .map(this::mapToResponse);
     }
 

@@ -14,7 +14,7 @@ import com.auction.app.domains.auction.bids.dtos.BidNotificationPayload;
 import com.auction.app.domains.auction.bids.dtos.BidRequest;
 import com.auction.app.domains.auction.bids.dtos.BidResponse;
 import com.auction.app.domains.auction.bids.dtos.PendingBid;
-import com.auction.app.domains.auction.bids.exceptions.InvalidBidException;
+import com.auction.app.domains.auction.exceptions.InvalidBidException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -255,5 +255,13 @@ public class BidService {
 
     private BigDecimal calculateIncrement(BigDecimal amount) {
         return amount.multiply(INCREMENT_PERCENTAGE).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private User currentUser() {
+        Authentication authentication = (Authentication) SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            throw new RuntimeException("Not authenticated");
+        }
+        return (User) authentication.getPrincipal();
     }
 }
