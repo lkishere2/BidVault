@@ -29,3 +29,12 @@ export interface AuctionResponse {
     winnerLabel?: string;
     bidCount: number;
 }
+
+export interface AuctionFindingRequest {
+    productName?: string;
+    tags?: string[];
+    startTime?: string;
+    endTime?: string;
+    minStartingPrice?: string;
+    status?: AuctionStatus;
+}

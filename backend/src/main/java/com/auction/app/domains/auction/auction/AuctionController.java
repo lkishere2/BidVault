@@ -6,18 +6,14 @@ import com.auction.app.domains.auction.auction.dtos.AuctionFindingRequest;
 import com.auction.app.domains.auction.auction.dtos.AuctionRequest;
 import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Min;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,25 +26,27 @@ import lombok.RequiredArgsConstructor;
 public class AuctionController {
     private final AuctionService auctionService;
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<AuctionResponse> createAuction(@RequestBody @Valid AuctionRequest request) {
         return ResponseEntity.ok(auctionService.createAuction(request));
     }
 
-    @DeleteMapping("/{auctionId}")
+    @DeleteMapping("/cancel/{auctionId}")
     public ResponseEntity<AuctionResponse> cancelAuction(@PathVariable Long auctionId) {
         return ResponseEntity.ok(auctionService.cancelAuction(auctionId));
     }
 
-    @GetMapping("/{auctionId}")
+    @GetMapping("/get/{auctionId}")
     public ResponseEntity<AuctionResponse> getAuction(@PathVariable Long auctionId) {
         return ResponseEntity.ok(auctionService.getAuction(auctionId));
     }
 
     @GetMapping("/discover")
     public ResponseEntity<Page<AuctionResponse>> getDiscoverableAuctions(
-            @Valid AuctionFindingRequest request,
-            @PageableDefault(size = 10) Pageable pageable) {
+            @Valid @RequestBody AuctionFindingRequest request,
+            @RequestParam(defaultValue = "0") @Min(value = 0, message = "page must be >= 0") int page,
+            @RequestParam(defaultValue = "10") @Min(value = 1, message = "size must be >= 1") int size) {
+        Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(auctionService.getDiscoverableAuctions(request, pageable));
     }
 
