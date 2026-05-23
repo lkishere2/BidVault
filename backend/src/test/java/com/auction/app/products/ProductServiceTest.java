@@ -16,13 +16,15 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -67,8 +69,12 @@ class ProductServiceTest {
         SecurityContextHolder.clearContext();
     }
 
+    // =========================================================================
+    // METHOD: getStorage (3 Tests)
+    // =========================================================================
+
     @Test
-    void getStorage_WhenKeywordHasSpacesAndUppercase_ShouldNormalizeKeywordForRepositoryLikeQuery() {
+    void getStorage_WhenValidPageAndSize_ShouldReturnMappedProductResponsesSortedByCreatedAtDesc() {
         Product product = Product.builder()
                 .id(1L)
                 .productName("Gaming Laptop")
@@ -78,35 +84,42 @@ class ProductServiceTest {
                 .owner(currentUser)
                 .build();
 
-        when(productRepository.findByKeywordAndTags(eq(1L), eq("%laptop%"), eq(Set.of(Tag.ELECTRONICS)), any(Pageable.class)))
+        Pageable expectedPageable = PageRequest.of(0, 10, Sort.by("createdAt").descending());
+
+        when(productRepository.findAllUserProducts(eq(1L), eq(expectedPageable)))
                 .thenReturn(new PageImpl<>(List.of(product)));
 
-        List<ProductResponse> responses = productService.getStorage(0, 10, "  LAPTOP  ", Set.of(Tag.ELECTRONICS))
-                .getContent();
+        Page<ProductResponse> resultPage = productService.getStorage(0, 10);
+        List<ProductResponse> responses = resultPage.getContent();
 
         assertThat(responses).hasSize(1);
-        assertThat(responses.get(0).getProductName()).isEqualTo("Gaming Laptop");
+        ProductResponse response = responses.get(0);
+        assertThat(response.getId()).isEqualTo(1L);
+        assertThat(response.getProductName()).isEqualTo("Gaming Laptop");
+        assertThat(response.getTags()).containsExactly(Tag.ELECTRONICS);
+
+        verify(productRepository).findAllUserProducts(1L, expectedPageable);
     }
 
     @Test
-    void getStorage_WhenKeywordIsBlankAndTagsAreEmpty_ShouldPassNullFiltersToRepository() {
-        when(productRepository.findByKeywordAndTags(eq(1L), eq(null), eq(null), any(Pageable.class)))
-                .thenReturn(new PageImpl<>(Collections.emptyList()));
+    void getStorage_WhenPageIsInvalid_ShouldThrowBeforeRepositoryCall() {
+        assertThatThrownBy(() -> productService.getStorage(-1, 10))
+                .isInstanceOf(IllegalArgumentException.class);
 
-        productService.getStorage(0, 10, "   ", Collections.emptySet());
-
-        verify(productRepository).findByKeywordAndTags(eq(1L), eq(null), eq(null), any(Pageable.class));
+        verify(productRepository, never()).findAllUserProducts(any(), any());
     }
 
     @Test
-    void getStorage_WhenPageOrSizeIsInvalid_ShouldThrowBeforeRepositoryCall() {
-        assertThatThrownBy(() -> productService.getStorage(-1, 10, null, null))
-                .isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> productService.getStorage(0, 0, null, null))
+    void getStorage_WhenSizeIsInvalid_ShouldThrowBeforeRepositoryCall() {
+        assertThatThrownBy(() -> productService.getStorage(0, 0))
                 .isInstanceOf(IllegalArgumentException.class);
 
-        verify(productRepository, never()).findByKeywordAndTags(any(), any(), any(), any());
+        verify(productRepository, never()).findAllUserProducts(any(), any());
     }
+
+    // =========================================================================
+    // METHOD: addProduct (1 Test)
+    // =========================================================================
 
     @Test
     void addProduct_WhenRequestIsValid_ShouldSaveProductForCurrentUser() {
@@ -125,6 +138,10 @@ class ProductServiceTest {
         assertThat(response.getProductName()).isEqualTo("Mechanical Keyboard");
         assertThat(response.getQuantity()).isEqualTo(3);
     }
+
+    // =========================================================================
+    // METHOD: editProduct (3 Tests)
+    // =========================================================================
 
     @Test
     void editProduct_WhenCurrentUserOwnsProduct_ShouldUpdateAndSaveProduct() {
@@ -163,48 +180,6 @@ class ProductServiceTest {
     }
 
     @Test
-    void deleteProduct_WhenProductBelongsToAnotherUser_ShouldThrowAccessDeniedException() {
-        User otherUser = User.builder()
-                .id(2L)
-                .username("other")
-                .email("other@example.com")
-                .password("password")
-                .build();
-        Product product = Product.builder()
-                .id(20L)
-                .productName("Camera")
-                .description("Film camera")
-                .quantity(1)
-                .owner(otherUser)
-                .build();
-
-        when(productRepository.findById(20L)).thenReturn(Optional.of(product));
-
-        assertThatThrownBy(() -> productService.deleteProduct(20L))
-                .isInstanceOf(AccessDeniedException.class)
-                .hasMessage("Unauthorized: You do not own this product.");
-
-        verify(productRepository, never()).delete(any(Product.class));
-    }
-
-    @Test
-    void deleteProduct_WhenCurrentUserOwnsProduct_ShouldDeleteProduct() {
-        Product product = Product.builder()
-                .id(20L)
-                .productName("Camera")
-                .description("Film camera")
-                .quantity(1)
-                .owner(currentUser)
-                .build();
-
-        when(productRepository.findById(20L)).thenReturn(Optional.of(product));
-
-        productService.deleteProduct(20L);
-
-        verify(productRepository).delete(product);
-    }
-
-    @Test
     void editProduct_WhenProductBelongsToAnotherUser_ShouldThrowAccessDeniedException() {
         User otherUser = User.builder()
                 .id(2L)
@@ -227,6 +202,52 @@ class ProductServiceTest {
                 .hasMessage("Unauthorized: You do not own this product.");
 
         verify(productRepository, never()).save(any(Product.class));
+    }
+
+    // =========================================================================
+    // METHOD: deleteProduct (2 Tests)
+    // =========================================================================
+
+    @Test
+    void deleteProduct_WhenCurrentUserOwnsProduct_ShouldDeleteProduct() {
+        Product product = Product.builder()
+                .id(20L)
+                .productName("Camera")
+                .description("Film camera")
+                .quantity(1)
+                .owner(currentUser)
+                .build();
+
+        when(productRepository.findById(20L)).thenReturn(Optional.of(product));
+
+        productService.deleteProduct(20L);
+
+        verify(productRepository).delete(product);
+    }
+
+    @Test
+    void deleteProduct_WhenProductBelongsToAnotherUser_ShouldThrowAccessDeniedException() {
+        User otherUser = User.builder()
+                .id(2L)
+                .username("other")
+                .email("other@example.com")
+                .password("password")
+                .build();
+        Product product = Product.builder()
+                .id(20L)
+                .productName("Camera")
+                .description("Film camera")
+                .quantity(1)
+                .owner(otherUser)
+                .build();
+
+        when(productRepository.findById(20L)).thenReturn(Optional.of(product));
+
+        assertThatThrownBy(() -> productService.deleteProduct(20L))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("Unauthorized: You do not own this product.");
+
+        verify(productRepository, never()).delete(any(Product.class));
     }
 
     private ProductRequest createProductRequest() {

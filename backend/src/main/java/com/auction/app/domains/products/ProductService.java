@@ -7,7 +7,7 @@ import org.springframework.data.domain.Page;
 import java.util.Set;
 
 public interface ProductService {
-    Page<ProductResponse> getStorage(int page, int size, String keyword, Set<Tag> tags);
+    Page<ProductResponse> getStorage(int page, int size);
     ProductResponse addProduct(ProductRequest productRequest);
     ProductResponse editProduct(Long id, ProductRequest productRequest);
     void deleteProduct(Long id);

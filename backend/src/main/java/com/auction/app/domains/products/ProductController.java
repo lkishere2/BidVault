@@ -11,8 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Set;
-
 @RestController
 @RequestMapping("api/v1/inventory")
 @io.swagger.v3.oas.annotations.tags.Tag(name = "Product")
@@ -25,10 +23,8 @@ public class ProductController {
     @GetMapping("/get")
     public ResponseEntity<Page<ProductResponse>> getStorage(
             @RequestParam(defaultValue = "0") @Min(value = 0, message = "page must be >= 0") int page,
-            @RequestParam(defaultValue = "10") @Min(value = 1, message = "size must be >= 1") int size,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Set<Tag> tags) {
-        Page<ProductResponse> response = productService.getStorage(page, size, keyword, tags);
+            @RequestParam(defaultValue = "10") @Min(value = 1, message = "size must be >= 1") int size) {
+        Page<ProductResponse> response = productService.getStorage(page, size);
         return ResponseEntity.ok(response);
     }
 
