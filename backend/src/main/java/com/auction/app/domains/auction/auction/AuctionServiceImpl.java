@@ -89,21 +89,22 @@ public class AuctionServiceImpl implements AuctionService {
         productRepository.save(product);
 
         // Change the status of the auction to CANCELLED
-        auction.setProduct(null);
         auction.setStatus(AuctionStatus.CANCELLED);
-        Auction saved = auctionRepository.save(auction);
+        AuctionResponse response = AuctionResponse.from(auction);
 
-        // Clear the cache here
+        auction.setProduct(null);
+        auctionRepository.saveAndFlush(auction);
+
         auctionCacheAdapter.clearAuctionCache(auctionId);
 
-        // Return the response to the user
-        return AuctionResponse.from(saved);
+        return response;
     }
 
     @Transactional(readOnly = true)
     public AuctionResponse getAuction(Long auctionId) {
 
         AuctionResponse cached = auctionCacheAdapter.getAuctionResponse(auctionId);
+
         if (cached != null) {
             log.info("Auction has been cached for {}", auctionId);
             return cached;
