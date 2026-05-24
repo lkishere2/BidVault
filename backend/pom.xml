@@ -137,6 +137,7 @@
 			<artifactId>junit-jupiter</artifactId>
 			<scope>test</scope>
 		</dependency>
+		
 		<!-- mockito-inline REMOVED: redundant with Mockito 5.x bundled in Spring Boot 3.4,
 		     and causes byte-buddy conflicts on Java 21 -->
 	</dependencies>
