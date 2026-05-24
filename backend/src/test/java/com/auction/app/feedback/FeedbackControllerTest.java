@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
@@ -199,14 +200,11 @@ class FeedbackControllerTest {
 
     @Test
     void getAllFeedback_WhenCalledWithValidParams_ShouldReturnPage() throws Exception {
-        // Arrange
         FeedbackResponse feedbackResponse = createFeedbackResponse(1L, "Some feedback");
         Page<FeedbackResponse> mockPage = new PageImpl<>(List.of(feedbackResponse));
-
         when(feedbackService.getAllFeedback(0, 20)).thenReturn(mockPage);
 
-        // Act & Assert
-        mockMvc.perform(get("/api/v1/feedback")
+        mockMvc.perform(get("/api/v1/feedback/all")  // ← sửa chỗ này
                         .param("page", "0")
                         .param("size", "20"))
                 .andExpect(status().isOk())
@@ -218,19 +216,16 @@ class FeedbackControllerTest {
 
     @Test
     void getAllFeedback_WhenParamsAreMissing_ShouldUseDefaults() throws Exception {
-        // Arrange
         Page<FeedbackResponse> mockPage = new PageImpl<>(List.of());
         when(feedbackService.getAllFeedback(0, 20)).thenReturn(mockPage);
 
-        // Act & Assert
-        mockMvc.perform(get("/api/v1/feedback"))
+        mockMvc.perform(get("/api/v1/feedback/all"))  // ← sửa chỗ này
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content").isEmpty());
 
         verify(feedbackService).getAllFeedback(0, 20);
     }
-
     // --- Helper Methods ---
 
     private FeedbackRequest createFeedbackRequest(String content) {
