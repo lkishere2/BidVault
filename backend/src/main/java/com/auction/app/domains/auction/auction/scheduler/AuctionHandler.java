@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -21,7 +20,6 @@ public class AuctionHandler {
     private final AuctionExecutionService auctionExecutionService;
 
     @Scheduled(fixedRate = 100000)
-    @Transactional
     public void activateUpcomingAuctions() {
 
         List<Long> toActivateIds = auctionRepository.findUpcomingIdsToActivate(AuctionStatus.UPCOMING, Instant.now());
@@ -43,7 +41,6 @@ public class AuctionHandler {
 
     // Same logic as the active
     @Scheduled(fixedRate = 100000)
-    @Transactional
     public void endActiveAuctions() {
 
         List<Long> toEndIds = auctionRepository.findActiveIdsToEnd(AuctionStatus.ACTIVE, Instant.now());

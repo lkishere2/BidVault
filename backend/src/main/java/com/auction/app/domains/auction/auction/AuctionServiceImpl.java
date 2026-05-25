@@ -8,14 +8,14 @@ import java.util.List;
 import com.auction.app.domains.auction.auction.dtos.AuctionFindingRequest;
 import com.auction.app.domains.auction.auction.dtos.AuctionRequest;
 import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
-import com.auction.app.domains.auction.auction.redis.AuctionCacheAdapter;
+import com.auction.app.domains.auction.auction.redis.AuctionRedisPort;
 import com.auction.app.domains.auction.exceptions.*;
 import com.auction.app.domains.notifications.NotificationService;
 import com.auction.app.domains.products.exceptions.ProductNotFoundException;
-import com.auction.app.domains.transaction.exceptions.AuthorizedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -36,7 +36,7 @@ public class AuctionServiceImpl implements AuctionService {
 
     private final AuctionRepository auctionRepository;
     private final ProductRepository productRepository;
-    private final AuctionCacheAdapter auctionCacheAdapter;
+    private final AuctionRedisPort cache;
     private final NotificationService notificationService;
 
     @Transactional
@@ -95,7 +95,7 @@ public class AuctionServiceImpl implements AuctionService {
         auction.setProduct(null);
         auctionRepository.saveAndFlush(auction);
 
-        auctionCacheAdapter.clearAuctionCache(auctionId);
+        cache.clearAuctionCache(auctionId);
 
         return response;
     }
@@ -103,7 +103,7 @@ public class AuctionServiceImpl implements AuctionService {
     @Transactional(readOnly = true)
     public AuctionResponse getAuction(Long auctionId) {
 
-        AuctionResponse cached = auctionCacheAdapter.getAuctionResponse(auctionId);
+        AuctionResponse cached = cache.getAuctionResponse(auctionId);
 
         if (cached != null) {
             log.info("Auction has been cached for {}", auctionId);
@@ -117,7 +117,7 @@ public class AuctionServiceImpl implements AuctionService {
                 .orElseThrow(() -> new AuctionNotFoundException("Auction not found"));
 
         AuctionResponse response = AuctionResponse.from(auction);
-        auctionCacheAdapter.cacheAuctionResponse(auctionId, response);
+        cache.cacheAuctionResponse(auctionId, response);
 
         return response;
     }
@@ -155,14 +155,14 @@ public class AuctionServiceImpl implements AuctionService {
 
     public void cacheAuctionResponse(Auction auction) {
         AuctionResponse response = AuctionResponse.from(auction);
-        auctionCacheAdapter.cacheAuctionResponse(auction.getId(), response);
+        cache.cacheAuctionResponse(auction.getId(), response);
     }
 
     // Helpers
     private User currentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
-            throw new AuthorizedException("User is not authenticated");
+            throw new BadCredentialsException("User is not authenticated");
         }
         return (User) authentication.getPrincipal();
     }
@@ -195,7 +195,7 @@ public class AuctionServiceImpl implements AuctionService {
 
     private void validateUser(User seller, User currentUser) {
         if (!seller.getId().equals(currentUser.getId())) {
-            throw new AuthorizedException("You are not the seller of this auction");
+            throw new BadCredentialsException("You are not the seller of this auction");
         }
     }
 
