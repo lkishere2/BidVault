@@ -103,9 +103,11 @@ public class AuctionServiceImpl implements AuctionService {
     @Transactional(readOnly = true)
     public AuctionResponse getAuction(Long auctionId) {
 
+        long start = System.currentTimeMillis();
         AuctionResponse cached = cache.getAuctionResponse(auctionId);
 
         if (cached != null) {
+            log.info("Redis deserialize took: {}ms", System.currentTimeMillis() - start);
             log.info("Auction has been cached for {}", auctionId);
             return cached;
         }

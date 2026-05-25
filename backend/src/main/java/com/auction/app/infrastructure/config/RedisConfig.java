@@ -1,15 +1,14 @@
 package com.auction.app.infrastructure.config;
 
 import com.auction.app.domains.auction.auction.notification.AuctionSubscriber;
+import com.auction.app.infrastructure.security.CachedUserDetails;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -18,43 +17,23 @@ import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
-@Slf4j
 public class RedisConfig {
 
     private ObjectMapper createRedisObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
-
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         mapper.configure(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN, true);
         mapper.configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, true);
-
-        ObjectMapper.DefaultTypeResolverBuilder typer =
-                new ObjectMapper.DefaultTypeResolverBuilder(
-                        ObjectMapper.DefaultTyping.NON_FINAL,
-                        LaissezFaireSubTypeValidator.instance
-                ) {
-                    @Override
-                    public boolean useForType(JavaType t) {
-                        String pkg = t.getRawClass().getPackageName();
-                        if (pkg.startsWith("java.")
-                                || pkg.startsWith("javax.")
-                                || pkg.startsWith("sun.")
-                                || pkg.startsWith("com.fasterxml.")) {
-                            return false;
-                        }
-                        return super.useForType(t);
-                    }
-                };
-
-        typer.init(JsonTypeInfo.Id.CLASS, null);
-        typer.inclusion(JsonTypeInfo.As.PROPERTY);
-        typer.typeProperty("@class");
-        mapper.setDefaultTyping(typer);
-
+        mapper.activateDefaultTyping(
+                LaissezFaireSubTypeValidator.instance,
+                ObjectMapper.DefaultTyping.NON_FINAL,
+                JsonTypeInfo.As.PROPERTY
+        );
         return mapper;
     }
 
@@ -65,6 +44,31 @@ public class RedisConfig {
 
         GenericJackson2JsonRedisSerializer serializer =
                 new GenericJackson2JsonRedisSerializer(createRedisObjectMapper());
+
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(serializer);
+        template.setHashValueSerializer(serializer);
+
+        template.afterPropertiesSet();
+        return template;
+    }
+
+    @Bean
+    public RedisTemplate<String, CachedUserDetails> userDetailsRedisTemplate(
+            RedisConnectionFactory connectionFactory) {
+
+        RedisTemplate<String, CachedUserDetails> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        mapper.configure(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN, true);
+        mapper.configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, true);
+
+        Jackson2JsonRedisSerializer<CachedUserDetails> serializer =
+                new Jackson2JsonRedisSerializer<>(mapper, CachedUserDetails.class);
 
         template.setKeySerializer(new StringRedisSerializer());
         template.setHashKeySerializer(new StringRedisSerializer());
