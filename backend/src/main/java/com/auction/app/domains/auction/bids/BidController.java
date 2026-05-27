@@ -28,10 +28,7 @@ public class BidController {
     private final AuctionService auctionService;
 
     @MessageMapping("/auction/{auctionId}/bid")
-    public void placeBid(
-            @DestinationVariable Long auctionId,
-            @Valid @Payload BidRequest request
-    ) {
+    public void placeBid(@DestinationVariable Long auctionId, @Valid @Payload BidRequest request) {
         bidService.placeBid(auctionId, request);
     }
 
@@ -45,4 +42,5 @@ public class BidController {
         List<Long> auctionIds = bidService.getAuctionsBiddenByCurrentUser();
         return ResponseEntity.ok(auctionService.getAuctionsBidOnByCurrentUser(auctionIds));
     }
+
 }

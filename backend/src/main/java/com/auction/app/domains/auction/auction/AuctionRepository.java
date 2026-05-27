@@ -17,6 +17,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface AuctionRepository extends JpaRepository<Auction, Long> {
 
+    // Get my auctions method
+    @Query(
+            value = "SELECT a.id FROM Auction a WHERE a.seller.id = :sellerId",
+            countQuery = "SELECT COUNT(a.id) FROM Auction a WHERE a.seller.id = :sellerId"
+    )
+    Page<Long> findIdsBySellerIdOrderByStartTime(@Param("sellerId") Long sellerId, Pageable pageable);
+
     @Query(value = "SELECT DISTINCT a.* FROM auctions a " +
             "LEFT JOIN products p ON a.product_id = p.id " +
             "WHERE (:status IS NULL AND a.status IN ('UPCOMING', 'ACTIVE') OR a.status = :status) " +
@@ -59,12 +66,6 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
 
     @Query("SELECT a FROM Auction a JOIN FETCH a.seller JOIN FETCH a.product WHERE a.seller.id = :sellerId")
     List<Auction> findBySellerIdWithDetails(@Param("sellerId") Long sellerId);
-
-    @Query(
-            value = "SELECT a.id FROM Auction a WHERE a.seller.id = :sellerId",
-            countQuery = "SELECT COUNT(a.id) FROM Auction a WHERE a.seller.id = :sellerId"
-    )
-    Page<Long> findIdsBySellerIdOrderByStartTime(@Param("sellerId") Long sellerId, Pageable pageable);
 
     @Query("SELECT a FROM Auction a JOIN FETCH a.seller JOIN FETCH a.product WHERE a.id IN :ids")
     List<Auction> findByIdsWithDetails(@Param("ids") List<Long> ids);
