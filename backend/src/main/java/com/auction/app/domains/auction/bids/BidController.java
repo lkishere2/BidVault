@@ -1,6 +1,5 @@
 package com.auction.app.domains.auction.bids;
 
-import java.security.Principal;
 import java.util.List;
 
 import com.auction.app.domains.auction.auction.AuctionService;
@@ -31,10 +30,9 @@ public class BidController {
     @MessageMapping("/auction/{auctionId}/bid")
     public void placeBid(
             @DestinationVariable Long auctionId,
-            @Valid @Payload BidRequest request,
-            Principal principal
+            @Valid @Payload BidRequest request
     ) {
-        bidService.placeBid(auctionId, request, principal);
+        bidService.placeBid(auctionId, request);
     }
 
     @GetMapping("/bids/{auctionId}")

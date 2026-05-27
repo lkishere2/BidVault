@@ -2,7 +2,6 @@ package com.auction.app.domains.auction.bids;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.security.Principal;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -16,13 +15,10 @@ import com.auction.app.domains.auction.bids.dtos.BidResponse;
 import com.auction.app.domains.auction.bids.dtos.PendingBid;
 import com.auction.app.domains.auction.bids.model.Bid;
 import com.auction.app.domains.auction.bids.model.BidStatus;
-import com.auction.app.domains.auction.exceptions.AuctionNotFoundException;
-import com.auction.app.domains.auction.exceptions.BidNotFoundException;
-import com.auction.app.domains.auction.exceptions.InsufficientBalanceException;
-import com.auction.app.domains.auction.exceptions.InvalidBidException;
+import com.auction.app.domains.auction.exceptions.*;
 import com.auction.app.domains.users.exceptions.UserNotFoundException;
 
-import org.springframework.security.core.Authentication;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,37 +49,48 @@ public class BidService {
     private static final BigDecimal INCREMENT_PERCENTAGE = BigDecimal.valueOf(0.05);
 
     @Transactional
-    public void placeBid(Long auctionId, BidRequest request, Principal principal) {
-        if (principal == null) {
-            throw new InvalidBidException("Authentication required to place a bid.");
-        }
+    public void placeBid(Long auctionId, BidRequest request) {
 
-        // Fetch some info
-        User bidder = (User) ((Authentication) principal).getPrincipal();
+        Long currentUserId = securityUtils.getCurrentUserId();
+        User bidder = findBidderById(currentUserId);
         AuctionResponse response = getActiveAuctionResponse(auctionId);
-        String sellerLabel = response.getSellerLabel();
-        Long sellerId = Long.valueOf(sellerLabel.substring(sellerLabel.lastIndexOf("#") + 1));
 
         // Validate
-        validateUser(bidder.getId(), sellerId);
+        validateUser(bidder.getId(), response.getSellerId());
         validateBidAmount(request.getAmount(), response);
         validateSpendableBalance(bidder, request.getAmount());
 
         // Find auction
         Auction auction = findAuctionById(auctionId);
 
-        // Persist PENDING bid immediately — funds are locked from this point
+        // Lock funds virtually
         Bid pendingBid = buildBid(auction, bidder, request.getAmount());
-        Bid saved = bidRepository.save(pendingBid);
+        Bid savedBid = bidRepository.save(pendingBid);
 
         // Enqueue to Redis for processing
-        PendingBid queued = buildPendingBid(saved, auctionId, bidder, request.getAmount());
-        auctionCacheAdapter.enqueueBid(auctionId, queued);
-        log.info("Bid queued as PENDING — auction #{}, bidder #{}, amount ${}",
-                auctionId, bidder.getId(), request.getAmount());
+        PendingBid queued = buildPendingBid(savedBid, auctionId, bidder, request.getAmount());
 
-        // Process immediately and broadcast to all subscribers
-        processNextBid(auctionId).ifPresent(publisher::publish);
+        try {
+            auctionCacheAdapter.enqueueBid(auctionId, queued);
+            log.info("Bid queued successfully — auction #{}, bidder #{}, amount ${}", auctionId, bidder.getId(), request.getAmount());
+        } catch (Exception e) {
+            log.error("Failed to queue new bid, error: {}", e.getMessage());
+        }
+
+        dequeueBid(auctionId);
+    }
+
+    @Async
+    public void dequeueBid(Long auctionId) {
+        boolean hasMoreBids = true;
+        while (hasMoreBids) {
+            hasMoreBids = this.processNextBid(auctionId)
+                    .map(payload -> {
+                        publisher.publish(payload);
+                        return true;
+                    })
+                    .orElse(false);
+        }
     }
 
     @Transactional
@@ -93,9 +100,9 @@ public class BidService {
         if (pendingBid == null) return Optional.empty();
 
         Bid bid = findBidById(pendingBid.getBidId());
-        AuctionResponse response = auctionCacheAdapter.getAuctionResponse(auctionId);
 
         // Auction no longer active or bid amount no longer meets minimum — REFUND
+        AuctionResponse response = getActiveAuctionResponse(auctionId);
         if (!isBidEligible(response, pendingBid.getAmount())) {
             bid.setStatus(BidStatus.REFUNDED);
             bidRepository.save(bid);
@@ -103,8 +110,8 @@ public class BidService {
             return Optional.empty();
         }
 
-        User bidder = findBidderById(pendingBid.getBidderId());
         // Re-check spendable balance at processing time — REFUND if insufficient
+        User bidder = findBidderById(pendingBid.getBidderId());
         if (!hasSufficientBalance(bidder, pendingBid.getAmount())) {
             bid.setStatus(BidStatus.REFUNDED);
             bidRepository.save(bid);
@@ -119,18 +126,19 @@ public class BidService {
         bid.setStatus(BidStatus.HELD);
         bidRepository.save(bid);
 
+        // Apply sniper for two more minutes
         boolean isExtended = applySniperProtection(response);
-        BigDecimal newIncrement = calculateIncrement(pendingBid.getAmount());
 
+        // Update the Auction Response in Redis
+        BigDecimal newIncrement = calculateIncrement(pendingBid.getAmount());
         response.setCurrentPrice(pendingBid.getAmount());
         response.setMinBidIncrement(newIncrement);
         response.setBidCount(response.getBidCount() + 1);
         response.setWinnerLabel(pendingBid.getBidderLabel());
         auctionCacheAdapter.updateAuctionResponse(auctionId, response);
+        log.info("Bid #{} promoted to HELD — auction #{}, price ${}, bidder #{}", bid.getId(), auctionId, pendingBid.getAmount(), pendingBid.getBidderId());
 
-        log.info("Bid #{} promoted to HELD — auction #{}, price ${}, bidder #{}",
-                bid.getId(), auctionId, pendingBid.getAmount(), pendingBid.getBidderId());
-
+        // Return the new change for UI
         return Optional.of(BidNotificationPayload.builder()
                 .auctionId(auctionId)
                 .currentPrice(pendingBid.getAmount())
@@ -174,7 +182,7 @@ public class BidService {
                 .bidId(bid.getId())
                 .auctionId(auctionId)
                 .bidderId(bidder.getId())
-                .bidderLabel(bidder.getDisplayName() + " #" + bidder.getId())
+                .bidderLabel(bidder.getDisplayName())
                 .amount(amount)
                 .placedAt(bid.getPlacedAt())
                 .build();
@@ -183,8 +191,14 @@ public class BidService {
     // Finders
     private AuctionResponse getActiveAuctionResponse(Long auctionId) {
         AuctionResponse response = auctionCacheAdapter.getAuctionResponse(auctionId);
-        if (response == null || response.getStatus() != AuctionStatus.ACTIVE) {
-            throw new AuctionNotFoundException("Auction with ID " + auctionId + " is not found or not active.");
+        if (response == null) {
+            log.info("Auction #{} is not found in cache. Fallback to DB!", auctionId);
+            Auction auction = findAuctionById(auctionId);
+            response = AuctionResponse.from(auction);
+            auctionCacheAdapter.cacheAuctionResponse(auctionId, response);
+        }
+        if (response.getStatus() != AuctionStatus.ACTIVE) {
+            throw new NotActiveAuctionException("Auction with ID " + auctionId + " is not active.");
         }
         return response;
     }
@@ -233,7 +247,7 @@ public class BidService {
     }
 
     private boolean isBidEligible(AuctionResponse response, BigDecimal amount) {
-        if (response == null || response.getStatus() != AuctionStatus.ACTIVE) return false;
+        if (response.getStatus() != AuctionStatus.ACTIVE) return false;
         BigDecimal minimumBid = response.getCurrentPrice().add(response.getMinBidIncrement());
         return amount.compareTo(minimumBid) >= 0;
     }
