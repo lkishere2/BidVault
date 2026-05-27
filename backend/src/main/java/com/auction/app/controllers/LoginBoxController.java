@@ -41,6 +41,10 @@ public class LoginBoxController {
     @FXML
     private PasswordField passwordField;
 
+    /**
+     * Handles user sign-in submissions, bridges credentials seamlessly to your backend,
+     * stores the resultant session tokens, and navigates into the Home View dashboard shell.
+     */
     @FXML
     private void handleLogin(ActionEvent event) {
         String email = emailField.getText().trim();
@@ -56,15 +60,15 @@ public class LoginBoxController {
             loginRequest.setEmail(email);
             loginRequest.setPassword(password);
 
-            // 1. Create a runtime proxy stub to cleanly substitute real HTTP request items
+            // 1. Create a runtime proxy stub to cleanly substitute real HTTP request parameters
             HttpServletRequest mockRequest = createMockHttpServletRequest();
 
-            // 2. Call your producers passing the custom proxy instead of null
+            // 2. Invoke your backend AuthController login endpoint using Direct Bean Injection
             ResponseEntity<AuthResponse> responseEntity = authController.login(loginRequest, mockRequest);
             AuthResponse response = responseEntity.getBody();
 
             if (response != null && response.getAccessToken() != null) {
-                // 3. Load user account payload
+                // 3. Extract and load user account authorities payload
                 CachedUserDetails userDetails = (CachedUserDetails) userDetailsService.loadUserByUsername(email);
 
                 // 4. Securely store credentials inside the application state session block
@@ -72,7 +76,7 @@ public class LoginBoxController {
                 userSession.setRefreshToken(response.getRefreshToken());
                 userSession.setUserDetails(userDetails);
 
-                // 5. Establish local thread validation
+                // 5. Establish local thread validation contexts for @PreAuthorize hooks
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authToken);
@@ -80,8 +84,8 @@ public class LoginBoxController {
                 System.out.println("Login Success! Secure session token context established inside the JVM thread container.");
                 showSuccessAlert("Welcome!", "Login successful! Stored credentials securely.");
 
-                // When your dashboard layouts are built, uncomment to transition out of login view:
-                // mainController.navigateTo("/ui/DashboardView.fxml");
+                // 6. Navigate directly out of the authentication stack into your new HomeView framework shell
+                mainController.navigateTo("/ui/HomeView.fxml");
 
             } else {
                 showErrorAlert("Sign In Failed", "Authentication returned an invalid credential confirmation schema.");
@@ -91,6 +95,9 @@ public class LoginBoxController {
         }
     }
 
+    /**
+     * Transitions the view layer into the registration layout workflow container pane.
+     */
     @FXML
     private void navigateToRegister(ActionEvent event) {
         mainController.navigateTo("/ui/RegisterView.fxml");

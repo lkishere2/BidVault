@@ -15,6 +15,18 @@ public class UserSession {
     private CachedUserDetails userDetails;
     private Date tokenExpirationTime; // Track expiration explicitly on the UI thread
 
+    /**
+     * Standard cleanup alias called by the Navbar component logic during
+     * token removal and session invalidation sequences.
+     */
+    public void clearSession() {
+        this.clear();
+    }
+
+    /**
+     * Flushes out all stored active user credential tokens and state fields
+     * upon command execution.
+     */
     public void clear() {
         this.accessToken = null;
         this.refreshToken = null;
@@ -22,12 +34,15 @@ public class UserSession {
         this.tokenExpirationTime = null;
     }
 
+    /**
+     * Checks if a user is currently authenticated within the local thread context.
+     */
     public boolean isAuthenticated() {
         return this.accessToken != null;
     }
 
     /**
-     * Checks if the active access token needs to be refreshed
+     * Checks if the active access token needs to be refreshed.
      */
     public boolean isTokenExpired() {
         if (tokenExpirationTime == null) return true;
