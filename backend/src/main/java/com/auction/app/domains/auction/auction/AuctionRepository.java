@@ -67,7 +67,7 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
     @Query("SELECT a FROM Auction a JOIN FETCH a.seller JOIN FETCH a.product WHERE a.seller.id = :sellerId")
     List<Auction> findBySellerIdWithDetails(@Param("sellerId") Long sellerId);
 
-    @Query("SELECT a FROM Auction a JOIN FETCH a.seller JOIN FETCH a.product WHERE a.id IN :ids")
+    @Query("SELECT a FROM Auction a JOIN FETCH a.seller s JOIN FETCH a.product p LEFT JOIN FETCH p.tags t WHERE a.id IN :ids")
     List<Auction> findByIdsWithDetails(@Param("ids") List<Long> ids);
 
     boolean existsByProduct_IdAndStatusIn(Long productId, List<AuctionStatus> statuses);

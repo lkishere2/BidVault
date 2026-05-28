@@ -100,11 +100,10 @@ public class AuctionServiceImpl implements AuctionService {
         product.setQuantity(product.getQuantity() - request.getQuantity());
         productRepository.save(product);
 
-        // Create new entity in DB, and save it
         Auction auction = mapToEntity(request, product, seller);
+        auctionRepository.save(auction);
         AuctionResponse response = AuctionResponse.from(auction);
 
-        // We also cache that for fast retrievement
         cache.cacheAuctionResponse(auction.getId(), response);
 
         // Notify to all followers

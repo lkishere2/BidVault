@@ -64,10 +64,16 @@ public class AccountNavbarController {
         String fxmlPath = null;
 
         // Route matching criteria based on user sidebar selections
-        if ("Settings".equals(panelName)) {
+        if ("Profile".equals(panelName)) {
+            // FIXED: Added path matching for the new Instagram-style portfolio dashboard view sheet
+            fxmlPath = "/ui/views/account/profile/ProfileView.fxml";
+        } else if ("Settings".equals(panelName)) {
             fxmlPath = "/ui/views/account/settings/SettingView.fxml";
         } else if ("Balance".equals(panelName)) {
             fxmlPath = "/ui/views/account/balance/BalanceView.fxml";
+        } else if ("Inventory".equals(panelName)) {
+            // Point path directly to your master personal inventory workspace panel view
+            fxmlPath = "/ui/views/account/inventory/InventoryView.fxml";
         }
 
         // If an explicit route mapping matches, process dynamic FXML scene injection
