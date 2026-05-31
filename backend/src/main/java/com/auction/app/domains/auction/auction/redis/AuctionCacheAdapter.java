@@ -9,22 +9,21 @@ import java.util.Map;
 
 import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
 import com.auction.app.domains.auction.auction.model.AuctionStatus;
+import com.auction.app.domains.auction.bids.dtos.PendingBid;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
-import com.auction.app.domains.auction.bids.dtos.PendingBid;
-
 @Component
 public class AuctionCacheAdapter implements AuctionRedisPort {
 
     private final RedisTemplate<String, AuctionResponse> auctionResponseRedisTemplate;
+    private final RedisTemplate<String, PendingBid> pendingBidRedisTemplate;
     private final RedisTemplate<String, Object> redisTemplate;
 
     private static final String RESPONSE_PREFIX = "auction:response:";
     private static final String QUEUE_PREFIX = "auction:queue:";
-    // Fix #2 / #10: key prefix for the distributed scheduler / dequeue-loop lock
     private static final String PROCESSING_LOCK_PREFIX = "auction:processing-lock:";
     private static final Duration POST_AUCTION_RETENTION = Duration.ofDays(1);
     private static final Duration TERMINAL_RETENTION = Duration.ofMinutes(30);
@@ -32,9 +31,11 @@ public class AuctionCacheAdapter implements AuctionRedisPort {
 
     public AuctionCacheAdapter(
             @Qualifier("auctionResponseRedisTemplate") RedisTemplate<String, AuctionResponse> auctionResponseRedisTemplate,
+            @Qualifier("pendingBidRedisTemplate") RedisTemplate<String, PendingBid> pendingBidRedisTemplate,
             @Qualifier("redisTemplate") RedisTemplate<String, Object> redisTemplate
     ) {
         this.auctionResponseRedisTemplate = auctionResponseRedisTemplate;
+        this.pendingBidRedisTemplate = pendingBidRedisTemplate;
         this.redisTemplate = redisTemplate;
     }
 
@@ -50,10 +51,6 @@ public class AuctionCacheAdapter implements AuctionRedisPort {
 
     @Override
     public void cacheAuctionResponses(Map<Long, AuctionResponse> responses) {
-        // Fix #8 / #15: multiSet has no per-key TTL support — pipeline individual SET EX calls instead
-        // so each entry gets the same TTL logic as cacheAuctionResponse.
-        // Cast explicitly to RedisCallback to resolve the ambiguous overload between
-        // executePipelined(RedisCallback<?>) and executePipelined(SessionCallback<?>).
         auctionResponseRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
             responses.forEach((id, response) -> {
                 String key = getResponseKey(id);
@@ -78,20 +75,20 @@ public class AuctionCacheAdapter implements AuctionRedisPort {
 
     @Override
     public void enqueueBid(Long auctionId, PendingBid bid) {
-        redisTemplate.opsForList().rightPush(getQueueKey(auctionId), bid);
+        pendingBidRedisTemplate.opsForList().rightPush(getQueueKey(auctionId), bid);
     }
 
     @Override
     public PendingBid dequeueBid(Long auctionId) {
-        return (PendingBid) redisTemplate.opsForList().leftPop(getQueueKey(auctionId));
+        return pendingBidRedisTemplate.opsForList().leftPop(getQueueKey(auctionId));
     }
 
     @Override
     public void clearAuctionCache(Long auctionId) {
-        redisTemplate.delete(List.of(getResponseKey(auctionId), getQueueKey(auctionId)));
+        auctionResponseRedisTemplate.delete(getResponseKey(auctionId));
+        pendingBidRedisTemplate.delete(getQueueKey(auctionId));
     }
 
-    // Fix #2 / #10: SET NX PX — atomic acquire; returns true only if this caller set the key
     @Override
     public boolean acquireProcessingLock(Long auctionId) {
         Boolean acquired = redisTemplate.opsForValue()
@@ -99,7 +96,6 @@ public class AuctionCacheAdapter implements AuctionRedisPort {
         return Boolean.TRUE.equals(acquired);
     }
 
-    // Fix #2 / #10: unconditional delete — lock is always released in a finally block
     @Override
     public void releaseProcessingLock(Long auctionId) {
         redisTemplate.delete(getLockKey(auctionId));
