@@ -14,8 +14,7 @@ import java.util.Collection;
 import java.util.List;
 import java.math.BigDecimal;
 
-@Getter
-@Setter
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

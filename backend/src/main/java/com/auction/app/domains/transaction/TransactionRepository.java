@@ -11,4 +11,10 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     @Query("SELECT tx FROM Transaction tx WHERE tx.user.id = :userId ")
     Page<Transaction> getTransactionByUserId(Pageable pageable, @Param("userId") Long userId);
+
+    @Query(
+            value = "SELECT tx FROM Transaction tx JOIN FETCH tx.user",
+            countQuery = "SELECT COUNT(tx) FROM Transaction tx"
+    )
+    Page<Transaction> findAllWithUser(Pageable pageable);
 }

@@ -10,7 +10,6 @@ import com.auction.app.domains.users.users.model.User;
 import com.auction.app.domains.users.users.UserRepository;
 import com.auction.app.infrastructure.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,50 +26,37 @@ public class ConnectionServiceImpl implements ConnectionService {
 
     @Override
     @Transactional
-    public String toggleFollow(Long followingId) {
-        Long followerId;
-        try {
-            followerId = securityUtils.getCurrentUserId();
-        } catch (IllegalStateException e) {
-            throw new BadCredentialsException("User session is invalid or expired.", e);
-        }
+    public void toggleFollow(Long followingId) {
+
+        User follower = securityUtils.getCurrentUser();
+        Long followerId = follower.getId();
 
         if (followerId.equals(followingId)) {
-            throw new SelfFollowException("Action rejected: You cannot follow your own account.");
+            throw new SelfFollowException("You cannot follow your own account.");
         }
 
         Optional<Connection> optionalConnection = connectionRepository.findByFollowerIdAndFollowingId(followerId, followingId);
         if (optionalConnection.isPresent()) {
             // Unfollow
             connectionRepository.delete(optionalConnection.get());
-            return "Unfollowed successfully!";
         }
         else {
             // Follow
-            User follower;
-            try {
-                follower = securityUtils.getCurrentUser();
-            } catch (IllegalStateException e) {
-                throw new BadCredentialsException("User session is invalid or expired.", e);
-            }
-            User following = findUserById(followingId);
-            Connection connection = Connection.builder()
-                    .follower(follower)
-                    .following(following)
-                    .build();
+            User following = userRepository.findById(followingId)
+                    .orElseThrow(() -> new UserNotFoundException("User not found!"));
+            Connection connection = Connection.builder().follower(follower).following(following).build();
             connectionRepository.save(connection);
 
-            // New step's here! call the notification service
+            // Call the notification service
             notificationService.createAndSend(following, follower, NotificationType.FOLLOWING);
-
-            return "Followed successfully";
         }
     }
 
     @Override
     public UserStats getUserStats(Long userId) {
+
         if (!userRepository.existsById(userId)) {
-            throw new UserNotFoundException("User not found with ID: " + userId);
+            throw new UserNotFoundException("User not found");
         }
 
         long followersCount = connectionRepository.countByFollowing_Id(userId);
@@ -79,8 +65,4 @@ public class ConnectionServiceImpl implements ConnectionService {
         return new UserStats(followersCount, followingCount);
     }
 
-    private User findUserById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User not found!"));
-    }
 }

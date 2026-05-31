@@ -1,79 +1,103 @@
 package com.auction.app.controllers.market;
 
+import com.auction.app.controllers.market.bidsection.BidSectionController;
 import com.auction.app.domains.auction.auction.AuctionService;
 import com.auction.app.domains.auction.auction.dtos.AuctionFindingRequest;
 import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
+import com.auction.app.domains.auction.auction.model.AuctionStatus;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.concurrent.DelegatingSecurityContextRunnable;
 import org.springframework.stereotype.Component;
 
 @Component
 public class MarketViewController {
 
-    @FXML private MarketSearchBarController searchBarController;
-    @FXML private MarketAuctionGridController auctionGridController;
-
+    @FXML private MarketSearchBarController   searchBarController;
+    @FXML private MarketAuctionGridController  auctionGridController;
     @FXML private Button prevButton;
     @FXML private Button nextButton;
-    @FXML private Label pageTrackerLabel;
+    @FXML private Label  pageTrackerLabel;
 
-    @Autowired
-    private AuctionService auctionService;
+    @Autowired private AuctionService       auctionService;
+    @Autowired private BidSectionController bidSectionController;
 
     private int currentPage = 0;
-    private final int pageSize = 12;
-    private int totalPages = 1;
+    private int totalPages  = 1;
+    private static final int PAGE_SIZE = 12;
 
     @FXML
     public void initialize() {
         if (searchBarController != null) {
             searchBarController.setOnSearchTriggered(() -> {
-                this.currentPage = 0;
-                loadMarketDataPage();
+                currentPage = 0;
+                loadPage();
             });
         }
-        loadMarketDataPage();
+        loadPage();
     }
 
-    private void loadMarketDataPage() {
-        AuctionFindingRequest criteria = searchBarController != null ?
-                searchBarController.getQueryRequest() : new AuctionFindingRequest();
+    @FXML
+    private void handlePrevPage() {
+        if (currentPage > 0) { currentPage--; loadPage(); }
+    }
 
-        Pageable paginationParams = PageRequest.of(currentPage, pageSize);
+    @FXML
+    private void handleNextPage() {
+        if (currentPage < totalPages - 1) { currentPage++; loadPage(); }
+    }
 
-        Thread backgroundWorker = new Thread(() -> {
+    private void loadPage() {
+        AuctionFindingRequest criteria = searchBarController != null
+                ? searchBarController.buildRequest()
+                : new AuctionFindingRequest();
+
+        Pageable pageable = PageRequest.of(currentPage, PAGE_SIZE);
+
+        // Fix: wrap in DelegatingSecurityContextRunnable so the Spring Security context
+        // is propagated to the worker thread.  Without this, any security check inside
+        // getDiscoverableAuctions (e.g. @PreAuthorize or SecurityUtils.getCurrentUser())
+        // throws an AuthenticationCredentialsNotFoundException because the thread-local
+        // SecurityContext is empty on a plain new Thread().
+        Runnable task = new DelegatingSecurityContextRunnable(() -> {
             try {
-                Page<AuctionResponse> outcomePage = auctionService.getDiscoverableAuctions(criteria, paginationParams);
-
+                Page<AuctionResponse> page = auctionService.getDiscoverableAuctions(criteria, pageable);
                 Platform.runLater(() -> {
-                    this.totalPages = Math.max(1, outcomePage.getTotalPages());
-
+                    totalPages = Math.max(1, page.getTotalPages());
                     if (auctionGridController != null) {
-                        auctionGridController.renderItems(outcomePage.getContent(), this::handleProductRedirect);
+                        auctionGridController.renderItems(page.getContent(), this::handleItemClicked);
                     }
-
                     pageTrackerLabel.setText(String.format("Page %d of %d", currentPage + 1, totalPages));
                     prevButton.setDisable(currentPage == 0);
                     nextButton.setDisable(currentPage >= totalPages - 1);
                 });
-            } catch (Exception err) {
-                err.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
-        backgroundWorker.setDaemon(true);
-        backgroundWorker.start();
+
+        Thread worker = new Thread(task);
+        worker.setDaemon(true);
+        worker.start();
     }
 
-    @FXML private void handlePrevPage() { if (currentPage > 0) { currentPage--; loadMarketDataPage(); } }
-    @FXML private void handleNextPage() { if (currentPage < totalPages - 1) { currentPage++; loadMarketDataPage(); } }
+    private void handleItemClicked(AuctionResponse auction) {
+        if (auction == null || auction.getStatus() == null) return;
 
-    private void handleProductRedirect(AuctionResponse selectedProduct) {
-        System.out.println("Forwarding action context to view item UUID: " + selectedProduct.getId());
+        Stage owner = (Stage) pageTrackerLabel.getScene().getWindow();
+
+        switch (auction.getStatus()) {
+            case UPCOMING -> bidSectionController.open(auction, AuctionStatus.UPCOMING, owner);
+            case ACTIVE   -> bidSectionController.open(auction, AuctionStatus.ACTIVE,   owner);
+            case ENDED    -> bidSectionController.open(auction, AuctionStatus.ENDED,     owner);
+            default       -> { /* CANCELLED — never reaches market grid */ }
+        }
     }
 }

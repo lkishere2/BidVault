@@ -30,24 +30,14 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public Page<ProductResponse> getStorage(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        try {
-            return productRepository.findAllUserProducts(securityUtils.getCurrentUserId(), pageable)
-                    .map(this::mapToResponse);
-        } catch (IllegalStateException e) {
-            throw new BadCredentialsException("User session is invalid or expired.", e);
-        }
+        return productRepository.findAllUserProducts(securityUtils.getCurrentUserId(), pageable)
+                .map(this::mapToResponse);
     }
 
     @Override
     @Transactional
     public ProductResponse addProduct(ProductRequest productRequest) {
-        User user;
-        try {
-            user = securityUtils.getCurrentUser();
-        } catch (IllegalStateException e) {
-            throw new BadCredentialsException("User session is invalid or expired.", e);
-        }
-        Product product = mapToEntity(productRequest, user);
+        Product product = mapToEntity(productRequest, securityUtils.getCurrentUser());
         return mapToResponse(productRepository.save(product));
     }
 
@@ -70,12 +60,8 @@ public class ProductServiceImpl implements ProductService {
     private Product findProductAndValidateUser(long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found."));
-        try {
-            if (!product.getOwner().getId().equals(securityUtils.getCurrentUserId())) {
-                throw new AccessDeniedException("Unauthorized: You do not own this product.");
-            }
-        } catch (IllegalStateException e) {
-            throw new BadCredentialsException("User session is invalid or expired.", e);
+        if (!product.getOwner().getId().equals(securityUtils.getCurrentUserId())) {
+            throw new AccessDeniedException("Unauthorized: You do not own this product.");
         }
         return product;
     }

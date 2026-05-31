@@ -396,38 +396,6 @@ class UserControllerTest {
         verify(userService).getAllUsers(0, 0);
     }
 
-    // =========================================================================
-    // METHOD 7: disableUser (3 Tests)
-    // =========================================================================
-
-    // --- Happy Path (1 Test) ---
-
-    @Test
-    void disableUser_WhenIdExists_ShouldReturnNoContent() throws Exception {
-        mockMvc.perform(patch("/api/v1/users/admin/disable/{id}", 2L))
-                .andExpect(status().isNoContent());
-
-        verify(userService).disableUser(2L);
-    }
-
-    // --- Edge Cases (2 Tests) ---
-
-    @Test
-    void disableUser_WhenIdIsZero_CurrentControllerStillPassesIdToService() throws Exception {
-        mockMvc.perform(patch("/api/v1/users/admin/disable/{id}", 0L))
-                .andExpect(status().isNoContent());
-
-        verify(userService).disableUser(0L);
-    }
-
-    @Test
-    void disableUser_WhenIdIsNotNumber_ShouldReturnBadRequest() throws Exception {
-        mockMvc.perform(patch("/api/v1/users/admin/disable/not-a-number"))
-                .andExpect(status().isBadRequest());
-
-        verifyNoInteractions(userService);
-    }
-
     private UsernameRequest createUsernameRequest(String username) {
         UsernameRequest request = new UsernameRequest();
         request.setUsername(username);

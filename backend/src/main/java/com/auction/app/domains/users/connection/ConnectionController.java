@@ -13,8 +13,9 @@ public class ConnectionController {
     private ConnectionService connectionService;
 
     @PostMapping("/follow/{following_id}")
-    public ResponseEntity<String> follow(@PathVariable("following_id") Long followingId) {
-        return ResponseEntity.ok(connectionService.toggleFollow(followingId));
+    public ResponseEntity<Void> follow(@PathVariable("following_id") Long followingId) {
+        connectionService.toggleFollow(followingId);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{user_id}/stats")

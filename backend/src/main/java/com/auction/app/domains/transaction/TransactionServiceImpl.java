@@ -1,16 +1,9 @@
 package com.auction.app.domains.transaction;
 
-import com.auction.app.domains.transaction.model.Transaction;
-import com.auction.app.domains.transaction.model.TransactionStatus;
-import com.auction.app.domains.transaction.model.TransactionType;
+import com.auction.app.domains.transaction.model.*;
 import com.auction.app.domains.users.exceptions.UserNotFoundException;
-import com.auction.app.domains.transaction.dtos.ClientRequest;
-import com.auction.app.domains.transaction.dtos.TransactionRequest;
-import com.auction.app.domains.transaction.dtos.TransactionResponse;
-import com.auction.app.domains.transaction.exceptions.UnauthorizedTransactionException;
-import com.auction.app.domains.transaction.exceptions.InsufficientFundsException;
-import com.auction.app.domains.transaction.exceptions.TransactionNotFoundException;
-import com.auction.app.domains.transaction.exceptions.InvalidTransactionStateException;
+import com.auction.app.domains.transaction.dtos.*;
+import com.auction.app.domains.transaction.exceptions.*;
 import com.auction.app.domains.users.users.model.User;
 import com.auction.app.domains.users.users.UserRepository;
 import com.auction.app.infrastructure.security.SecurityUtils;
@@ -19,7 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,12 +28,8 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Page<TransactionResponse> getUserTransaction(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        try {
-            return transactionRepository.getTransactionByUserId(pageable, securityUtils.getCurrentUserId())
-                    .map(this::mapToResponse);
-        } catch (IllegalStateException e) {
-            throw new BadCredentialsException("User session is invalid or expired.", e);
-        }
+        return transactionRepository.getTransactionByUserId(pageable, securityUtils.getCurrentUserId())
+                .map(this::mapToResponse);
     }
 
     @Override
@@ -57,12 +45,8 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction transaction = transactionRepository.findById(id)
                 .orElseThrow(() -> new TransactionNotFoundException("Transaction not found with ID: " + id));
 
-        try {
-            if (!transaction.getUser().getId().equals(securityUtils.getCurrentUserId())) {
-                throw new UnauthorizedTransactionException("Access denied: You do not own this transaction resource.");
-            }
-        } catch (IllegalStateException e) {
-            throw new BadCredentialsException("User session is invalid or expired.", e);
+        if (!transaction.getUser().getId().equals(securityUtils.getCurrentUserId())) {
+            throw new UnauthorizedTransactionException("Access denied: You do not own this transaction resource.");
         }
 
         transactionRepository.delete(transaction);
@@ -71,7 +55,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Page<ClientRequest> getAllTransactionRequest(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        return transactionRepository.findAll(pageable)
+        return transactionRepository.findAllWithUser(pageable)
                 .map(this::mapToClientRequest);
     }
 
@@ -89,13 +73,13 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         BigDecimal currentBalance = user.getBalance();
-        if (clientRequest.getType().equals(TransactionType.DEPOSIT)) {
-            user.setBalance(currentBalance.add(clientRequest.getAmount()));
+        if (transaction.getType() == TransactionType.DEPOSIT) {
+            user.setBalance(currentBalance.add(transaction.getAmount()));
         } else {
-            if (currentBalance.compareTo(clientRequest.getAmount()) < 0) {
+            if (currentBalance.compareTo(transaction.getAmount()) < 0) {
                 throw new InsufficientFundsException("Transaction failed: Insufficient wallet balance for withdrawal.");
             }
-            user.setBalance(currentBalance.subtract(clientRequest.getAmount()));
+            user.setBalance(currentBalance.subtract(transaction.getAmount()));
         }
 
         userRepository.save(user);
@@ -117,7 +101,6 @@ public class TransactionServiceImpl implements TransactionService {
         transactionRepository.save(transaction);
     }
 
-    // Helpers
     private TransactionResponse mapToResponse(Transaction transaction) {
         return TransactionResponse.builder()
                 .amount(transaction.getAmount())
@@ -141,18 +124,12 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private Transaction mapToEntity(TransactionRequest request) {
-        User user;
-        try {
-            user = securityUtils.getCurrentUser();
-        } catch (IllegalStateException e) {
-            throw new BadCredentialsException("User session is invalid or expired.", e);
-        }
-
+        User user = securityUtils.getCurrentUser();
         return Transaction.builder()
                 .user(user)
                 .amount(request.getAmount())
                 .type(request.getType())
-                .status(TransactionStatus.PENDING) // Explicitly setting state to PENDING on birth
+                .status(TransactionStatus.PENDING)
                 .build();
     }
 }

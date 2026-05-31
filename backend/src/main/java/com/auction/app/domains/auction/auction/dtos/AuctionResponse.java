@@ -46,6 +46,7 @@ public class AuctionResponse implements Serializable {
 
         User seller = auction.getSeller();
         Product product = auction.getProduct();
+        User winner = auction.getWinner();
 
         return AuctionResponse.builder()
                 .id(auction.getId())
@@ -62,8 +63,11 @@ public class AuctionResponse implements Serializable {
                 .minBidIncrement(auction.getMinBidIncrement())
                 .startTime(auction.getStartTime())
                 .endTime(auction.getEndTime())
+                .extended(auction.isExtended())
                 .status(auction.getStatus())
-                .winnerLabel(auction.getWinner() != null ? auction.getWinner().getDisplayName() : null)
+                // Fix #11: winnerId was declared on the DTO but never set — always null on the wire
+                .winnerId(winner != null ? winner.getId() : null)
+                .winnerLabel(winner != null ? winner.getDisplayName() : null)
                 .bidCount(auction.getBidCount())
                 .build();
     }

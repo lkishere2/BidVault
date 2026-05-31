@@ -1,22 +1,14 @@
 package com.auction.app.domains.users.users;
 
-import com.auction.app.domains.users.exceptions.UserNotFoundException;
 import com.auction.app.domains.users.exceptions.InvalidPasswordException;
-import com.auction.app.domains.users.exceptions.InvalidUserStateException;
 import com.auction.app.domains.users.exceptions.UserUpdateException;
-import com.auction.app.domains.users.users.dtos.EmailRequest;
-import com.auction.app.domains.users.users.dtos.PasswordRequest;
-import com.auction.app.domains.users.users.dtos.ProfileImageRequest;
-import com.auction.app.domains.users.users.dtos.UserResponse;
-import com.auction.app.domains.users.users.dtos.UsernameRequest;
-import com.auction.app.domains.users.users.model.Role;
+import com.auction.app.domains.users.users.dtos.*;
 import com.auction.app.domains.users.users.model.User;
 import com.auction.app.infrastructure.security.SecurityUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -30,34 +22,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse getCurrentUserInfo() {
-        try {
-            User user = securityUtils.getCurrentUser();
-            return mapToResponse(user);
-        } catch (IllegalStateException e) {
-            throw new BadCredentialsException("User session is invalid or expired.", e);
-        }
+        return mapToResponse(securityUtils.getCurrentUser());
     }
 
     @Override
     @Transactional
     public void updateUsername(UsernameRequest usernameRequest) {
-        try {
-            userRepository.updateUsername(securityUtils.getCurrentUserId(), usernameRequest.getUsername());
-        } catch (IllegalStateException e) {
-            throw new BadCredentialsException("User session is invalid or expired.", e);
-        }
+        userRepository.updateUsername(securityUtils.getCurrentUserId(), usernameRequest.getUsername());
     }
 
     @Override
     @Transactional
     public void updateEmail(EmailRequest emailRequest) {
+
         String newEmail = emailRequest.getEmail();
-        User user;
-        try {
-            user = securityUtils.getCurrentUser();
-        } catch (IllegalStateException e) {
-            throw new BadCredentialsException("User session is invalid or expired.", e);
-        }
+        User user = securityUtils.getCurrentUser();
 
         // Valid check
         if (newEmail.equals(user.getEmail())) {
@@ -73,12 +52,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void updatePassword(PasswordRequest passwordRequest) {
-        User user;
-        try {
-            user = securityUtils.getCurrentUser();
-        } catch (IllegalStateException e) {
-            throw new BadCredentialsException("User session is invalid or expired.", e);
-        }
+
+        User user = securityUtils.getCurrentUser();
 
         if (!passwordEncoder.matches(passwordRequest.getCurrentPassword(), user.getPassword())) {
             throw new InvalidPasswordException("Update failed: Current password is incorrect.");
@@ -93,39 +68,12 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void updateProfileImage(ProfileImageRequest profileImageRequest) {
-        try {
-            userRepository.updateProfileImageUrl(securityUtils.getCurrentUserId(), profileImageRequest.getProfileImageUrl());
-        } catch (IllegalStateException e) {
-            throw new BadCredentialsException("User session is invalid or expired.", e);
-        }
+        userRepository.updateProfileImageUrl(securityUtils.getCurrentUserId(), profileImageRequest.getProfileImageUrl());
     }
 
     @Override
     public Page<UserResponse> getAllUsers(int page, int size) {
-        // Create pagination request
-        PageRequest pageRequest = PageRequest.of(page, size);
-
-        // Fetch users from repo and map Entity to DTO (UserResponse)
-        return userRepository.findAll(pageRequest).map(this :: mapToResponse);
-    }
-
-    @Override
-    @Transactional
-    public void disableUser(Long id) {
-        try {
-            // Prevent admin from disabling their own account
-            if (securityUtils.getCurrentUserId().equals(id)) {
-                throw new InvalidUserStateException("Action rejected: You cannot disable your own account.");
-            }
-        } catch (IllegalStateException e) {
-            throw new BadCredentialsException("User session is invalid or expired.", e);
-        }
-
-        User userToDisable = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
-
-        userToDisable.setRole(Role.DISABLE);
-        userRepository.save(userToDisable);
+        return userRepository.findAll(PageRequest.of(page, size)).map(this :: mapToResponse);
     }
 
     // Helpers

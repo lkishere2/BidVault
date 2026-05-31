@@ -21,7 +21,6 @@ import java.io.IOException;
 @Component
 public class UserBalanceCardController {
 
-    // ✅ FIX 1: Renamed balanceDisplayLabel → balanceAmountLabel to match fx:id in UserBalanceCard.fxml
     @FXML private Label balanceAmountLabel;
     @FXML private Button requestBalanceBtn;
 
@@ -45,7 +44,6 @@ public class UserBalanceCardController {
                 ResponseEntity<UserResponse> response = userController.getCurrentUserInformation();
                 if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                     UserResponse profile = response.getBody();
-                    // ✅ FIX 1: Updated all usages to balanceAmountLabel
                     Platform.runLater(() -> balanceAmountLabel.setText(
                             String.format("$%,.2f", profile.getBalance())
                     ));
@@ -58,15 +56,18 @@ public class UserBalanceCardController {
         new Thread(secureTask).start();
     }
 
-    // ✅ FIX 5: Added deposit modal handler — wired via onAction="#handleOpenDepositModal" in FXML
     @FXML
     private void handleOpenDepositModal() {
         openBalanceRequestModal(TransactionType.DEPOSIT);
     }
 
+    @FXML
+    private void handleOpenWithdrawalModal() {
+        openBalanceRequestModal(TransactionType.WITHDRAWAL);
+    }
+
     private void openBalanceRequestModal(TransactionType type) {
         if (parentController == null) {
-            System.err.println("ERROR: parentController is null — cannot open modal overlay.");
             return;
         }
         try {
@@ -83,7 +84,6 @@ public class UserBalanceCardController {
             overlay.setStyle("-fx-background-color: rgba(0,0,0,0.6);");
             overlay.setMouseTransparent(false);
         } catch (IOException e) {
-            System.err.println("ERROR: Failed to load BalanceRequestBox.fxml modal overlay.");
             e.printStackTrace();
         }
     }

@@ -3,6 +3,7 @@ package com.auction.app.infrastructure.security;
 import com.auction.app.domains.users.users.model.User;
 import com.auction.app.domains.users.users.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,37 +16,25 @@ public class SecurityUtils {
     private final UserRepository userRepository;
 
     public User getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("No authenticated user found");
-        }
+        Object principal = getPrinciple();
 
-        Object principal = authentication.getPrincipal();
-
-        // Handle CachedUserDetails
         if (principal instanceof CachedUserDetails cached) {
             return userRepository.findById(cached.getId())
-                    .orElseThrow(() -> new IllegalStateException("Authenticated user not found in DB: id=" + cached.getId()));
+                    .orElseThrow(() -> new BadCredentialsException("No authenticated user found"));
         }
 
-        // Handle UserDetails fallback
         if (principal instanceof UserDetails details) {
             return userRepository.findByEmail(details.getUsername())
-                    .orElseThrow(() -> new IllegalStateException("Authenticated user not found in DB: email=" + details.getUsername()));
+                    .orElseThrow(() -> new BadCredentialsException("No authenticated user found"));
         }
 
-        throw new IllegalStateException("Unexpected principal type: " + principal.getClass().getName());
+        throw new BadCredentialsException("No authenticated user found");
     }
 
     public Long getCurrentUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("No authenticated user found");
-        }
-
-        Object principal = authentication.getPrincipal();
+        Object principal = getPrinciple();
 
         if (principal instanceof CachedUserDetails cached) {
             return cached.getId();
@@ -53,10 +42,20 @@ public class SecurityUtils {
 
         if (principal instanceof UserDetails details) {
             return userRepository.findByEmail(details.getUsername())
-                    .orElseThrow(() -> new IllegalStateException("User not found: " + details.getUsername()))
+                    .orElseThrow(() -> new BadCredentialsException("No authenticated user found"))
                     .getId();
         }
 
-        throw new IllegalStateException("Unexpected principal type: " + principal.getClass().getName());
+        throw new BadCredentialsException("No authenticated user found");
+    }
+
+    private Object getPrinciple() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new BadCredentialsException("No authenticated user found");
+        }
+
+        return authentication.getPrincipal();
     }
 }

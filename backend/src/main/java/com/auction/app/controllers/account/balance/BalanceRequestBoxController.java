@@ -11,6 +11,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.concurrent.DelegatingSecurityContextRunnable;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -68,12 +69,11 @@ public class BalanceRequestBoxController {
             return;
         }
 
-        // Initialize input values into your backend TransactionRequest structure
         TransactionRequest requestPayload = new TransactionRequest();
         requestPayload.setAmount(requestedAmount);
         requestPayload.setType(currentContextType);
 
-        new Thread(() -> {
+        Runnable secureTask = new DelegatingSecurityContextRunnable(() -> {
             try {
                 ResponseEntity<?> response = transactionController.createTransaction(requestPayload);
                 if (response.getStatusCode().is2xxSuccessful()) {
@@ -87,7 +87,9 @@ public class BalanceRequestBoxController {
             } catch (Exception e) {
                 Platform.runLater(() -> displayError("Connection failure: Could not reach transaction service."));
             }
-        }).start();
+        });
+
+        new Thread(secureTask).start();
     }
 
     @FXML

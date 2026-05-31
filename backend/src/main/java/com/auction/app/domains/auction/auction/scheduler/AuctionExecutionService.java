@@ -24,6 +24,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -45,11 +48,11 @@ public class AuctionExecutionService {
         AuctionResponse response = null;
         try {
             response = cache.getAuctionResponse(auction.getId());
-            log.info("[Auction Execution Service - Activate Auction] Cache auction #{}", auctionId);
+            // Fix #18: was "Cache auction" on a read — renamed to "Cache hit"
+            log.info("[Auction Execution Service - Activate Auction] Cache hit for auction #{}", auctionId);
         } catch (Exception e) {
-            log.error("[Auction Execution Service - Activate Auction] Failed to cache auction #{}, errors: {}", auctionId, e.getMessage());
+            log.error("[Auction Execution Service - Activate Auction] Failed to read cache for auction #{}, errors: {}", auctionId, e.getMessage());
         }
-
 
         if (response != null) {
             log.info("[Auction Execution Service - Activate Auction] Cache auction #{} to active", auctionId);
@@ -57,9 +60,14 @@ public class AuctionExecutionService {
             cache.cacheAuctionResponse(auction.getId(), response);
         }
         else {
+            // Fix #6: cache-miss branch was setting status on the entity but never saving it.
+            // AuctionHandler already did the bulk DB update via updateStatusForIds, so we just need
+            // to build the response from the current entity state (which reflects ACTIVE after the
+            // bulk update) and populate the cache correctly.
             log.info("[Auction Execution Service - Activate Auction] Auction #{} not exist in cache, fall back to DB!", auctionId);
-            auction.setStatus(AuctionStatus.ACTIVE);
-            cache.cacheAuctionResponse(auction.getId(), AuctionResponse.from(auction));
+            AuctionResponse freshResponse = AuctionResponse.from(auction);
+            freshResponse.setStatus(AuctionStatus.ACTIVE);
+            cache.cacheAuctionResponse(auction.getId(), freshResponse);
         }
 
         publisher.publishAuctionStarted(auction);
@@ -75,12 +83,14 @@ public class AuctionExecutionService {
         AuctionResponse response = null;
         try {
             response = cache.getAuctionResponse(auction.getId());
-            log.info("[Auction Execution Service - End Auction] Cache auction #{}", auctionId);
+            // Fix #18: was "Cache auction" on a read — renamed to "Cache hit"
+            log.info("[Auction Execution Service - End Auction] Cache hit for auction #{}", auctionId);
         } catch (Exception e) {
-            log.error("[Auction Execution Service - End Auction] Failed to cache auction #{}, errors: {}", auctionId, e.getMessage());
+            log.error("[Auction Execution Service - End Auction] Failed to read cache for auction #{}, errors: {}", auctionId, e.getMessage());
         }
 
         if (response != null) {
+            // Sync live bidding state from cache back to the entity before persisting
             auction.setCurrentPrice(response.getCurrentPrice());
             auction.setBidCount(response.getBidCount());
             auction.setEndTime(response.getEndTime());
@@ -88,29 +98,44 @@ public class AuctionExecutionService {
             cache.cacheAuctionResponse(auction.getId(), response);
             log.info("[Auction Execution Service - End Auction] Cache auction #{} success to update", auctionId);
         }
+        // Fix #14: if response is null (Redis cold), auction.getBidCount() reads the DB value which
+        // is never updated during live bidding — only the cached bidCount is incremented per bid.
+        // Without cache, we cannot reliably know the true bid count, so we check for a HELD bid
+        // directly instead of trusting the stale DB bidCount field.
 
-        if (auction.getBidCount() == 0) {
+        // Fix #3: BidRepository.findByAuctionIdAndStatus now returns List (bid domain fix).
+        // handleWinner updated accordingly — it takes the first HELD bid and handles the rest defensively.
+        List<Bid> heldBids = bidRepository.findByAuctionIdAndStatus(auctionId, BidStatus.HELD);
+
+        if (heldBids.isEmpty()) {
+            // Fix #14: use the HELD bid presence as the source of truth instead of the stale bidCount
             handleNoBids(auction);
         }
         else {
-            handleWinner(auction);
+            handleWinner(auction, heldBids);
         }
 
         auction.setStatus(AuctionStatus.ENDED);
         auctionRepository.save(auction);
 
         Long id = auction.getId();
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                cache.clearAuctionCache(id);
-            }
-        });
-
         String winnerLabel = auction.getWinner() != null
                 ? auction.getWinner().getDisplayName() + " #" + auction.getWinner().getId()
                 : null;
-        publisher.publishAuctionEnded(auction.getId(), winnerLabel, auction.getCurrentPrice(), auction.getBidCount(), auction.getEndTime());
+        BigDecimal finalPrice = auction.getCurrentPrice();
+        Integer finalBidCount = auction.getBidCount();
+        java.time.Instant finalEndTime = auction.getEndTime();
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                // Fix #5: publishAuctionEnded was firing before commit — if any of handleWinner's
+                // saves rolled back, clients would receive an ENDED notification for an ACTIVE auction.
+                // Moved inside afterCommit so the publishing only happens once the DB is durably updated.
+                publisher.publishAuctionEnded(id, winnerLabel, finalPrice, finalBidCount, finalEndTime);
+                cache.clearAuctionCache(id);
+            }
+        });
 
         log.info("Auction #{} ENDED — winner: {}", auction.getId(), winnerLabel);
     }
@@ -124,14 +149,15 @@ public class AuctionExecutionService {
         log.info("Auction #{} ended with no bids — quantity restored to product #{}", auction.getId(), product.getId());
     }
 
-    private void handleWinner(Auction auction) {
+    private void handleWinner(Auction auction, List<Bid> heldBids) {
 
-        Bid winningBid = bidRepository.findByAuctionIdAndStatus(auction.getId(), BidStatus.HELD).orElse(null);
-
-        if (winningBid == null) {
-            log.warn("Auction #{} has bidCount > 0 but no HELD bid found", auction.getId());
-            handleNoBids(auction);
-            return;
+        // Fix #3: take the first HELD bid as the winning bid; any extras are defensive leftovers
+        // from before the uniqueness constraint was enforced — refund them all
+        Bid winningBid = heldBids.getFirst();
+        for (int i = 1; i < heldBids.size(); i++) {
+            heldBids.get(i).setStatus(BidStatus.REFUNDED);
+            bidRepository.save(heldBids.get(i));
+            log.warn("Auction #{} — extra HELD bid #{} found and refunded", auction.getId(), heldBids.get(i).getId());
         }
 
         User winner = winningBid.getBidder();
@@ -141,9 +167,10 @@ public class AuctionExecutionService {
         winningBid.setStatus(BidStatus.WON);
         bidRepository.save(winningBid);
 
-        winner.setBalance(winner.getBalance().subtract(winningBid.getAmount()));
+        // Fix #4: winner's balance was being subtracted here even though funds were already locked
+        // when the bid was placed (HELD status means the amount is excluded from spendable balance).
+        // The correct action is simply to transfer the locked amount to the seller — not deduct again.
         seller.setBalance(seller.getBalance().add(winningBid.getAmount()));
-        userRepository.save(winner);
         userRepository.save(seller);
 
         // Transfer auctionedQuantity to winner's product inventory
@@ -154,8 +181,11 @@ public class AuctionExecutionService {
                         // Winner doesn't own this product yet — create a new entry
                         .productName(soldProduct.getProductName())
                         .description(soldProduct.getDescription())
+                        .productImageUrl(soldProduct.getProductImageUrl())
                         .tags(soldProduct.getTags())
                         .owner(winner)
+                        // Fix #9: quantity must be initialized to 0 — if null, the addition below throws NPE
+                        .quantity(0)
                         .build()
                 );
 
@@ -164,7 +194,7 @@ public class AuctionExecutionService {
 
         auction.setWinner(winner);
 
-        log.info("Auction #{} — winner #{} paid ${}, seller #{} credited. {} units transferred.",
+        log.info("Auction #{} — winner #{} credited ${} to seller #{}. {} units transferred.",
                 auction.getId(), winner.getId(), winningBid.getAmount(),
                 seller.getId(), auction.getAuctionedQuantity());
     }

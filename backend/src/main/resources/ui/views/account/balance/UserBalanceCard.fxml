@@ -32,15 +32,23 @@
             </Label>
         </VBox>
 
-        <!-- ✅ FIX 5: Added onAction to wire button to handleOpenDepositModal in controller -->
-        <Button fx:id="requestBalanceBtn"
-                text="+ Request Funds"
-                onAction="#handleOpenDepositModal"
-                style="-fx-background-color: #3B82F6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6px; -fx-cursor: hand;"
-                prefHeight="40.0">
-            <padding>
-                <Insets left="20.0" right="20.0"/>
-            </padding>
-        </Button>
+        <HBox spacing="10.0" alignment="CENTER_RIGHT">
+            <Button text="+ Deposit"
+                    onAction="#handleOpenDepositModal"
+                    style="-fx-background-color: #10B981; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6px; -fx-cursor: hand;"
+                    prefHeight="40.0">
+                <padding>
+                    <Insets left="20.0" right="20.0"/>
+                </padding>
+            </Button>
+            <Button text="- Withdraw"
+                    onAction="#handleOpenWithdrawalModal"
+                    style="-fx-background-color: #F43F5E; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6px; -fx-cursor: hand;"
+                    prefHeight="40.0">
+                <padding>
+                    <Insets left="20.0" right="20.0"/>
+                </padding>
+            </Button>
+        </HBox>
     </HBox>
 </VBox>

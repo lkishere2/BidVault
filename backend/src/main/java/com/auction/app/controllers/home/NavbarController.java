@@ -7,6 +7,7 @@ import com.auction.app.domains.auth.auth.AuthController;
 import jakarta.servlet.http.HttpServletRequest;
 import javafx.fxml.FXML;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -21,7 +22,7 @@ public class NavbarController {
     @FXML private HBox navExplore;
     @FXML private HBox navMarket;
     @FXML private HBox navAccount;
-    @FXML private HBox navAdmin;
+    @FXML private VBox navAdmin;
     @FXML private HBox navLogout;
 
     @FXML private NavbarItemController navDashboardController;
@@ -55,7 +56,6 @@ public class NavbarController {
         if (navMarket != null) {
             navMarket.setOnMouseClicked(event -> {
                 System.out.println("Routing to live standalone Market View frame wrapper...");
-                // FIXED: Uses navigateTo directly to route to the unified views resource hierarchy
                 mainController.navigateTo("/ui/views/market/MarketView.fxml");
             });
         }
@@ -69,7 +69,8 @@ public class NavbarController {
 
         if (navAdmin != null) {
             navAdmin.setOnMouseClicked(event -> {
-                System.out.println("Admin Portal requested. Loading metrics...");
+                System.out.println("Admin Portal requested. Routing to layout container framework...");
+                mainController.navigateTo("/ui/views/admin/AdminView.fxml");
             });
         }
 

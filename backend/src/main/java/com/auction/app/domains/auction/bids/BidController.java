@@ -37,7 +37,7 @@ public class BidController {
         return ResponseEntity.ok(bidService.getBidHistory(auctionId));
     }
 
-    @GetMapping("/bids/me")
+    @GetMapping("/me/auctions-bid-on")
     public ResponseEntity<List<AuctionResponse>> getAuctionsBidOn() {
         List<Long> auctionIds = bidService.getAuctionsBiddenByCurrentUser();
         return ResponseEntity.ok(auctionService.getAuctionsBidOnByCurrentUser(auctionIds));

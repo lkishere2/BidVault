@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.auction.app.controllers.market.bidsection.BidFeedPanelController"
+      spacing="0" style="-fx-background-color: #0F1117;">
+
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="10"
+          style="-fx-padding: 20 24 20 24;
+                 -fx-border-color: #1E2433;
+                 -fx-border-width: 0 0 1 0;">
+        <Label text="●" style="-fx-text-fill: #4ADE80; -fx-font-size: 10px;"/>
+        <Label text="LIVE BID FEED"
+               style="-fx-font-size: 12px; -fx-font-weight: bold;
+                      -fx-text-fill: #9CA3AF; -fx-letter-spacing: 2px;"/>
+        <HBox HBox.hgrow="ALWAYS"/>
+        <Label fx:id="connectionStatusLabel" text="Connecting..."
+               style="-fx-font-size: 11px; -fx-text-fill: #6B7280;"/>
+    </HBox>
+
+    <!-- Feed list -->
+    <ListView fx:id="feedListView" VBox.vgrow="ALWAYS"
+              style="-fx-background-color: transparent;
+                     -fx-background: transparent;
+                     -fx-border-color: transparent;
+                     -fx-padding: 8 0 8 0;"/>
+
+    <!-- Empty state -->
+    <Label fx:id="emptyLabel" text="No bids yet. Be the first!"
+           alignment="CENTER" maxWidth="Infinity"
+           managed="false" visible="false"
+           style="-fx-text-fill: #4B5563; -fx-font-size: 14px; -fx-padding: 40 0 0 0;"/>
+
+</VBox>

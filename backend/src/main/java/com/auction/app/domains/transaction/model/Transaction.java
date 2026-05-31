@@ -6,10 +6,9 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Data
 @Entity
 @Table(name = "transactions")
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

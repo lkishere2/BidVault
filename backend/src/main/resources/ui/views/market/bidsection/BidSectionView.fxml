@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<HBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.auction.app.controllers.market.bidsection.BidSectionController"
+      prefHeight="680.0" prefWidth="1100.0"
+      style="-fx-background-color: #0F1117;">
+
+    <fx:include fx:id="bidInfoPanel" source="BidInfoPanel.fxml"/>
+    <fx:include fx:id="bidFeedPanel" source="BidFeedPanel.fxml" HBox.hgrow="ALWAYS"/>
+
+</HBox>

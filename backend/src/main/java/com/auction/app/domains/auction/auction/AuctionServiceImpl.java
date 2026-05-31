@@ -78,6 +78,8 @@ public class AuctionServiceImpl implements AuctionService {
                 toCache.put(auction.getId(), response);
             }
 
+            // Fix #8 / #15: cacheAuctionResponses now pipelines individual SET EX calls
+            // so each entry gets a proper TTL instead of living forever via multiSet
             cache.cacheAuctionResponses(toCache);
         }
 
@@ -104,13 +106,15 @@ public class AuctionServiceImpl implements AuctionService {
         auctionRepository.save(auction);
         AuctionResponse response = AuctionResponse.from(auction);
 
-        cache.cacheAuctionResponse(auction.getId(), response);
-
-        // Notify to all followers
+        // Fix #7: cache write was inside the transaction — if the transaction rolled back,
+        // the cache would hold a response for an auction that doesn't exist in the DB.
+        // Moved to afterCommit so the write only happens once the DB row is guaranteed durable.
         TransactionSynchronizationManager.registerSynchronization(
                 new TransactionSynchronization() {
                     @Override
                     public void afterCommit() {
+                        cache.cacheAuctionResponse(auction.getId(), response);
+                        // Notify to all followers
                         notificationService.notifyFollowersOfNewAuction(seller);
                     }
                 }
@@ -157,9 +161,10 @@ public class AuctionServiceImpl implements AuctionService {
         AuctionResponse cached = null;
         try {
             cached = cache.getAuctionResponse(auctionId);
-            log.info("[Auction Service - Get Auction] Cache auction #{}", auctionId);
+            // Fix #18: log message previously said "Cache auction" on a read — renamed to "Cache hit"
+            log.info("[Auction Service - Get Auction] Cache hit for auction #{}", auctionId);
         } catch (Exception e) {
-            log.error("[Auction Service - Get Auction] Failed to cache auction #{}, error: {}", auctionId, e.getMessage());
+            log.error("[Auction Service - Get Auction] Failed to read cache for auction #{}, error: {}", auctionId, e.getMessage());
         }
 
         if (cached != null) return cached;
@@ -236,16 +241,16 @@ public class AuctionServiceImpl implements AuctionService {
 
     private Auction mapToEntity(AuctionRequest request, Product product, User seller) {
         BigDecimal startPrice = request.getStartingPrice();
-        BigDecimal initialIncrement = startPrice.multiply(BigDecimal.valueOf(0.05))
-                .setScale(2, RoundingMode.HALF_UP);
 
+        // Fix #13: minBidIncrement was calculated twice — once inline here and once inside
+        // recalculateMinBidIncrement(). Removed the redundant inline calculation; the builder
+        // sets a temporary placeholder and recalculateMinBidIncrement() is the single source of truth.
         Auction auction = Auction.builder()
                 .seller(seller)
                 .product(product)
                 .auctionedQuantity(request.getQuantity())
                 .startingPrice(startPrice)
                 .currentPrice(startPrice)
-                .minBidIncrement(initialIncrement)
                 .startTime(request.getStartTime())
                 .endTime(request.getEndTime())
                 .build();

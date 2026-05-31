@@ -8,21 +8,21 @@
       xmlns="http://javafx.com/javafx/21"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.auction.app.controllers.home.NavbarController">
-    <children>
-        <VBox spacing="4.0" style="-fx-padding: 0 0 20 0;">
-            <Label text="BidVault" style="-fx-text-fill: #38BDF8; -fx-font-size: 22.0; -fx-font-weight: max-bold;" />
-            <Label text="Desktop App Client" style="-fx-text-fill: #64748B; -fx-font-size: 11.0;" />
-        </VBox>
+    <VBox spacing="4.0" style="-fx-padding: 0 0 20 0;">
+        <Label text="BidVault" style="-fx-text-fill: #38BDF8; -fx-font-size: 22.0; -fx-font-weight: bold;"/>
+        <Label text="Desktop App Client" style="-fx-text-fill: #64748B; -fx-font-size: 11.0;"/>
+    </VBox>
 
-        <fx:include source="../../components/NavItem.fxml" fx:id="navDashboard" />
-        <fx:include source="../../components/NavItem.fxml" fx:id="navExplore" />
-        <fx:include source="../../components/NavItem.fxml" fx:id="navMarket" />
-        <fx:include source="../../components/NavItem.fxml" fx:id="navAccount" />
+    <fx:include source="../../components/NavItem.fxml" fx:id="navDashboard"/>
+    <fx:include source="../../components/NavItem.fxml" fx:id="navExplore"/>
+    <fx:include source="../../components/NavItem.fxml" fx:id="navMarket"/>
+    <fx:include source="../../components/NavItem.fxml" fx:id="navAccount"/>
 
-        <fx:include source="../../components/NavItem.fxml" fx:id="navAdmin" visible="false" managed="false"/>
+    <VBox fx:id="navAdmin" visible="false" managed="false">
+        <fx:include source="../../components/NavItem.fxml" fx:id="navAdminInner"/>
+    </VBox>
 
-        <Region VBox.vgrow="ALWAYS" />
+    <Region VBox.vgrow="ALWAYS"/>
 
-        <fx:include source="../../components/NavItem.fxml" fx:id="navLogout" />
-    </children>
+    <fx:include source="../../components/NavItem.fxml" fx:id="navLogout"/>
 </VBox>

@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
 import com.auction.app.domains.auction.auction.notification.AuctionPublisher;
+import com.auction.app.domains.auction.bids.dtos.BidFeedEvent;
 import com.auction.app.domains.auction.bids.dtos.BidNotificationPayload;
 import com.auction.app.domains.auction.bids.dtos.BidRequest;
 import com.auction.app.domains.auction.bids.dtos.BidResponse;
@@ -18,6 +19,7 @@ import com.auction.app.domains.auction.bids.model.BidStatus;
 import com.auction.app.domains.auction.exceptions.*;
 import com.auction.app.domains.users.exceptions.UserNotFoundException;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,13 +32,11 @@ import com.auction.app.domains.users.users.model.User;
 import com.auction.app.domains.users.users.UserRepository;
 import com.auction.app.infrastructure.security.SecurityUtils;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
-public class BidServiceImpl implements BidService{
+public class BidServiceImpl implements BidService {
 
     private final AuctionRepository auctionRepository;
     private final BidRepository bidRepository;
@@ -44,9 +44,28 @@ public class BidServiceImpl implements BidService{
     private final AuctionCacheAdapter auctionCacheAdapter;
     private final AuctionPublisher publisher;
     private final SecurityUtils securityUtils;
+    private final BidServiceImpl self;
 
     private static final long SNIPER_PROTECTION_SECONDS = 120L;
     private static final BigDecimal INCREMENT_PERCENTAGE = BigDecimal.valueOf(0.05);
+
+    public BidServiceImpl(
+            AuctionRepository auctionRepository,
+            BidRepository bidRepository,
+            UserRepository userRepository,
+            AuctionCacheAdapter auctionCacheAdapter,
+            AuctionPublisher publisher,
+            SecurityUtils securityUtils,
+            @Lazy BidServiceImpl self
+    ) {
+        this.auctionRepository = auctionRepository;
+        this.bidRepository = bidRepository;
+        this.userRepository = userRepository;
+        this.auctionCacheAdapter = auctionCacheAdapter;
+        this.publisher = publisher;
+        this.securityUtils = securityUtils;
+        this.self = self;
+    }
 
     @Override
     @Transactional
@@ -56,53 +75,66 @@ public class BidServiceImpl implements BidService{
         User bidder = findBidderById(currentUserId);
         AuctionResponse response = getActiveAuctionResponse(auctionId);
 
-        // Validate
         validateUser(bidder.getId(), response.getSellerId());
         validateBidAmount(request.getAmount(), response);
         validateSpendableBalance(bidder, request.getAmount());
 
-        // Find auction
         Auction auction = findAuctionById(auctionId);
 
-        // Lock funds virtually
         Bid pendingBid = buildBid(auction, bidder, request.getAmount());
         Bid savedBid = bidRepository.save(pendingBid);
 
-        // Enqueue to Redis for processing
         PendingBid queued = buildPendingBid(savedBid, auctionId, bidder, request.getAmount());
 
         try {
             auctionCacheAdapter.enqueueBid(auctionId, queued);
             log.info("Bid queued successfully — auction #{}, bidder #{}, amount ${}", auctionId, bidder.getId(), request.getAmount());
         } catch (Exception e) {
-            log.error("Failed to queue new bid, error: {}", e.getMessage());
+            savedBid.setStatus(BidStatus.REFUNDED);
+            bidRepository.save(savedBid);
+            log.error("Failed to queue new bid — bid #{} marked REFUNDED, error: {}", savedBid.getId(), e.getMessage());
+            return;
         }
 
-        dequeueBid(auctionId);
+        self.dequeueBid(auctionId);
     }
 
     @Async
-    private void dequeueBid(Long auctionId) {
-        boolean hasMoreBids = true;
-        while (hasMoreBids) {
-            hasMoreBids = this.processNextBid(auctionId)
-                    .map(payload -> {
-                        publisher.publish(payload);
-                        return true;
-                    })
-                    .orElse(false);
+    public void dequeueBid(Long auctionId) {
+        boolean lockAcquired = auctionCacheAdapter.acquireProcessingLock(auctionId);
+        if (!lockAcquired) {
+            log.info("Bid processing lock not acquired for auction #{} — another thread is processing", auctionId);
+            return;
+        }
+
+        try {
+            boolean hasMoreBids = true;
+            while (hasMoreBids) {
+                try {
+                    hasMoreBids = self.processNextBid(auctionId)
+                            .map(payload -> {
+                                publisher.publish(payload);
+                                return true;
+                            })
+                            .orElse(false);
+                } catch (Exception e) {
+                    log.error("Error processing bid for auction #{} — stopping dequeue loop: {}", auctionId, e.getMessage());
+                    hasMoreBids = false;
+                }
+            }
+        } finally {
+            auctionCacheAdapter.releaseProcessingLock(auctionId);
         }
     }
 
     @Transactional
-    private Optional<BidNotificationPayload> processNextBid(Long auctionId) {
+    public Optional<BidNotificationPayload> processNextBid(Long auctionId) {
 
         PendingBid pendingBid = auctionCacheAdapter.dequeueBid(auctionId);
         if (pendingBid == null) return Optional.empty();
 
         Bid bid = findBidById(pendingBid.getBidId());
 
-        // Auction no longer active or bid amount no longer meets minimum — REFUND
         AuctionResponse response = getActiveAuctionResponse(auctionId);
         if (!isBidEligible(response, pendingBid.getAmount())) {
             bid.setStatus(BidStatus.REFUNDED);
@@ -111,7 +143,6 @@ public class BidServiceImpl implements BidService{
             return Optional.empty();
         }
 
-        // Re-check spendable balance at processing time — REFUND if insufficient
         User bidder = findBidderById(pendingBid.getBidderId());
         if (!hasSufficientBalance(bidder, pendingBid.getAmount())) {
             bid.setStatus(BidStatus.REFUNDED);
@@ -120,17 +151,21 @@ public class BidServiceImpl implements BidService{
             return Optional.empty();
         }
 
-        // Outbid the previous highest bidder — flip their HELD to REFUNDED
         refundPreviousHighestBidder(auctionId);
 
-        // Promote this bid from PENDING to HELD
         bid.setStatus(BidStatus.HELD);
         bidRepository.save(bid);
 
-        // Apply sniper for two more minutes
-        boolean isExtended = applySniperProtection(response);
+        // Publish to the live feed so all watchers see "X bid $Y"
+        BidFeedEvent feedEvent = BidFeedEvent.builder()
+                .bidderLabel(pendingBid.getBidderLabel())
+                .amount(pendingBid.getAmount())
+                .placedAt(pendingBid.getPlacedAt())
+                .build();
+        publisher.publishBidFeedEvent(auctionId, feedEvent);
 
-        // Update the Auction Response in Redis
+        boolean isExtended = applySniperProtection(auctionId, response);
+
         BigDecimal newIncrement = calculateIncrement(pendingBid.getAmount());
         response.setCurrentPrice(pendingBid.getAmount());
         response.setMinBidIncrement(newIncrement);
@@ -139,7 +174,6 @@ public class BidServiceImpl implements BidService{
         auctionCacheAdapter.cacheAuctionResponse(auctionId, response);
         log.info("Bid #{} promoted to HELD — auction #{}, price ${}, bidder #{}", bid.getId(), auctionId, pendingBid.getAmount(), pendingBid.getBidderId());
 
-        // Return the new change for UI
         return Optional.of(BidNotificationPayload.builder()
                 .auctionId(auctionId)
                 .currentPrice(pendingBid.getAmount())
@@ -171,7 +205,6 @@ public class BidServiceImpl implements BidService{
 
     // Helpers
 
-    // Builders
     private Bid buildBid(Auction auction, User bidder, BigDecimal amount) {
         return Bid.builder()
                 .auction(auction)
@@ -191,7 +224,6 @@ public class BidServiceImpl implements BidService{
                 .build();
     }
 
-    // Finders
     private AuctionResponse getActiveAuctionResponse(Long auctionId) {
         AuctionResponse response = auctionCacheAdapter.getAuctionResponse(auctionId);
         if (response == null) {
@@ -221,7 +253,6 @@ public class BidServiceImpl implements BidService{
                 .orElseThrow(() -> new UserNotFoundException("Bidder with ID " + bidderId + " was not found."));
     }
 
-    // Validators
     private void validateBidAmount(BigDecimal amount, AuctionResponse response) {
         BigDecimal minimumBid = response.getCurrentPrice().add(response.getMinBidIncrement());
         if (amount.compareTo(minimumBid) < 0) {
@@ -259,20 +290,21 @@ public class BidServiceImpl implements BidService{
         return amount.compareTo(getSpendableBalance(bidder)) <= 0;
     }
 
-    // Other
     private void refundPreviousHighestBidder(Long auctionId) {
         bidRepository.findByAuctionIdAndStatus(auctionId, BidStatus.HELD)
-                .ifPresent(oldBid -> {
+                .forEach(oldBid -> {
                     oldBid.setStatus(BidStatus.REFUNDED);
                     bidRepository.save(oldBid);
                     log.info("Bid #{} flipped to REFUNDED — outbid on auction #{}", oldBid.getId(), auctionId);
                 });
     }
 
-    private boolean applySniperProtection(AuctionResponse response) {
+    private boolean applySniperProtection(Long auctionId, AuctionResponse response) {
         Instant now = Instant.now();
         if (Duration.between(now, response.getEndTime()).getSeconds() < SNIPER_PROTECTION_SECONDS) {
-            response.setEndTime(now.plusSeconds(SNIPER_PROTECTION_SECONDS));
+            Instant newEndTime = now.plusSeconds(SNIPER_PROTECTION_SECONDS);
+            response.setEndTime(newEndTime);
+            auctionRepository.updateEndTime(auctionId, newEndTime);
             log.info("Auction #{} extended by 2 minutes", response.getId());
             return true;
         }

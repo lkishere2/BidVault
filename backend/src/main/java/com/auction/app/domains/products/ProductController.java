@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api/v1/inventory")
-@io.swagger.v3.oas.annotations.tags.Tag(name = "Product")
 @Validated
 public class ProductController {
 
@@ -23,7 +22,7 @@ public class ProductController {
     @GetMapping("/get")
     public ResponseEntity<Page<ProductResponse>> getStorage(
             @RequestParam(defaultValue = "0") @Min(value = 0, message = "page must be >= 0") int page,
-            @RequestParam(defaultValue = "10") @Min(value = 1, message = "size must be >= 1") int size) {
+            @RequestParam(defaultValue = "20") @Min(value = 1, message = "size must be >= 1") int size) {
         Page<ProductResponse> response = productService.getStorage(page, size);
         return ResponseEntity.ok(response);
     }
@@ -43,6 +42,6 @@ public class ProductController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 }

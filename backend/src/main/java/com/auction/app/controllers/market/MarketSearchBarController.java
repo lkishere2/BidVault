@@ -10,55 +10,79 @@ import javafx.scene.control.TextField;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.List;
 
-// FIX #1: Added @Component so Spring manages this controller.
-// MarketSearchBar.fxml is loaded via <fx:include> inside MarketView.fxml,
-// whose fx:controller (MarketViewController) is a Spring bean. JavaFX will
-// ask the Spring controller factory to resolve this controller by type —
-// without @Component it is not registered in the context, causing the
-// NoSuchBeanDefinitionException that crashes the entire MarketView load.
+/**
+ * Controller for the search/filter bar embedded via {@code <fx:include>} in MarketView.fxml.
+ *
+ * <p>Must be a Spring {@code @Component} so the Spring-aware FXML controller factory can
+ * inject it as a nested controller into {@link MarketViewController} via the
+ * {@code @FXML private MarketSearchBarController searchBarController} field.
+ *
+ * <p>Only the three publicly-discoverable statuses are offered:
+ * {@code UPCOMING}, {@code ACTIVE}, and {@code ENDED}. {@code CANCELLED} auctions
+ * are never shown on the market.
+ */
 @Component
 public class MarketSearchBarController {
-    @FXML private TextField searchField;
-    @FXML private TextField minPriceField;
-    @FXML private ComboBox<AuctionStatus> statusComboBox;
-    @FXML private Button searchButton;
 
-    private Runnable searchTriggerCallback;
+    /** Discoverable statuses — CANCELLED is intentionally excluded. */
+    private static final List<AuctionStatus> DISCOVERABLE_STATUSES = List.of(
+            AuctionStatus.UPCOMING,
+            AuctionStatus.ACTIVE,
+            AuctionStatus.ENDED
+    );
+
+    @FXML private TextField  searchField;
+    @FXML private TextField  minPriceField;
+    @FXML private ComboBox<AuctionStatus> statusComboBox;
+    @FXML private Button     searchButton;
+
+    private Runnable onSearchTriggered;
 
     @FXML
     public void initialize() {
-        statusComboBox.setItems(FXCollections.observableArrayList(AuctionStatus.values()));
+        statusComboBox.setItems(FXCollections.observableArrayList(DISCOVERABLE_STATUSES));
         statusComboBox.setValue(AuctionStatus.ACTIVE);
 
+        // Numeric-only guard for the price field
         minPriceField.textProperty().addListener((obs, oldVal, newVal) -> {
             if (!newVal.matches("\\d*(\\.\\d*)?")) {
                 minPriceField.setText(oldVal);
             }
         });
+
+        // Also trigger search on Enter inside the text field
+        searchField.setOnAction(e -> handleSearchAction());
     }
 
+    /** Called by {@link MarketViewController} after include injection is complete. */
     public void setOnSearchTriggered(Runnable callback) {
-        this.searchTriggerCallback = callback;
+        this.onSearchTriggered = callback;
     }
 
     @FXML
     private void handleSearchAction() {
-        if (searchTriggerCallback != null) {
-            searchTriggerCallback.run();
+        if (onSearchTriggered != null) {
+            onSearchTriggered.run();
         }
     }
 
-    public AuctionFindingRequest getQueryRequest() {
+    /**
+     * Builds a query request from the current field values.
+     * Empty strings become {@code null}; empty price becomes {@code BigDecimal.ZERO}.
+     */
+    public AuctionFindingRequest buildRequest() {
         AuctionFindingRequest request = new AuctionFindingRequest();
+
         String query = searchField.getText().trim();
         request.setProductName(query.isEmpty() ? null : query);
 
-        String priceStr = minPriceField.getText().trim();
-        if (!priceStr.isEmpty()) {
+        String priceText = minPriceField.getText().trim();
+        if (!priceText.isEmpty()) {
             try {
-                request.setMinStartingPrice(new BigDecimal(priceStr));
-            } catch (Exception e) {
+                request.setMinStartingPrice(new BigDecimal(priceText));
+            } catch (NumberFormatException ignored) {
                 request.setMinStartingPrice(BigDecimal.ZERO);
             }
         } else {

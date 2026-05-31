@@ -9,6 +9,7 @@ import com.auction.app.domains.auction.auction.model.Auction;
 import com.auction.app.domains.auction.auction.model.AuctionStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -87,4 +88,9 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
     @Transactional
     @Query("UPDATE Auction a SET a.status = :newStatus WHERE a.id IN :ids")
     int updateStatusForIds(@Param("ids") List<Long> ids, @Param("newStatus") AuctionStatus newStatus);
+
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query("UPDATE Auction a SET a.endTime = :endTime WHERE a.id = :id")
+    void updateEndTime(@Param("id") Long id, @Param("endTime") Instant endTime);
 }

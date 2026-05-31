@@ -17,7 +17,6 @@ public class BidResponse {
 
     private Long bidId;
     private Long auctionId;
-    private Long bidderId;
     private String bidderLabel;
     private BigDecimal amount;
     private Instant placedAt;
@@ -26,7 +25,6 @@ public class BidResponse {
         return BidResponse.builder()
                 .bidId(bid.getId())
                 .auctionId(bid.getAuction().getId())
-                .bidderId(bid.getBidder().getId())
                 .bidderLabel(bid.getBidder().getDisplayName())
                 .amount(bid.getAmount())
                 .placedAt(bid.getPlacedAt())
