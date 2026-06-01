@@ -70,7 +70,7 @@ public class BidServiceImpl implements BidService {
         this.self = self;
     }
 
-    private static final long SNIPER_PROTECTION_SECONDS = 120L;
+    private static final long SNIPER_PROTECTION_SECONDS = 120;
     private static final BigDecimal INCREMENT_PERCENTAGE = BigDecimal.valueOf(0.05);
 
     @Override
@@ -247,9 +247,12 @@ public class BidServiceImpl implements BidService {
         Instant now = Instant.now();
         if (Duration.between(now, response.getEndTime()).getSeconds() < SNIPER_PROTECTION_SECONDS) {
             Instant newEndTime = now.plusSeconds(SNIPER_PROTECTION_SECONDS);
+            Auction auction = findAuctionById(auctionId);
             response.setEndTime(newEndTime);
             response.setExtended(true);
-            auctionRepository.updateEndTime(auctionId, newEndTime);
+            auction.setEndTime(newEndTime);
+            auction.setExtended(true);
+            auctionRepository.save(auction);
             log.info("[Bid Service] Auction #{} extended by 2 minutes", response.getId());
             return true;
         }

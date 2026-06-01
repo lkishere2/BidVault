@@ -13,7 +13,7 @@ import java.util.Optional;
 @Repository
 public interface ConnectionRepository extends JpaRepository<Connection, Long> {
 
-    @Query("SELECT c.follower FROM Connection c WHERE c.following.id = :followingId")
+    @Query("SELECT c.follower FROM UserConnection c WHERE c.following.id = :followingId")
     List<User> findAllFollowersByFollowingId(@Param("followingId") Long followingId);
 
     Optional<Connection> findByFollowerIdAndFollowingId(long followerId, long followingId);
