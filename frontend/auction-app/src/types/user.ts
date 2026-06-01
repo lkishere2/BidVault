@@ -2,6 +2,7 @@ export interface UserResponse {
     username: string;
     email: string;
     balance: string;
+    profileImageUrl?: string;
 }
 
 export interface UsernameRequest {
@@ -17,3 +18,6 @@ export interface PasswordRequest {
     newPassword: string;
 }
 
+export interface ProfileImageRequest {
+    profileImageUrl: string;
+}
