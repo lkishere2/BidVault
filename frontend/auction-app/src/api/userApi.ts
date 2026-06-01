@@ -25,7 +25,6 @@ export const userApi = {
     updatePassword: (data: PasswordRequest) =>
         api.patch<void>('/users/update-password', data),
 
-    // Added missing profile image update method
     updateProfileImage: (data: ProfileImageRequest) =>
         api.patch<void>('/users/update-profile-image', data),
 

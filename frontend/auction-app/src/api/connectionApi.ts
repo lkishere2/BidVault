@@ -4,9 +4,14 @@ import type { UserStats } from '../types/connection';
 export const connectionApi = {
 
     follow: (followingId: number) =>
-        api.post(`/connections/follow/${followingId}`),
+        api.post<void>(`/api/v1/users/follow/${followingId}`),
 
     getStats: (userId: number) =>
-        api.get<UserStats>(`/connections/${userId}/stats`),
+        api.get<UserStats>(`/api/v1/users/${userId}/stats`),
 
-}
+    checkFollowStatus: (userId: number) =>
+        api.get<boolean>(`/api/v1/users/${userId}/is-following`),
+
+};
+
+export default connectionApi;

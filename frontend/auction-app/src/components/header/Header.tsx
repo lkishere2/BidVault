@@ -30,11 +30,7 @@ export default function Header({ user, isLoggedIn = !!user, onLogout, onLogin }:
 
     return (
         <header className="sticky top-0 z-[100] w-full bg-white border-b border-[#0D0D0D]">
-
-            {/* ── Main bar ── */}
             <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 h-[60px] sm:h-[68px] lg:h-[72px] flex items-center justify-between gap-6">
-
-                {/* Logo */}
                 <button
                     type="button"
                     onClick={() => navigate('/')}
@@ -49,23 +45,19 @@ export default function Header({ user, isLoggedIn = !!user, onLogout, onLogin }:
                     </span>
                 </button>
 
-                {/* Desktop nav — centred in remaining space */}
                 <nav className="hidden md:flex items-center gap-0 flex-1 justify-center">
                     {NAV.map(item => (
                         <NavItem key={item.label} {...item} />
                     ))}
                 </nav>
 
-                {/* Right — auth + hamburger */}
                 <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-
-                    {/* Auth: desktop (sm+) */}
                     <div className="hidden sm:flex items-center gap-2">
                         {isLoggedIn && user ? (
                             <>
                                 <button
                                     type="button"
-                                    onClick={() => navigate('/account')}
+                                    onClick={() => navigate('/account/overview')}
                                     className="flex items-center gap-2 h-[38px] sm:h-[42px] pl-1.5 pr-4 bg-white border border-[#0D0D0D] rounded-full cursor-pointer hover:bg-neutral-50 transition-colors"
                                 >
                                     <div className="w-[27px] h-[27px] sm:w-[30px] sm:h-[30px] rounded-full bg-[#F5C518] flex items-center justify-center text-[10px] sm:text-[11px] font-bold text-[#0D0D0D] flex-shrink-0">
@@ -95,7 +87,6 @@ export default function Header({ user, isLoggedIn = !!user, onLogout, onLogin }:
                         )}
                     </div>
 
-                    {/* Hamburger: mobile only */}
                     <button
                         type="button"
                         onClick={() => setMobileOpen(v => !v)}
@@ -107,7 +98,6 @@ export default function Header({ user, isLoggedIn = !!user, onLogout, onLogin }:
                 </div>
             </div>
 
-            {/* ── Mobile slide-down panel ── */}
             <div
                 className="md:hidden border-t border-neutral-100 overflow-hidden transition-all duration-300"
                 style={{ maxHeight: mobileOpen ? '360px' : '0px', opacity: mobileOpen ? 1 : 0 }}
@@ -115,7 +105,6 @@ export default function Header({ user, isLoggedIn = !!user, onLogout, onLogin }:
                 <nav className="flex flex-col px-4 pt-2 pb-3 gap-0.5">
                     {NAV.map(item =>
                         item.sub ? (
-                            // Mobile: flatten sub-items under a header label
                             <div key={item.label}>
                                 <p className="px-3 pt-3 pb-1 text-[10px] font-bold tracking-[.12em] uppercase text-neutral-400">
                                     {item.label}
@@ -143,7 +132,6 @@ export default function Header({ user, isLoggedIn = !!user, onLogout, onLogin }:
                         )
                     )}
 
-                    {/* Auth row inside mobile panel */}
                     <div className="mt-2 pt-2 border-t border-neutral-100">
                         {isLoggedIn && user ? (
                             <div className="flex items-center justify-between px-3 py-2">
@@ -173,7 +161,6 @@ export default function Header({ user, isLoggedIn = !!user, onLogout, onLogin }:
                     </div>
                 </nav>
             </div>
-
         </header>
     );
 }
