@@ -45,9 +45,10 @@ public class AuctionSchedulerService {
 
         for (Long auctionId : toEndIds) {
             try {
+                log.info("Ending active auction #{}", auctionId);
                 auctionExecutor.processEndedAuctionById(auctionId);
             } catch (Exception e) {
-                log.error("Failed to process ending for auction #{}: {}", auctionId, e.getMessage(), e);
+                log.error("Failed to process ending for auction #{}", auctionId, e);
             }
         }
     }

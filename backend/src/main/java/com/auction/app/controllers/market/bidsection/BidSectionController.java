@@ -5,10 +5,10 @@ import com.auction.app.domains.auction.auction.model.AuctionStatus;
 import com.auction.app.domains.auction.bids.dtos.BidFeedEvent;
 import com.auction.app.domains.auction.bids.dtos.BidNotificationPayload;
 import javafx.application.Platform;
-import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
@@ -17,9 +17,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.*;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
+import jakarta.websocket.ContainerProvider;
+import jakarta.websocket.WebSocketContainer;
 import java.lang.reflect.Type;
 
 @Component
@@ -27,56 +30,36 @@ import java.lang.reflect.Type;
 @Slf4j
 public class BidSectionController {
 
-    // Fix: inject ApplicationContext so we can supply a Spring controller factory to
-    // each FXMLLoader, allowing the sub-panel fx:controller beans to be resolved by
-    // Spring (honouring @Autowired / @RequiredArgsConstructor) rather than instantiated
-    // via plain reflection by JavaFX (which would fail on required-arg constructors).
     private final ApplicationContext applicationContext;
 
-    // ------------------------------------------------------------------
-    // Public API — called by MarketViewController
-    // ------------------------------------------------------------------
-
-    /**
-     * Opens a new modal Stage for the given auction.
-     * Must be called from the JavaFX Application Thread.
-     *
-     * Fix (singleton-state / concurrency): this bean is a Spring singleton, so the
-     * original design of storing auction/mode/stompSession as instance fields meant
-     * that opening a second window would overwrite the first window's state and
-     * disconnect its STOMP session.  All per-window state is now held in a local
-     * WindowContext record and captured by lambdas, making each open() call
-     * fully independent.
-     */
     public void open(AuctionResponse auction, AuctionStatus mode, Stage owner) {
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/ui/views/market/bidsection/BidSectionView.fxml")
-            );
+            FXMLLoader mainLoader = new FXMLLoader(getClass().getResource("/ui/views/market/bidsection/BidSectionView.fxml"));
+            mainLoader.setControllerFactory(applicationContext::getBean);
+            HBox root = mainLoader.load();
+            BidSectionViewController rootController = mainLoader.getController();
 
-            // Fix: supply a Spring-aware controller factory so that BidInfoPanelController
-            // and BidFeedPanelController (which have @RequiredArgsConstructor final fields)
-            // are resolved as Spring beans rather than being instantiated by JavaFX via
-            // no-arg reflection — which would throw because Lombok does not generate a
-            // no-arg constructor when required-arg fields are present.
-            loader.setControllerFactory(applicationContext::getBean);
+            // 2. Load Bid Info Panel explicitly
+            FXMLLoader infoLoader = new FXMLLoader(getClass().getResource("/ui/views/market/bidsection/BidInfoPanel.fxml"));
+            infoLoader.setControllerFactory(applicationContext::getBean);
+            VBox infoPanelNode = infoLoader.load();
+            BidInfoPanelController bidInfoPanel = infoLoader.getController();
 
-            HBox root = loader.load();
+            // 3. Load Bid Feed Panel explicitly
+            FXMLLoader feedLoader = new FXMLLoader(getClass().getResource("/ui/views/market/bidsection/BidFeedPanel.fxml"));
+            feedLoader.setControllerFactory(applicationContext::getBean);
+            VBox feedPanelNode = feedLoader.load();
+            BidFeedPanelController bidFeedPanel = feedLoader.getController();
 
-            // Retrieve the sub-panel controllers that JavaFX injected from the fx:include nodes.
-            // The fx:id="bidInfoPanel" / fx:id="bidFeedPanel" includes cause JavaFX to inject
-            // the nested controllers under the keys "bidInfoPanelController" / "bidFeedPanelController".
-            BidInfoPanelController bidInfoPanel =
-                    (BidInfoPanelController) loader.getNamespace().get("bidInfoPanelController");
-            BidFeedPanelController bidFeedPanel =
-                    (BidFeedPanelController) loader.getNamespace().get("bidFeedPanelController");
+            // 4. Inject visual panels directly into the frame container
+            rootController.getBidInfoPanelContainer().getChildren().setAll(infoPanelNode);
+            rootController.getBidFeedPanelContainer().getChildren().setAll(feedPanelNode);
 
+            // 5. Run Initializations
             bidInfoPanel.initialize(auction, mode);
             bidFeedPanel.initialize(auction, mode);
 
-            // Per-window STOMP state — isolated from any other open window.
             StompSessionHolder sessionHolder = new StompSessionHolder();
-
             Stage stage = new Stage();
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initOwner(owner);
@@ -91,34 +74,31 @@ public class BidSectionController {
             stage.show();
 
         } catch (Exception e) {
-            log.error("Failed to open BidSectionView: {}", e.getMessage(), e);
+            log.error("Failed to build out real-time view structure: {}", e.getMessage(), e);
         }
     }
-
-    // ------------------------------------------------------------------
-    // STOMP
-    // ------------------------------------------------------------------
 
     private void connectStomp(Long auctionId,
                               BidInfoPanelController bidInfoPanel,
                               BidFeedPanelController bidFeedPanel,
                               StompSessionHolder sessionHolder) {
 
-        WebSocketStompClient stompClient = new WebSocketStompClient(new StandardWebSocketClient());
+        WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+        container.setDefaultMaxTextMessageBufferSize(512 * 1024);
+
+        WebSocketClient webSocketClient = new StandardWebSocketClient(container);
+        WebSocketStompClient stompClient = new WebSocketStompClient(webSocketClient);
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
         sessionHolder.stompClient = stompClient;
 
-        // Fix: was hardcoded to port 8080 — app runs on port 8000.
         stompClient.connectAsync("ws://localhost:8000/ws", new StompSessionHandlerAdapter() {
-
             @Override
             public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
                 sessionHolder.stompSession = session;
-                log.info("STOMP connected for auction #{}", auctionId);
+                log.info("STOMP connection fully operational for auction #{}", auctionId);
 
                 Platform.runLater(() -> bidFeedPanel.setConnectionStatus(true));
 
-                // Price ticker
                 session.subscribe("/topic/auction/" + auctionId, new StompFrameHandler() {
                     @Override
                     public Type getPayloadType(StompHeaders headers) {
@@ -131,8 +111,6 @@ public class BidSectionController {
                         Platform.runLater(() -> {
                             bidInfoPanel.updateFromTicker(ticker);
                             if (ticker.isEnded()) {
-                                // Fix: pass the ticker so switchToEndedMode can read the winner
-                                // label from the live payload instead of the stale open-time snapshot.
                                 bidInfoPanel.switchToEndedMode(ticker);
                                 bidFeedPanel.setConnectionStatus(false);
                             }
@@ -140,7 +118,6 @@ public class BidSectionController {
                     }
                 });
 
-                // Live bid feed
                 session.subscribe("/topic/auction/" + auctionId + "/bids", new StompFrameHandler() {
                     @Override
                     public Type getPayloadType(StompHeaders headers) {
@@ -157,7 +134,7 @@ public class BidSectionController {
 
             @Override
             public void handleTransportError(StompSession session, Throwable exception) {
-                log.error("STOMP transport error for auction #{}: {}", auctionId, exception.getMessage());
+                log.error("STOMP broker mapping disconnected: {}", exception.getMessage());
                 Platform.runLater(() -> bidFeedPanel.setConnectionStatus(false));
             }
         });
@@ -166,14 +143,12 @@ public class BidSectionController {
     private void disconnect(StompSessionHolder sessionHolder, Long auctionId) {
         if (sessionHolder.stompSession != null && sessionHolder.stompSession.isConnected()) {
             sessionHolder.stompSession.disconnect();
-            log.info("STOMP disconnected for auction #{}", auctionId);
         }
         if (sessionHolder.stompClient != null) {
             sessionHolder.stompClient.stop();
         }
     }
 
-    /** Mutable holder so lambdas can capture STOMP state per window without instance fields. */
     private static class StompSessionHolder {
         WebSocketStompClient stompClient;
         StompSession stompSession;

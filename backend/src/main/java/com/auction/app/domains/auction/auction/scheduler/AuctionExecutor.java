@@ -92,6 +92,9 @@ public class AuctionExecutor {
             cache.cacheAuctionResponse(auction.getId(), response);
             log.info("[Auction Execution Service - End Auction] Cache auction #{} success to update", auctionId);
         }
+        else {
+            log.warn("[Auction Execution Service - End Auction] No cache entry for auction #{}, proceeding with DB values", auctionId);
+        }
 
         List<Bid> heldBids = bidRepository.findByAuctionIdAndStatus(auctionId, BidStatus.HELD);
 
