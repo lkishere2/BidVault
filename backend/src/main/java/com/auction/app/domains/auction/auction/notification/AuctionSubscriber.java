@@ -1,6 +1,7 @@
 package com.auction.app.domains.auction.auction.notification;
 
 import org.jspecify.annotations.NonNull;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -21,6 +22,8 @@ import java.io.IOException;
 public class AuctionSubscriber implements MessageListener {
 
     private final SimpMessagingTemplate messagingTemplate;
+
+    @Qualifier("redisObjectMapper")
     private final ObjectMapper objectMapper;
 
     private static final String NOTIFY_PREFIX = "auction:notify:";
