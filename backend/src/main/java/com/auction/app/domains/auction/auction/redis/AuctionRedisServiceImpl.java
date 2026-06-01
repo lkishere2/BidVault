@@ -16,27 +16,22 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AuctionCacheAdapter implements AuctionRedisPort {
+public class AuctionRedisServiceImpl implements AuctionRedisService {
 
     private final RedisTemplate<String, AuctionResponse> auctionResponseRedisTemplate;
     private final RedisTemplate<String, PendingBid> pendingBidRedisTemplate;
-    private final RedisTemplate<String, Object> redisTemplate;
 
     private static final String RESPONSE_PREFIX = "auction:response:";
     private static final String QUEUE_PREFIX = "auction:queue:";
-    private static final String PROCESSING_LOCK_PREFIX = "auction:processing-lock:";
     private static final Duration POST_AUCTION_RETENTION = Duration.ofDays(1);
     private static final Duration TERMINAL_RETENTION = Duration.ofMinutes(30);
-    private static final Duration LOCK_TTL = Duration.ofSeconds(30);
 
-    public AuctionCacheAdapter(
+    public AuctionRedisServiceImpl(
             @Qualifier("auctionResponseRedisTemplate") RedisTemplate<String, AuctionResponse> auctionResponseRedisTemplate,
-            @Qualifier("pendingBidRedisTemplate") RedisTemplate<String, PendingBid> pendingBidRedisTemplate,
-            @Qualifier("redisTemplate") RedisTemplate<String, Object> redisTemplate
+            @Qualifier("pendingBidRedisTemplate") RedisTemplate<String, PendingBid> pendingBidRedisTemplate
     ) {
         this.auctionResponseRedisTemplate = auctionResponseRedisTemplate;
         this.pendingBidRedisTemplate = pendingBidRedisTemplate;
-        this.redisTemplate = redisTemplate;
     }
 
     @Override
@@ -89,28 +84,12 @@ public class AuctionCacheAdapter implements AuctionRedisPort {
         pendingBidRedisTemplate.delete(getQueueKey(auctionId));
     }
 
-    @Override
-    public boolean acquireProcessingLock(Long auctionId) {
-        Boolean acquired = redisTemplate.opsForValue()
-                .setIfAbsent(getLockKey(auctionId), "locked", LOCK_TTL);
-        return Boolean.TRUE.equals(acquired);
-    }
-
-    @Override
-    public void releaseProcessingLock(Long auctionId) {
-        redisTemplate.delete(getLockKey(auctionId));
-    }
-
     private String getResponseKey(Long auctionId) {
         return RESPONSE_PREFIX + auctionId;
     }
 
     private String getQueueKey(Long auctionId) {
         return QUEUE_PREFIX + auctionId;
-    }
-
-    private String getLockKey(Long auctionId) {
-        return PROCESSING_LOCK_PREFIX + auctionId;
     }
 
     private Duration calculateTtl(AuctionResponse response) {

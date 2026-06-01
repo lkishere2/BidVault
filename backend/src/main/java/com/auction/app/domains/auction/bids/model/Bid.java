@@ -15,11 +15,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(
-        name = "bids",
-        // Fix #7: enforce at the DB level that only one HELD bid can exist per auction at a time
-        uniqueConstraints = @UniqueConstraint(name = "uq_auction_held_bid", columnNames = {"auction_id", "status"})
-)
+@Table(name = "bids")
 public class Bid {
 
     @Id
@@ -43,7 +39,6 @@ public class Bid {
     private BidStatus status = BidStatus.PENDING;
 
     @Column(nullable = false)
-    // Fix #12: set placedAt at persist time, not at object construction time
     private Instant placedAt;
 
     @PrePersist

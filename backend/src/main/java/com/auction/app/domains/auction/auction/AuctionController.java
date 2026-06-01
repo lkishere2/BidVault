@@ -13,7 +13,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -26,7 +25,6 @@ import java.util.Set;
 @RestController
 @RequestMapping("/api/v1/auctions")
 @RequiredArgsConstructor
-@Validated
 public class AuctionController {
     private final AuctionService auctionService;
 
@@ -54,8 +52,6 @@ public class AuctionController {
         return ResponseEntity.ok(auctionService.getAuction(auctionId));
     }
 
-    // Fix #12: GET with @RequestBody is non-standard — many proxies and HTTP clients strip the body.
-    // Filter criteria are now individual @RequestParam fields, keeping the endpoint a proper GET.
     @GetMapping("/discover")
     public ResponseEntity<Page<AuctionResponse>> getDiscoverableAuctions(
             @RequestParam(required = false) @Size(max = 100, message = "Product name search query must not exceed 100 characters") String productName,

@@ -82,7 +82,6 @@ public class RedisConfig {
         return template;
     }
 
-    // --- NEW CONFIGURATION TEMPLATE FOR PENDINGBID ---
     @Bean
     public RedisTemplate<String, PendingBid> pendingBidRedisTemplate(
             RedisConnectionFactory connectionFactory) {
@@ -92,9 +91,7 @@ public class RedisConfig {
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
-        // Crucial for keeping Instant fields readable in JSON strings
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        // Keeps BigDecimals precise without converting them to scientific notation formatting
         mapper.configure(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN, true);
         mapper.configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, true);
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
