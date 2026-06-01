@@ -36,7 +36,6 @@ public class UserProfileController {
 
     public void loadProfileData(UserResponse user) {
         this.currentTargetUser = user;
-        this.isFollowing = false; // Initial baseline reset status pass
         profileUsername.setText(user.getUsername());
 
         if (user.getProfileImageUrl() != null && !user.getProfileImageUrl().isBlank()) {
@@ -49,9 +48,28 @@ public class UserProfileController {
             setDefaultAvatar();
         }
 
-        // Updates styles back to original follow configuration
-        updateButtonUI();
+        // Fetch follow state from backend database and refresh numbers concurrently
+        checkFollowRelationshipState();
         fetchUserStats();
+    }
+
+    private void checkFollowRelationshipState() {
+        long targetUserId = currentTargetUser.getId();
+
+        Runnable checkTask = () -> {
+            try {
+                ResponseEntity<Boolean> response = connectionController.checkFollowStatus(targetUserId);
+                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                    this.isFollowing = response.getBody();
+                    Platform.runLater(this::updateButtonUI);
+                }
+            } catch (Exception e) {
+                System.err.println("Failed to fetch follow baseline relationship state from server: " + e.getMessage());
+            }
+        };
+
+        DelegatingSecurityContextRunnable secureTask = new DelegatingSecurityContextRunnable(checkTask, SecurityContextHolder.getContext());
+        new Thread(secureTask).start();
     }
 
     private void fetchUserStats() {
@@ -84,15 +102,14 @@ public class UserProfileController {
             try {
                 ResponseEntity<Void> response = connectionController.follow(targetUserId);
                 if (response.getStatusCode().is2xxSuccessful()) {
-                    // Locally toggle state safely without waiting for asynchronous background check overrides
                     isFollowing = !isFollowing;
                     Platform.runLater(() -> {
                         updateButtonUI();
-                        fetchUserStats(); // Safely pulls updated count fields without wiping button state strings
+                        fetchUserStats();
                     });
                 }
             } catch (Exception e) {
-                System.err.println("Connection controller state transition mutation rejected: " + e.getMessage());
+                System.err.println("Connection status transition mutation rejected: " + e.getMessage());
             }
         };
 
