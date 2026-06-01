@@ -4,13 +4,15 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.Region?>
 
-<VBox prefWidth="240.0" spacing="8.0" style="-fx-background-color: #1E293B; -fx-padding: 20;"
+<VBox prefWidth="240.0" spacing="8.0"
+      style="-fx-background-color: #121212; -fx-padding: 20; -fx-border-color: #D4A900; -fx-border-width: 0 1 0 0;"
       xmlns="http://javafx.com/javafx/21"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.auction.app.controllers.home.NavbarController">
+
     <VBox spacing="4.0" style="-fx-padding: 0 0 20 0;">
-        <Label text="BidVault" style="-fx-text-fill: #38BDF8; -fx-font-size: 22.0; -fx-font-weight: bold;"/>
-        <Label text="Desktop App Client" style="-fx-text-fill: #64748B; -fx-font-size: 11.0;"/>
+        <Label text="BidVault" style="-fx-text-fill: #F5C518; -fx-font-size: 24.0; -fx-font-weight: bold; -fx-font-family: 'Segoe UI', Helvetica, Arial, sans-serif;"/>
+        <Label text="Desktop App Client" style="-fx-text-fill: #A0A0A0; -fx-font-size: 11.0; -fx-font-style: italic;"/>
     </VBox>
 
     <fx:include source="../../components/NavItem.fxml" fx:id="navDashboard"/>

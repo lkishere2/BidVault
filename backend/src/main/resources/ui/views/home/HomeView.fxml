@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane fx:id="homeViewContainer" prefHeight="720.0" prefWidth="1080.0"
-            style="-fx-background-color: #0F172A;"
+            style="-fx-background-color: #0D0D0D;"
             xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.auction.app.controllers.home.HomeViewController">
@@ -17,10 +21,149 @@
     <center>
         <VBox alignment="TOP_LEFT" BorderPane.alignment="CENTER">
             <children>
-                <fx:include source="../../components/Header.fxml" />
+                <HBox spacing="15.0" style="-fx-background-color: #1A1A1A; -fx-padding: 12 30 12 30; -fx-border-color: #D4A900; -fx-border-width: 0 0 1 0;">
+                    <Label text="🔥 NOTICE:" style="-fx-text-fill: #F5C518; -fx-font-weight: bold; -fx-font-size: 13.0;" />
+                    <Label text="The premium 'Golden Dragon' auction starts in 15 minutes! Prepare your bidding vault."
+                           style="-fx-text-fill: #FFFFFF; -fx-font-size: 13.0;" />
+                </HBox>
 
                 <StackPane fx:id="contentViewPane" VBox.vgrow="ALWAYS"
-                           style="-fx-background-color: #0F172A; -fx-padding: 30;" />
+                           style="-fx-background-color: #0D0D0D; -fx-padding: 30;">
+                    <children>
+
+                        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-background: #0D0D0D;">
+                            <content>
+                                <VBox spacing="25.0" style="-fx-background-color: #0D0D0D;">
+                                    <children>
+
+                                        <Label text="Live Auctions" style="-fx-text-fill: #F5C518; -fx-font-size: 20.0; -fx-font-weight: bold;" />
+
+                                        <FlowPane hgap="25.0" vgap="25.0" style="-fx-background-color: #0D0D0D;">
+                                            <children>
+
+                                                <VBox prefWidth="240.0" spacing="10.0" style="-fx-background-color: #161616; -fx-padding: 15; -fx-background-radius: 10; -fx-border-color: #262626; -fx-border-width: 1; -fx-border-radius: 10;">
+                                                    <children>
+                                                        <StackPane prefHeight="160.0" style="-fx-background-image: url('1.jpg'); -fx-background-size: cover; -fx-background-position: center; -fx-background-radius: 6;" />
+                                                        <HBox>
+                                                            <children>
+                                                                <Label text="ACTIVE" style="-fx-text-fill: #10B981; -fx-background-color: #064E3B; -fx-font-size: 11.0; -fx-font-weight: bold; -fx-padding: 3 8 3 8; -fx-background-radius: 4;" />
+                                                            </children>
+                                                        </HBox>
+                                                        <Label text="Long Blue Cat Artifact" style="-fx-text-fill: #FFFFFF; -fx-font-size: 16.0; -fx-font-weight: bold;" />
+                                                        <VBox spacing="2.0">
+                                                            <children>
+                                                                <Label text="Current price" style="-fx-text-fill: #8E8E93; -fx-font-size: 12.0;" />
+                                                                <Label text="\$1,250.00" style="-fx-text-fill: #F5C518; -fx-font-size: 20.0; -fx-font-weight: bold;" />
+                                                            </children>
+                                                        </VBox>
+                                                        <Label text="Ends in 2 d" style="-fx-text-fill: #8E8E93; -fx-font-size: 12.0;" />
+                                                    </children>
+                                                </VBox>
+
+                                                <VBox prefWidth="240.0" spacing="10.0" style="-fx-background-color: #161616; -fx-padding: 15; -fx-background-radius: 10; -fx-border-color: #262626; -fx-border-width: 1; -fx-border-radius: 10;">
+                                                    <children>
+                                                        <StackPane prefHeight="160.0" style="-fx-background-image: url('565833064_122144457560719133_6303912020514622026_n.jpg'); -fx-background-size: cover; -fx-background-position: center; -fx-background-radius: 6;" />
+                                                        <HBox>
+                                                            <children>
+                                                                <Label text="ACTIVE" style="-fx-text-fill: #10B981; -fx-background-color: #064E3B; -fx-font-size: 11.0; -fx-font-weight: bold; -fx-padding: 3 8 3 8; -fx-background-radius: 4;" />
+                                                            </children>
+                                                        </HBox>
+                                                        <Label text="Thunder Mesozoic Fossil" style="-fx-text-fill: #FFFFFF; -fx-font-size: 16.0; -fx-font-weight: bold;" />
+                                                        <VBox spacing="2.0">
+                                                            <children>
+                                                                <Label text="Current price" style="-fx-text-fill: #8E8E93; -fx-font-size: 12.0;" />
+                                                                <Label text="\$850.00" style="-fx-text-fill: #F5C518; -fx-font-size: 20.0; -fx-font-weight: bold;" />
+                                                            </children>
+                                                        </VBox>
+                                                        <Label text="Ends in 5 h" style="-fx-text-fill: #8E8E93; -fx-font-size: 12.0;" />
+                                                    </children>
+                                                </VBox>
+
+                                                <VBox prefWidth="240.0" spacing="10.0" style="-fx-background-color: #161616; -fx-padding: 15; -fx-background-radius: 10; -fx-border-color: #262626; -fx-border-width: 1; -fx-border-radius: 10;">
+                                                    <children>
+                                                        <StackPane prefHeight="160.0" style="-fx-background-image: url('597310813_2560042274361990_6236800977706241324_n.jpg'); -fx-background-size: cover; -fx-background-position: center; -fx-background-radius: 6;" />
+                                                        <HBox>
+                                                            <children>
+                                                                <Label text="ACTIVE" style="-fx-text-fill: #10B981; -fx-background-color: #064E3B; -fx-font-size: 11.0; -fx-font-weight: bold; -fx-padding: 3 8 3 8; -fx-background-radius: 4;" />
+                                                            </children>
+                                                        </HBox>
+                                                        <Label text="Anxious Green Feline" style="-fx-text-fill: #FFFFFF; -fx-font-size: 16.0; -fx-font-weight: bold;" />
+                                                        <VBox spacing="2.0">
+                                                            <children>
+                                                                <Label text="Current price" style="-fx-text-fill: #8E8E93; -fx-font-size: 12.0;" />
+                                                                <Label text="\$100.00" style="-fx-text-fill: #F5C518; -fx-font-size: 20.0; -fx-font-weight: bold;" />
+                                                            </children>
+                                                        </VBox>
+                                                        <Label text="Ends in 2 d" style="-fx-text-fill: #8E8E93; -fx-font-size: 12.0;" />
+                                                    </children>
+                                                </VBox>
+
+                                                <VBox prefWidth="240.0" spacing="10.0" style="-fx-background-color: #161616; -fx-padding: 15; -fx-background-radius: 10; -fx-border-color: #262626; -fx-border-width: 1; -fx-border-radius: 10;">
+                                                    <children>
+                                                        <StackPane prefHeight="160.0" style="-fx-background-image: url('622822440_122203158932560450_5028282210830824816_n.jpg'); -fx-background-size: cover; -fx-background-position: center; -fx-background-radius: 6;" />
+                                                        <HBox>
+                                                            <children>
+                                                                <Label text="ACTIVE" style="-fx-text-fill: #10B981; -fx-background-color: #064E3B; -fx-font-size: 11.0; -fx-font-weight: bold; -fx-padding: 3 8 3 8; -fx-background-radius: 4;" />
+                                                            </children>
+                                                        </HBox>
+                                                        <Label text="Golden Poultry Sculptures" style="-fx-text-fill: #FFFFFF; -fx-font-size: 16.0; -fx-font-weight: bold;" />
+                                                        <VBox spacing="2.0">
+                                                            <children>
+                                                                <Label text="Current price" style="-fx-text-fill: #8E8E93; -fx-font-size: 12.0;" />
+                                                                <Label text="\$2,100.00" style="-fx-text-fill: #F5C518; -fx-font-size: 20.0; -fx-font-weight: bold;" />
+                                                            </children>
+                                                        </VBox>
+                                                        <Label text="Ends in 3 d" style="-fx-text-fill: #8E8E93; -fx-font-size: 12.0;" />
+                                                    </children>
+                                                </VBox>
+
+                                                <VBox prefWidth="240.0" spacing="10.0" style="-fx-background-color: #161616; -fx-padding: 15; -fx-background-radius: 10; -fx-border-color: #262626; -fx-border-width: 1; -fx-border-radius: 10;">
+                                                    <children>
+                                                        <StackPane prefHeight="160.0" style="-fx-background-image: url('696231048_1283406440438694_1789724437054869500_n.jpg'); -fx-background-size: cover; -fx-background-position: center; -fx-background-radius: 6;" />
+                                                        <HBox>
+                                                            <children>
+                                                                <Label text="ACTIVE" style="-fx-text-fill: #10B981; -fx-background-color: #064E3B; -fx-font-size: 11.0; -fx-font-weight: bold; -fx-padding: 3 8 3 8; -fx-background-radius: 4;" />
+                                                            </children>
+                                                        </HBox>
+                                                        <Label text="Crazy Scientist Portrait" style="-fx-text-fill: #FFFFFF; -fx-font-size: 16.0; -fx-font-weight: bold;" />
+                                                        <VBox spacing="2.0">
+                                                            <children>
+                                                                <Label text="Current price" style="-fx-text-fill: #8E8E93; -fx-font-size: 12.0;" />
+                                                                <Label text="\$420.00" style="-fx-text-fill: #F5C518; -fx-font-size: 20.0; -fx-font-weight: bold;" />
+                                                            </children>
+                                                        </VBox>
+                                                        <Label text="Ends in 12 h" style="-fx-text-fill: #8E8E93; -fx-font-size: 12.0;" />
+                                                    </children>
+                                                </VBox>
+
+                                                <VBox prefWidth="240.0" spacing="10.0" style="-fx-background-color: #161616; -fx-padding: 15; -fx-background-radius: 10; -fx-border-color: #262626; -fx-border-width: 1; -fx-border-radius: 10;">
+                                                    <children>
+                                                        <StackPane prefHeight="160.0" style="-fx-background-image: url('699256682_1404901518321302_6343185342432744418_n.jpg'); -fx-background-size: cover; -fx-background-position: center; -fx-background-radius: 6;" />
+                                                        <HBox>
+                                                            <children>
+                                                                <Label text="ACTIVE" style="-fx-text-fill: #10B981; -fx-background-color: #064E3B; -fx-font-size: 11.0; -fx-font-weight: bold; -fx-padding: 3 8 3 8; -fx-background-radius: 4;" />
+                                                            </children>
+                                                        </HBox>
+                                                        <Label text="Disappointed Mouse Meme" style="-fx-text-fill: #FFFFFF; -fx-font-size: 16.0; -fx-font-weight: bold;" />
+                                                        <VBox spacing="2.0">
+                                                            <children>
+                                                                <Label text="Current price" style="-fx-text-fill: #8E8E93; -fx-font-size: 12.0;" />
+                                                                <Label text="\$670.00" style="-fx-text-fill: #F5C518; -fx-font-size: 20.0; -fx-font-weight: bold;" />
+                                                            </children>
+                                                        </VBox>
+                                                        <Label text="Ends in 4 d" style="-fx-text-fill: #8E8E93; -fx-font-size: 12.0;" />
+                                                    </children>
+                                                </VBox>
+
+                                            </children>
+                                        </FlowPane>
+                                    </children>
+                                </VBox>
+                            </content>
+                        </ScrollPane>
+
+                    </children>
+                </StackPane>
 
                 <fx:include source="../../components/Footer.fxml" />
             </children>
