@@ -2,7 +2,6 @@ import api from './axios';
 import type { UserStats } from '../types/connection';
 
 export const connectionApi = {
-
     follow: (followingId: number) =>
         api.post<void>(`/api/v1/users/follow/${followingId}`),
 

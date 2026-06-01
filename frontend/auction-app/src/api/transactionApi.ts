@@ -4,23 +4,33 @@ import type { Page } from '../types/pagination';
 
 export const transactionApi = {
 
-    getUserTransactions: (page = 0, size = 10) =>
-        api.get<Page<TransactionResponse>>(`/transaction/me?page=${page}&size=${size}`),
+    getUserTransactions: (page: number = 0, size: number = 20) =>
+        api.get<Page<TransactionResponse>>('/api/v1/transaction/me', {
+            params: {
+                page,
+                size
+            }
+        }),
 
     createTransaction: (data: TransactionRequest) =>
-        api.post<TransactionResponse>('/transaction/create', data),
+        api.post<TransactionResponse>('/api/v1/transaction/create', data),
 
     deleteTransaction: (id: number) =>
-        api.delete<void>(`/transaction/delete/${id}`),
+        api.delete<void>(`/api/v1/transaction/delete/${id}`),
 
-    getAllTransactionRequests: (page = 0, size = 10) =>
-        api.get<Page<TransactionResponse>>(`/transaction/all?page=${page}&size=${size}`),
+    getAllTransactionRequests: (page: number = 0, size: number = 20) =>
+        api.get<Page<ClientRequest>>('/api/v1/transaction/all', {
+            params: {
+                page,
+                size
+            }
+        }),
 
     acceptTransaction: (data: ClientRequest) =>
-        api.post<void>('/transaction/deposit', data),
+        api.post<void>('/api/v1/transaction/accept', data),
 
     cancelTransaction: (id: number) =>
-        api.put<void>(`/transaction/cancel/${id}`),
+        api.put<void>(`/api/v1/transaction/cancel/${id}`),
 
 };
 

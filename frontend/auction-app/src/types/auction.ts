@@ -5,13 +5,14 @@ export type AuctionStatus = 'UPCOMING' | 'ACTIVE' | 'ENDED' | 'CANCELLED';
 export interface AuctionRequest {
     productId: number;
     quantity: number;
-    startingPrice: string;
-    startTime: string;
-    endTime: string;
+    startingPrice: number; // Đổi thành number để khớp với BigDecimal, hoặc string nếu bạn quản lý chuỗi lớn
+    startTime: string;     // ISO String (Instant bên Java)
+    endTime: string;       // ISO String (Instant bên Java)
 }
 
 export interface AuctionResponse {
     id: number;
+    sellerId: number;
     sellerLabel: string;
     productId: number;
     productName: string;
@@ -26,13 +27,14 @@ export interface AuctionResponse {
     endTime: string;
     extended: boolean;
     status: AuctionStatus;
-    winnerLabel?: string;
-    bidCount: number;
+    winnerId: number | null;
+    winnerLabel: string | null;
+    bidCount: string;
 }
 
 export interface AuctionFindingRequest {
     productName?: string;
-    tags?: string[];
+    tags?: Tag[]; // Khớp với Set<Tag> bên backend (truyền object hoặc xử lý mảng)
     startTime?: string;
     endTime?: string;
     minStartingPrice?: string;

@@ -11,19 +11,19 @@ import type {
 export const userApi = {
 
     getInfo: () =>
-        api.get<UserResponse>('/users/info'),
+        api.get<UserResponse>('/api/v1/users/info'),
 
     searchUsers: (username: string, page = 0, size = 20) =>
         api.get<Page<UserResponse>>(`/users/search?username=${encodeURIComponent(username)}&page=${page}&size=${size}`),
 
     updateUsername: (data: UsernameRequest) =>
-        api.patch<void>('/users/update-username', data),
+        api.patch<void>('/api/v1/users/update-username', data),
 
     updateEmail: (data: EmailRequest) =>
-        api.patch<void>('/users/update-email', data),
+        api.patch<void>('/api/v1/users/update-email', data),
 
     updatePassword: (data: PasswordRequest) =>
-        api.patch<void>('/users/update-password', data),
+        api.patch<void>('/api/v1/users/update-password', data),
 
     updateProfileImage: (data: ProfileImageRequest) =>
         api.patch<void>('/users/update-profile-image', data),
