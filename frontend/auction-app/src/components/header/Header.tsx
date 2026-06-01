@@ -1,95 +1,179 @@
-import { Gavel } from 'lucide-react';
+import { useState } from 'react';
+import { Gavel, LogOut, LogIn, Menu, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import LoginButton from './LoginButton';
-import ProfileButton from './ProfileButton';
+import NavItem from './NavItem';
 
 interface HeaderProps {
-    user?: {
-        username: string;
-        initials: string;
-    };
+    user?: { username: string; initials: string };
+    isLoggedIn?: boolean;
     onLogout?: () => void;
+    onLogin?: () => void;
 }
 
-export default function Header({ user, onLogout }: HeaderProps) {
+const NAV = [
+    { label: 'Home', path: '/' },
+    {
+        label: 'Market',
+        sub: [
+            { label: 'All Auctions', path: '/auctions/hub' },
+            { label: 'My Bids', path: '/auction/joined' },
+            { label: 'Live Now', path: '/auctions/live' },
+        ],
+    },
+    { label: 'Community', path: '/explore' },
+];
+
+export default function Header({ user, isLoggedIn = !!user, onLogout, onLogin }: HeaderProps) {
     const navigate = useNavigate();
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const close = () => setMobileOpen(false);
 
     return (
-        <header
-            style={{
-                position: 'sticky',
-                top: 0,
-                zIndex: 100,
-                width: '100%',
-                height: '72px',
-                background: '#FFFFFF',
-                borderBottom: '1px solid #0D0D0D',
-            }}
-        >
-            <div
-                style={{
-                    maxWidth: '1280px',
-                    height: '100%',
-                    margin: '0 auto',
-                    padding: '0 32px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                }}
-            >
+        <header className="sticky top-0 z-[100] w-full bg-white border-b border-[#0D0D0D]">
+
+            {/* ── Main bar ── */}
+            <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 h-[60px] sm:h-[68px] lg:h-[72px] flex items-center justify-between gap-6">
+
+                {/* Logo */}
                 <button
+                    type="button"
                     onClick={() => navigate('/')}
                     aria-label="BidVault home"
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        padding: 0,
-                        flexShrink: 0,
-                    }}
+                    className="flex items-center gap-2.5 bg-transparent border-0 cursor-pointer p-0 flex-shrink-0"
                 >
-                    <div
-                        style={{
-                            width: '40px',
-                            height: '40px',
-                            background: '#0D0D0D',
-                            borderRadius: '10px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexShrink: 0,
-                        }}
-                    >
-                        <Gavel size={20} color="#F5C518" strokeWidth={2} aria-hidden />
+                    <div className="w-[34px] h-[34px] sm:w-[38px] sm:h-[38px] bg-[#0D0D0D] rounded-[9px] flex items-center justify-center flex-shrink-0">
+                        <Gavel size={16} color="#F5C518" strokeWidth={2} aria-hidden />
                     </div>
-                    <span
-                        style={{
-                            fontSize: '22px',
-                            fontWeight: 700,
-                            color: '#0D0D0D',
-                            letterSpacing: '-0.03em',
-                            lineHeight: 1,
-                        }}
-                    >
+                    <span className="text-[17px] sm:text-[20px] font-bold text-[#0D0D0D] tracking-[-0.03em] leading-none">
                         BidVault
                     </span>
                 </button>
 
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                    {user ? (
-                        <ProfileButton
-                            username={user.username}
-                            initials={user.initials}
-                            onLogout={onLogout}
-                        />
-                    ) : (
-                        <LoginButton />
-                    )}
+                {/* Desktop nav — centred in remaining space */}
+                <nav className="hidden md:flex items-center gap-0 flex-1 justify-center">
+                    {NAV.map(item => (
+                        <NavItem key={item.label} {...item} />
+                    ))}
+                </nav>
+
+                {/* Right — auth + hamburger */}
+                <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+
+                    {/* Auth: desktop (sm+) */}
+                    <div className="hidden sm:flex items-center gap-2">
+                        {isLoggedIn && user ? (
+                            <>
+                                <button
+                                    type="button"
+                                    onClick={() => navigate('/account')}
+                                    className="flex items-center gap-2 h-[38px] sm:h-[42px] pl-1.5 pr-4 bg-white border border-[#0D0D0D] rounded-full cursor-pointer hover:bg-neutral-50 transition-colors"
+                                >
+                                    <div className="w-[27px] h-[27px] sm:w-[30px] sm:h-[30px] rounded-full bg-[#F5C518] flex items-center justify-center text-[10px] sm:text-[11px] font-bold text-[#0D0D0D] flex-shrink-0">
+                                        {user.initials}
+                                    </div>
+                                    <span className="text-[13px] font-semibold text-[#0D0D0D] max-w-[96px] truncate">
+                                        {user.username}
+                                    </span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={onLogout}
+                                    title="Log out"
+                                    className="w-[38px] h-[38px] sm:w-[42px] sm:h-[42px] rounded-full border border-neutral-200 flex items-center justify-center text-neutral-400 hover:border-red-400 hover:text-red-500 transition-colors bg-white cursor-pointer"
+                                >
+                                    <LogOut size={14} strokeWidth={2} />
+                                </button>
+                            </>
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={onLogin ?? (() => navigate('/login'))}
+                                className="h-[38px] sm:h-[42px] px-5 bg-[#0D0D0D] text-white rounded-full text-[13px] font-semibold cursor-pointer border-0 hover:opacity-80 transition-opacity"
+                            >
+                                Log in
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Hamburger: mobile only */}
+                    <button
+                        type="button"
+                        onClick={() => setMobileOpen(v => !v)}
+                        aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+                        className="md:hidden w-[36px] h-[36px] flex items-center justify-center rounded-lg border border-neutral-200 text-[#0D0D0D] hover:border-[#F5C518] hover:text-[#F5C518] transition-colors bg-white cursor-pointer"
+                    >
+                        {mobileOpen ? <X size={17} strokeWidth={2} /> : <Menu size={17} strokeWidth={2} />}
+                    </button>
                 </div>
             </div>
+
+            {/* ── Mobile slide-down panel ── */}
+            <div
+                className="md:hidden border-t border-neutral-100 overflow-hidden transition-all duration-300"
+                style={{ maxHeight: mobileOpen ? '360px' : '0px', opacity: mobileOpen ? 1 : 0 }}
+            >
+                <nav className="flex flex-col px-4 pt-2 pb-3 gap-0.5">
+                    {NAV.map(item =>
+                        item.sub ? (
+                            // Mobile: flatten sub-items under a header label
+                            <div key={item.label}>
+                                <p className="px-3 pt-3 pb-1 text-[10px] font-bold tracking-[.12em] uppercase text-neutral-400">
+                                    {item.label}
+                                </p>
+                                {item.sub.map(s => (
+                                    <button
+                                        key={s.path}
+                                        type="button"
+                                        onClick={() => { navigate(s.path); close(); }}
+                                        className="w-full text-left px-3 py-2.5 text-[13px] font-semibold text-[#0D0D0D] hover:text-[#F5C518] rounded-lg hover:bg-neutral-50 transition-colors bg-transparent border-0 cursor-pointer"
+                                    >
+                                        {s.label}
+                                    </button>
+                                ))}
+                            </div>
+                        ) : (
+                            <button
+                                key={item.label}
+                                type="button"
+                                onClick={() => { navigate(item.path!); close(); }}
+                                className="w-full text-left px-3 py-2.5 text-[13px] font-semibold text-[#0D0D0D] hover:text-[#F5C518] rounded-lg hover:bg-neutral-50 transition-colors bg-transparent border-0 cursor-pointer"
+                            >
+                                {item.label}
+                            </button>
+                        )
+                    )}
+
+                    {/* Auth row inside mobile panel */}
+                    <div className="mt-2 pt-2 border-t border-neutral-100">
+                        {isLoggedIn && user ? (
+                            <div className="flex items-center justify-between px-3 py-2">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-[30px] h-[30px] rounded-full bg-[#F5C518] flex items-center justify-center text-[11px] font-bold text-[#0D0D0D]">
+                                        {user.initials}
+                                    </div>
+                                    <span className="text-[13px] font-semibold text-[#0D0D0D]">{user.username}</span>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => { onLogout?.(); close(); }}
+                                    className="flex items-center gap-1.5 text-[12px] font-semibold text-red-500 bg-transparent border-0 cursor-pointer"
+                                >
+                                    <LogOut size={13} strokeWidth={2} /> Log out
+                                </button>
+                            </div>
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={() => { (onLogin ?? (() => navigate('/login')))(); close(); }}
+                                className="w-full flex items-center justify-center gap-2 py-3 bg-[#0D0D0D] text-white rounded-xl text-[13px] font-semibold cursor-pointer border-0 hover:opacity-85 transition-opacity"
+                            >
+                                <LogIn size={14} strokeWidth={2} /> Log in
+                            </button>
+                        )}
+                    </div>
+                </nav>
+            </div>
+
         </header>
     );
 }
