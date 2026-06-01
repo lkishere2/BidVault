@@ -10,7 +10,7 @@
       onMouseClicked="#handleCardClick"
       prefWidth="220.0"
       spacing="8.0"
-      style="-fx-background-color: #FFFFFF; -fx-background-radius: 8px; -fx-border-color: #D4A900; -fx-border-radius: 8px; -fx-border-width: 1px; -fx-cursor: hand;"
+      style="-fx-background-color: #0D0D0D; -fx-background-radius: 8px; -fx-border-color: #F5C518; -fx-border-radius: 8px; -fx-border-width: 1px; -fx-cursor: hand;"
       xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1">
     <children>
@@ -23,19 +23,29 @@
         <VBox spacing="8" style="-fx-padding: 12 16 16 16;">
 
             <HBox alignment="CENTER_LEFT">
+                <!-- Thay đổi trạng thái ACTIVE thành màu vàng đậm để nổi bật trên nền đen -->
                 <Label fx:id="statusTag" text="" style="-fx-text-fill: #D4A900; -fx-font-weight: bold;"/>
             </HBox>
 
+            <!-- Tên sản phẩm: Chuyển sang màu Trắng để dễ đọc trên nền đen -->
             <Label fx:id="titleLabel" text="" wrapText="true"
-                   style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #0D0D0D;"/> <VBox spacing="2">
-            <Label fx:id="priceCaptionLabel" text=""
-                   style="-fx-font-size: 10px; -fx-text-fill: #777777;"/> <Label fx:id="priceLabel" text=""
-                                                                                 style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #D4A900;"> <VBox.margin><Insets top="4.0"/></VBox.margin>
-        </Label>
-        </VBox>
+                   style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #FFFFFF;"/>
 
+            <VBox spacing="2">
+                <!-- Chữ 'Current price': Đổi từ xám tối sang màu trắng mờ/xám sáng để nổi trên nền đen -->
+                <Label fx:id="priceCaptionLabel" text=""
+                       style="-fx-font-size: 10px; -fx-text-fill: #AAAAAA;"/>
+
+                <!-- Giá tiền: Đổi sang màu Vàng sáng (Gold) cực kỳ nổi bật -->
+                <Label fx:id="priceLabel" text=""
+                       style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #F5C518;">
+                    <VBox.margin><Insets top="4.0"/></VBox.margin>
+                </Label>
+            </VBox>
+
+            <!-- Thời gian còn lại 'Ends in...': Chuyển sang màu xám sáng -->
             <Label fx:id="contextHintLabel" text=""
-                   style="-fx-font-size: 11px; -fx-text-fill: #777777;"/>
+                   style="-fx-font-size: 11px; -fx-text-fill: #AAAAAA;"/>
 
         </VBox>
     </children>
