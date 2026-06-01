@@ -34,26 +34,39 @@ import com.auction.app.domains.users.users.model.User;
 import com.auction.app.domains.users.users.UserRepository;
 import com.auction.app.infrastructure.security.SecurityUtils;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class BidServiceImpl implements BidService {
 
     private final AuctionRepository auctionRepository;
     private final BidRepository bidRepository;
     private final UserRepository userRepository;
-    private final AuctionRedisService auctionCacheAdapter;
+    private final AuctionRedisService cache;
     private final AuctionPublisher publisher;
     private final SecurityUtils securityUtils;
     private final BidValidatorService bidValidatorService;
-
-    private BidServiceImpl self;
+    private final BidServiceImpl self;
 
     @Autowired
-    public void setSelf(@Lazy BidServiceImpl self) {
+    public BidServiceImpl(
+            AuctionRepository auctionRepository,
+            BidRepository bidRepository,
+            UserRepository userRepository,
+            AuctionRedisService cache,
+            AuctionPublisher publisher,
+            SecurityUtils securityUtils,
+            BidValidatorService bidValidatorService,
+            @Lazy BidServiceImpl self) {
+
+        this.auctionRepository = auctionRepository;
+        this.bidRepository = bidRepository;
+        this.userRepository = userRepository;
+        this.cache = cache;
+        this.publisher = publisher;
+        this.securityUtils = securityUtils;
+        this.bidValidatorService = bidValidatorService;
         this.self = self;
     }
 
@@ -82,7 +95,7 @@ public class BidServiceImpl implements BidService {
         PendingBid queued = buildPendingBid(pendingBid, auctionId, bidder, request.getAmount());
 
         try {
-            auctionCacheAdapter.enqueueBid(auctionId, queued);
+            cache.enqueueBid(auctionId, queued);
             log.info("[Bid Service - Place Bid] Bid queued successfully — auction #{}, bidder #{}, amount ${}", auctionId, bidder.getId(), request.getAmount());
         } catch (Exception e) {
             pendingBid.setStatus(BidStatus.REFUNDED);
@@ -98,14 +111,15 @@ public class BidServiceImpl implements BidService {
     @Transactional
     public void processNextBid(Long auctionId) {
         while (true) {
-            log.info("[Bid Service - Process Bid] Dequeuing next bid for auction #{}", auctionId);
-            PendingBid pendingBid = auctionCacheAdapter.dequeueBid(auctionId);
+            log.info("[Bid Service - Process Bid] De-queuing next bid for auction #{}", auctionId);
+            PendingBid pendingBid = cache.dequeueBid(auctionId);
             if (pendingBid == null) break;
 
             Bid bid = findBidById(pendingBid.getBidId());
 
             AuctionResponse response = getActiveAuctionResponse(auctionId);
 
+            log.info("[Bid Service - Process Bid] Validate info for bid #{}", pendingBid.getBidId());
             if (!bidValidatorService.isBidEligible(response, pendingBid.getAmount())) {
                 bid.setStatus(BidStatus.REFUNDED);
                 bidRepository.save(bid);
@@ -141,7 +155,7 @@ public class BidServiceImpl implements BidService {
             response.setBidCount(response.getBidCount() + 1);
             response.setWinnerId(pendingBid.getBidderId());
             response.setWinnerLabel(pendingBid.getBidderLabel());
-            auctionCacheAdapter.cacheAuctionResponse(auctionId, response);
+            cache.cacheAuctionResponse(auctionId, response);
             log.info("[Bid Service - Process Bid] Bid #{} promoted to HELD — auction #{}, price ${}, bidder #{}", bid.getId(), auctionId, pendingBid.getAmount(), pendingBid.getBidderId());
 
             publisher.publish(BidNotificationPayload.builder()
@@ -189,12 +203,12 @@ public class BidServiceImpl implements BidService {
     }
 
     private AuctionResponse getActiveAuctionResponse(Long auctionId) {
-        AuctionResponse response = Optional.ofNullable(auctionCacheAdapter.getAuctionResponse(auctionId))
+        AuctionResponse response = Optional.ofNullable(cache.getAuctionResponse(auctionId))
                 .orElseGet(() -> {
                     log.info("[Bid Service] Auction #{} not in cache, fallback to DB", auctionId);
                     Auction auction = findAuctionById(auctionId);
                     AuctionResponse dbResponse = AuctionResponse.from(auction);
-                    auctionCacheAdapter.cacheAuctionResponse(auctionId, dbResponse);
+                    cache.cacheAuctionResponse(auctionId, dbResponse);
                     return dbResponse;
                 });
 

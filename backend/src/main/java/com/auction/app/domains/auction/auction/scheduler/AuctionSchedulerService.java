@@ -19,7 +19,7 @@ public class AuctionSchedulerService {
     private final AuctionRepository auctionRepository;
     private final AuctionExecutor auctionExecutor;
 
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(fixedRate = 60000)
     public void activateUpcomingAuctions() {
 
         List<Long> toActivateIds = auctionRepository.findUpcomingIdsToActivate(AuctionStatus.UPCOMING, Instant.now());
@@ -35,7 +35,7 @@ public class AuctionSchedulerService {
         }
     }
 
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(fixedRate = 60000)
     public void endActiveAuctions() {
 
         List<Long> toEndIds = auctionRepository.findActiveIdsToEnd(AuctionStatus.ACTIVE, Instant.now());

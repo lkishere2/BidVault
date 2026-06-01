@@ -53,6 +53,13 @@ public class NavbarController {
             });
         }
 
+        if (navExplore != null) {
+            navExplore.setOnMouseClicked(event -> {
+                System.out.println("Routing to the dynamic Explore View framework...");
+                mainController.navigateTo("/ui/views/explore/ExploreView.fxml");
+            });
+        }
+
         if (navMarket != null) {
             navMarket.setOnMouseClicked(event -> {
                 System.out.println("Routing to live standalone Market View frame wrapper...");
