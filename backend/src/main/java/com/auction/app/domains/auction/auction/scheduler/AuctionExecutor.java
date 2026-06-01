@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -154,16 +155,16 @@ public class AuctionExecutor {
 
         Product soldProduct = auction.getProduct();
         Product winnerProduct = productRepository
-                .findByIdAndOwnerUserId(soldProduct.getId(), winner.getId())
-                .orElseGet(() -> Product.builder()
-                        .productName(soldProduct.getProductName())
-                        .description(soldProduct.getDescription())
-                        .productImageUrl(soldProduct.getProductImageUrl())
-                        .tags(soldProduct.getTags())
-                        .owner(winner)
-                        .quantity(0)
-                        .build()
-                );
+        .findByIdAndOwnerUserId(soldProduct.getId(), winner.getId())
+        .orElseGet(() -> Product.builder()
+                .productName(soldProduct.getProductName())
+                .description(soldProduct.getDescription())
+                .productImageUrl(soldProduct.getProductImageUrl())
+                .tags(new HashSet<>(soldProduct.getTags())) 
+                .owner(winner)
+                .quantity(0)
+                .build()
+        );
 
         winnerProduct.setQuantity(winnerProduct.getQuantity() + auction.getAuctionedQuantity());
         log.info("Product is sent to {}", winner.getDisplayName());
