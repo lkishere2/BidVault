@@ -15,18 +15,29 @@ export const UserAuctionGrid: React.FC<UserAuctionGridProps> = ({ userId }) => {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        setIsLoading(true);
-        auctionApi.getMyAuctions(userId, 0, 10)
-            .then((res) => {
+        let cancelled = false;
+
+        const fetchAuctions = async () => {
+            setIsLoading(true);
+            try {
+                const res = await auctionApi.getMyAuctions(0, 10);
+                if (cancelled) return;
+
+                // Keep your flexible data parsing just in case the backend paginates differently
                 const data = res.data as unknown as { content?: AuctionResponse[] } | AuctionResponse[];
-                if (Array.isArray(data)) {
-                    setAuctions(data);
-                } else {
-                    setAuctions(data?.content || []);
+                setAuctions(Array.isArray(data) ? data : (data?.content ?? []));
+            } catch (error) {
+                console.error("Failed to load auctions:", error);
+            } finally {
+                if (!cancelled) {
+                    setIsLoading(false);
                 }
-            })
-            .catch(() => { })
-            .finally(() => setIsLoading(false));
+            }
+        };
+
+        fetchAuctions();
+
+        return () => { cancelled = true; };
     }, [userId]);
 
     return (

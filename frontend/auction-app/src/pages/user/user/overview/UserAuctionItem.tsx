@@ -7,9 +7,12 @@ interface UserAuctionItemProps {
 }
 
 export const UserAuctionItem: React.FC<UserAuctionItemProps> = ({ auction, onClick }) => {
+    // Smart image URL handler with a clean, modern placeholder
     const imageUrl = auction.productImageUrl
-        ? `https://res.cloudinary.com/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload/${auction.productImageUrl}`
-        : 'https://via.placeholder.com/240x160?text=No+Image';
+        ? auction.productImageUrl.startsWith('http')
+            ? auction.productImageUrl
+            : `https://res.cloudinary.com/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload/${auction.productImageUrl}`
+        : 'https://placehold.co/400x300/f3f4f6/9ca3af?text=No+Image';
 
     return (
         <div
@@ -52,7 +55,8 @@ export const UserAuctionItem: React.FC<UserAuctionItemProps> = ({ auction, onCli
                     {auction.status}
                 </span>
                 <span style={{ fontSize: '12px', color: '#9ca3af' }}>
-                    {auction.bidCount} {auction.bidCount === 1 ? 'bid' : 'bids'}
+                    {/* Fixed TypeScript Error Here by casting bidCount to a Number */}
+                    {auction.bidCount} {Number(auction.bidCount) === 1 ? 'bid' : 'bids'}
                 </span>
             </div>
         </div>

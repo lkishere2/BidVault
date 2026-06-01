@@ -8,11 +8,12 @@ import RegisterPage from './pages/auth/RegisterPage';
 import VerifyPage from './pages/auth/VerifyPage';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import ForgotPasswordVerifyPage from './pages/auth/ForgotPasswordVerifyPage';
-import { ProfilePage } from './pages/user/profile/ProfilePage';
-import { InventoryPage } from './pages/user/storage/InventoryPage';
 import AccountNavbar from './pages/user/user/AccountNavbar';
 import OverviewPage from './pages/user/user/overview/OverviewPage';
 import OverviewPageLoading from './pages/user/user/overview/OverViewPageLoading';
+import StoragePage from './pages/user/user/storage/StoragePage';
+import SettingPage from './pages/user/user/setting/SettingPage';
+import { userApi } from './api/userApi';
 import './App.css';
 
 const OfficeDashboard = () => <div className="p-4"><h1 className="text-xl font-bold">Dashboard</h1></div>;
@@ -21,8 +22,6 @@ const AllAuctionsPage = () => <div className="p-4"><h1 className="text-xl font-b
 const MyBidsPage = () => <div className="p-4"><h1 className="text-xl font-bold">My Bids</h1></div>;
 
 const AccountBalance = () => <div><h2 className="text-xl font-bold mb-4">Balance</h2><p className="text-neutral-500 text-sm">Manage transactions and funds wallet setup.</p></div>;
-const AccountStorage = () => <div><h2 className="text-xl font-bold mb-4">Storage</h2><p className="text-neutral-500 text-sm">Track your archived vault item storage assets.</p></div>;
-const AccountSettings = () => <div><h2 className="text-xl font-bold mb-4">Settings</h2><p className="text-neutral-500 text-sm">Update security parameters and preference rules.</p></div>;
 
 function RootLayout({
   user, isLoggedIn, onLogout,
@@ -55,6 +54,31 @@ function readSavedUser(): UserData | null {
 
 function App() {
   const [user, setUser] = useState<UserData | null>(readSavedUser);
+
+  useEffect(() => {
+    const syncUser = async () => {
+      const token = localStorage.getItem('accessToken');
+
+      if (token && !user?.id) {
+        try {
+          const response = await userApi.getInfo();
+          const { id, username } = response.data;
+          const initials = username
+            .split(/[\s._-]+/)
+            .slice(0, 2)
+            .map((w: string) => w[0]?.toUpperCase() ?? '')
+            .join('');
+
+          setUser({ id, username, initials });
+        } catch (error) {
+          console.error("Failed to sync user on load", error);
+          setUser(null);
+        }
+      }
+    };
+
+    syncUser();
+  }, [user?.id]);
 
   useEffect(() => {
     if (user) {
@@ -104,12 +128,10 @@ function App() {
               }
             />
             <Route path="balance" element={<AccountBalance />} />
-            <Route path="storage" element={<AccountStorage />} />
-            <Route path="settings" element={<AccountSettings />} />
+            <Route path="storage" element={<StoragePage />} />
+            <Route path="settings" element={<SettingPage />} />
           </Route>
 
-          <Route path="/profile/:userId" element={<ProfilePage />} />
-          <Route path="/inventory" element={<InventoryPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

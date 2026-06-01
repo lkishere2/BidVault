@@ -1,11 +1,15 @@
 import { useState } from 'react';
-import { Gavel, LogOut, LogIn, Menu, X } from 'lucide-react';
+import { Gavel, LogOut, Menu, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import NavItem from './NavItem';
+import LoginButton from './LoginButton';
+import ProfileButton from './ProfileButton';
+import AdminButton from './AdminButton';
 
 interface HeaderProps {
-    user?: { username: string; initials: string };
+    user?: { username: string; initials: string; role?: string };
     isLoggedIn?: boolean;
+    isAdmin?: boolean;
     onLogout?: () => void;
     onLogin?: () => void;
 }
@@ -23,7 +27,7 @@ const NAV = [
     { label: 'Community', path: '/explore' },
 ];
 
-export default function Header({ user, isLoggedIn = !!user, onLogout, onLogin }: HeaderProps) {
+export default function Header({ user, isLoggedIn = !!user, isAdmin = false, onLogout, onLogin }: HeaderProps) {
     const navigate = useNavigate();
     const [mobileOpen, setMobileOpen] = useState(false);
     const close = () => setMobileOpen(false);
@@ -55,18 +59,8 @@ export default function Header({ user, isLoggedIn = !!user, onLogout, onLogin }:
                     <div className="hidden sm:flex items-center gap-2">
                         {isLoggedIn && user ? (
                             <>
-                                <button
-                                    type="button"
-                                    onClick={() => navigate('/account/overview')}
-                                    className="flex items-center gap-2 h-[38px] sm:h-[42px] pl-1.5 pr-4 bg-white border border-[#0D0D0D] rounded-full cursor-pointer hover:bg-neutral-50 transition-colors"
-                                >
-                                    <div className="w-[27px] h-[27px] sm:w-[30px] sm:h-[30px] rounded-full bg-[#F5C518] flex items-center justify-center text-[10px] sm:text-[11px] font-bold text-[#0D0D0D] flex-shrink-0">
-                                        {user.initials}
-                                    </div>
-                                    <span className="text-[13px] font-semibold text-[#0D0D0D] max-w-[96px] truncate">
-                                        {user.username}
-                                    </span>
-                                </button>
+                                {isAdmin && <AdminButton />}
+                                <ProfileButton username={user.username} initials={user.initials} />
                                 <button
                                     type="button"
                                     onClick={onLogout}
@@ -77,13 +71,9 @@ export default function Header({ user, isLoggedIn = !!user, onLogout, onLogin }:
                                 </button>
                             </>
                         ) : (
-                            <button
-                                type="button"
-                                onClick={onLogin ?? (() => navigate('/login'))}
-                                className="h-[38px] sm:h-[42px] px-5 bg-[#0D0D0D] text-white rounded-full text-[13px] font-semibold cursor-pointer border-0 hover:opacity-80 transition-opacity"
-                            >
-                                Log in
-                            </button>
+                            <div onClick={onLogin}>
+                                <LoginButton />
+                            </div>
                         )}
                     </div>
 
@@ -100,7 +90,7 @@ export default function Header({ user, isLoggedIn = !!user, onLogout, onLogin }:
 
             <div
                 className="md:hidden border-t border-neutral-100 overflow-hidden transition-all duration-300"
-                style={{ maxHeight: mobileOpen ? '360px' : '0px', opacity: mobileOpen ? 1 : 0 }}
+                style={{ maxHeight: mobileOpen ? '420px' : '0px', opacity: mobileOpen ? 1 : 0 }}
             >
                 <nav className="flex flex-col px-4 pt-2 pb-3 gap-0.5">
                     {NAV.map(item =>
@@ -134,29 +124,27 @@ export default function Header({ user, isLoggedIn = !!user, onLogout, onLogin }:
 
                     <div className="mt-2 pt-2 border-t border-neutral-100">
                         {isLoggedIn && user ? (
-                            <div className="flex items-center justify-between px-3 py-2">
-                                <div className="flex items-center gap-2.5">
-                                    <div className="w-[30px] h-[30px] rounded-full bg-[#F5C518] flex items-center justify-center text-[11px] font-bold text-[#0D0D0D]">
-                                        {user.initials}
+                            <div className="flex flex-col gap-2">
+                                {isAdmin && (
+                                    <div className="px-3 pb-2 border-b border-neutral-100 flex justify-center" onClick={close}>
+                                        <AdminButton />
                                     </div>
-                                    <span className="text-[13px] font-semibold text-[#0D0D0D]">{user.username}</span>
+                                )}
+                                <div className="flex items-center justify-between px-3 py-2">
+                                    <ProfileButton username={user.username} initials={user.initials} />
+                                    <button
+                                        type="button"
+                                        onClick={() => { onLogout?.(); close(); }}
+                                        className="flex items-center gap-1.5 text-[12px] font-semibold text-red-500 bg-transparent border-0 cursor-pointer pl-4"
+                                    >
+                                        <LogOut size={13} strokeWidth={2} /> Log out
+                                    </button>
                                 </div>
-                                <button
-                                    type="button"
-                                    onClick={() => { onLogout?.(); close(); }}
-                                    className="flex items-center gap-1.5 text-[12px] font-semibold text-red-500 bg-transparent border-0 cursor-pointer"
-                                >
-                                    <LogOut size={13} strokeWidth={2} /> Log out
-                                </button>
                             </div>
                         ) : (
-                            <button
-                                type="button"
-                                onClick={() => { (onLogin ?? (() => navigate('/login')))(); close(); }}
-                                className="w-full flex items-center justify-center gap-2 py-3 bg-[#0D0D0D] text-white rounded-xl text-[13px] font-semibold cursor-pointer border-0 hover:opacity-85 transition-opacity"
-                            >
-                                <LogIn size={14} strokeWidth={2} /> Log in
-                            </button>
+                            <div onClick={() => { onLogin?.(); close(); }} className="w-full flex justify-center py-2">
+                                <LoginButton />
+                            </div>
                         )}
                     </div>
                 </nav>

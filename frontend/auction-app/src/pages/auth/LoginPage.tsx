@@ -32,9 +32,9 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
     const handleLoginSuccessInternal = (userData: { username: string; initials: string }) => {
         // Gọi callback truyền ngược lên App.tsx để lưu thông tin user / token vào state tổng
         onLoginSuccess(userData);
-        
+
         // Chuyển hướng người dùng sang trang Dashboard ở đường dẫn /office
-        navigate('/office');
+        navigate('/home');
     };
 
     return (

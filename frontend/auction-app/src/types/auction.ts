@@ -5,9 +5,9 @@ export type AuctionStatus = 'UPCOMING' | 'ACTIVE' | 'ENDED' | 'CANCELLED';
 export interface AuctionRequest {
     productId: number;
     quantity: number;
-    startingPrice: number; // Đổi thành number để khớp với BigDecimal, hoặc string nếu bạn quản lý chuỗi lớn
-    startTime: string;     // ISO String (Instant bên Java)
-    endTime: string;       // ISO String (Instant bên Java)
+    startingPrice: number;
+    startTime: string;
+    endTime: string;
 }
 
 export interface AuctionResponse {
@@ -34,7 +34,7 @@ export interface AuctionResponse {
 
 export interface AuctionFindingRequest {
     productName?: string;
-    tags?: Tag[]; // Khớp với Set<Tag> bên backend (truyền object hoặc xử lý mảng)
+    tags?: Tag[];
     startTime?: string;
     endTime?: string;
     minStartingPrice?: string;

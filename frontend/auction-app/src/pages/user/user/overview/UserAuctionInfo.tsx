@@ -7,9 +7,12 @@ interface UserAuctionInfoProps {
 }
 
 export const UserAuctionInfo: React.FC<UserAuctionInfoProps> = ({ auction, onClose }) => {
+    // Smart image URL handler with a modern placeholder
     const imageUrl = auction.productImageUrl
-        ? `https://res.cloudinary.com/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload/${auction.productImageUrl}`
-        : 'https://via.placeholder.com/400x250?text=No+Image';
+        ? auction.productImageUrl.startsWith('http')
+            ? auction.productImageUrl
+            : `https://res.cloudinary.com/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload/${auction.productImageUrl}`
+        : 'https://placehold.co/600x400/f3f4f6/9ca3af?text=No+Image';
 
     return (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(2px)' }}>

@@ -9,29 +9,40 @@ interface UserInfoProps {
     userId: number;
 }
 
-interface AxiosResponseWrapper<T> {
-    data: T;
-}
-
 export const UserInfo: React.FC<UserInfoProps> = ({ userId }) => {
     const [user, setUser] = useState<UserResponse | null>(null);
     const [stats, setStats] = useState<UserStats | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        Promise.all([
-            userApi.getInfo(userId)
-                .then((res: AxiosResponseWrapper<UserResponse>) => setUser(res.data))
-                .catch(() => { }),
-            connectionApi.getStats(userId)
-                .then((res: AxiosResponseWrapper<UserStats>) => setStats(res.data))
-                .catch(() => { })
-        ]).finally(() => setIsLoading(false));
+        const fetchOverviewData = async () => {
+            setIsLoading(true);
+            try {
+                const [userRes, statsRes] = await Promise.all([
+                    userApi.getInfo(),
+                    connectionApi.getStats(userId)
+                ]);
+
+                setUser(userRes.data);
+                setStats(statsRes.data);
+            } catch (error) {
+                console.error("Failed to load user overview info:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchOverviewData();
     }, [userId]);
 
+    // Create a dynamic avatar based on the username with your brand colors
+    const defaultAvatar = `https://ui-avatars.com/api/?name=${user?.username || 'User'}&background=F5C518&color=0D0D0D&size=128&font-weight=bold`;
+
     const avatarUrl = user?.profileImageUrl
-        ? `https://res.cloudinary.com/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload/${user.profileImageUrl}`
-        : '';
+        ? user.profileImageUrl.startsWith('http')
+            ? user.profileImageUrl
+            : `https://res.cloudinary.com/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload/${user.profileImageUrl}`
+        : defaultAvatar;
 
     if (isLoading) {
         return <UserInfoLoading />;
@@ -39,17 +50,11 @@ export const UserInfo: React.FC<UserInfoProps> = ({ userId }) => {
 
     return (
         <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-            {avatarUrl ? (
-                <img
-                    src={avatarUrl}
-                    alt={user?.username}
-                    style={{ width: '96px', height: '96px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #e5e7eb' }}
-                />
-            ) : (
-                <div style={{ width: '96px', height: '96px', borderRadius: '50%', background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', color: '#9ca3af', border: '2px solid #e5e7eb' }}>
-                    👤
-                </div>
-            )}
+            <img
+                src={avatarUrl}
+                alt={user?.username}
+                style={{ width: '96px', height: '96px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #e5e7eb' }}
+            />
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <h2 style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#1f2937' }}>
                     {user ? user.username : `User #${userId}`}
