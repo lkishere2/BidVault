@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane fx:id="homeViewContainer" prefHeight="720.0" prefWidth="1080.0"
-            style="-fx-background-color: #0F172A;"
+            style="-fx-background-color: #0D0D0D;"
             xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.auction.app.controllers.home.HomeViewController">
@@ -17,10 +20,170 @@
     <center>
         <VBox alignment="TOP_LEFT" BorderPane.alignment="CENTER">
             <children>
-                <fx:include source="../../components/Header.fxml" />
+                <HBox spacing="15.0" style="-fx-background-color: #1A1A1A; -fx-padding: 12 30 12 30; -fx-border-color: #D4A900; -fx-border-width: 0 0 1 0;">
+                    <Label text="🔥 NOTICE:" style="-fx-text-fill: #F5C518; -fx-font-weight: bold; -fx-font-size: 13.0;" />
+                    <Label text="The premium 'Golden Dragon' auction starts in 15 minutes! Prepare your bidding vault." style="-fx-text-fill: #FFFFFF; -fx-font-size: 13.0;" />
+                </HBox>
 
-                <StackPane fx:id="contentViewPane" VBox.vgrow="ALWAYS"
-                           style="-fx-background-color: #0F172A; -fx-padding: 30;" />
+                <StackPane fx:id="contentViewPane" VBox.vgrow="ALWAYS" style="-fx-background-color: #0D0D0D; -fx-padding: 30 0 30 0;">
+                    <children>
+                        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-background: #0D0D0D;">
+                            <content>
+                                <VBox spacing="45.0" style="-fx-background-color: #0D0D0D;" alignment="TOP_CENTER">
+                                    <children>
+
+                                        <VBox alignment="CENTER" spacing="12.0" style="-fx-padding: 20 0 0 0;">
+                                            <Label text="Welcome to Bid-Vault" style="-fx-text-fill: #F5C518; -fx-font-size: 46.0; -fx-font-weight: bold; -fx-effect: dropshadow(three-pass-box, rgba(212,169,0,0.25), 15, 0.3, 0, 0);" />
+                                            <Label text="the auction app" style="-fx-text-fill: #8E8E93; -fx-font-size: 20.0; -fx-font-style: italic;" />
+                                        </VBox>
+
+                                        <HBox alignment="CENTER" spacing="40.0" style="-fx-background-color: #161616; -fx-padding: 25 45 25 45; -fx-background-radius: 12; -fx-border-color: #262626; -fx-border-width: 1; -fx-border-radius: 12; -fx-max-width: 720.0;">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="6.0">
+                                                    <Label text="More than 100+" style="-fx-text-fill: #F5C518; -fx-font-size: 24.0; -fx-font-weight: bold;" />
+                                                    <Label text="auctions has been launched" style="-fx-text-fill: #FFFFFF; -fx-font-size: 14.0;" />
+                                                </VBox>
+                                                <VBox style="-fx-background-color: #262626; -fx-pref-width: 1; -fx-pref-height: 45;" />
+                                                <VBox alignment="CENTER" spacing="6.0">
+                                                    <Label text="More than 2000" style="-fx-text-fill: #F5C518; -fx-font-size: 24.0; -fx-font-weight: bold;" />
+                                                    <Label text="users all over the world" style="-fx-text-fill: #FFFFFF; -fx-font-size: 14.0;" />
+                                                </VBox>
+                                            </children>
+                                        </HBox>
+
+                                        <VBox spacing="15.0" alignment="TOP_LEFT">
+                                            <children>
+                                                <Label text="✨ DISCOVER FEATURED VAULTS" style="-fx-text-fill: #8E8E93; -fx-font-size: 13.0; -fx-font-weight: bold; -fx-letter-spacing: 2px; -fx-padding: 0 0 0 40;" />
+
+                                                <ScrollPane hbarPolicy="AS_NEEDED" vbarPolicy="NEVER" fitToHeight="true" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-background: #0D0D0D;">
+                                                    <content>
+                                                        <HBox spacing="20.0" style="-fx-background-color: #0D0D0D; -fx-padding: 10 40 20 40;">
+                                                            <children>
+
+                                                                <VBox prefWidth="170.0" spacing="12.0" style="-fx-background-color: #161616; -fx-padding: 12; -fx-background-radius: 10; -fx-border-color: #262626; -fx-border-radius: 10;">
+                                                                    <StackPane prefHeight="120.0" style="-fx-background-color: linear-gradient(to bottom right, #D4A900, #1A1A1A); -fx-background-radius: 6;" />
+                                                                    <Label text="Golden Artifact #01" style="-fx-text-fill: #FFFFFF; -fx-font-weight: bold; -fx-font-size: 13.0;" />
+                                                                    <Label text="💎 Premium" style="-fx-text-fill: #F5C518; -fx-font-size: 12.0;" />
+                                                                </VBox>
+
+                                                                <VBox prefWidth="170.0" spacing="12.0" style="-fx-background-color: #161616; -fx-padding: 12; -fx-background-radius: 10; -fx-border-color: #262626; -fx-border-radius: 10;">
+                                                                    <StackPane prefHeight="120.0" style="-fx-background-color: linear-gradient(to bottom right, #2C2C2C, #1A1A1A); -fx-background-radius: 6;" />
+                                                                    <Label text="Ancient Vault #02" style="-fx-text-fill: #FFFFFF; -fx-font-weight: bold; -fx-font-size: 13.0;" />
+                                                                    <Label text="🔒 Verified" style="-fx-text-fill: #8E8E93; -fx-font-size: 12.0;" />
+                                                                </VBox>
+
+                                                                <VBox prefWidth="170.0" spacing="12.0" style="-fx-background-color: #161616; -fx-padding: 12; -fx-background-radius: 10; -fx-border-color: #262626; -fx-border-radius: 10;">
+                                                                    <StackPane prefHeight="120.0" style="-fx-background-color: linear-gradient(to bottom right, #1E3A8A, #1A1A1A); -fx-background-radius: 6;" />
+                                                                    <Label text="Cyber Core #03" style="-fx-text-fill: #FFFFFF; -fx-font-weight: bold; -fx-font-size: 13.0;" />
+                                                                    <Label text="🔥 Hot Bid" style="-fx-text-fill: #10B981; -fx-font-size: 12.0;" />
+                                                                </VBox>
+
+                                                                <VBox prefWidth="170.0" spacing="12.0" style="-fx-background-color: #161616; -fx-padding: 12; -fx-background-radius: 10; -fx-border-color: #262626; -fx-border-radius: 10;">
+                                                                    <StackPane prefHeight="120.0" style="-fx-background-color: linear-gradient(to bottom right, #D4A900, #1A1A1A); -fx-background-radius: 6;" />
+                                                                    <Label text="Golden Artifact #04" style="-fx-text-fill: #FFFFFF; -fx-font-weight: bold; -fx-font-size: 13.0;" />
+                                                                    <Label text="💎 Premium" style="-fx-text-fill: #F5C518; -fx-font-size: 12.0;" />
+                                                                </VBox>
+
+                                                                <VBox prefWidth="170.0" spacing="12.0" style="-fx-background-color: #161616; -fx-padding: 12; -fx-background-radius: 10; -fx-border-color: #262626; -fx-border-radius: 10;">
+                                                                    <StackPane prefHeight="120.0" style="-fx-background-color: linear-gradient(to bottom right, #2C2C2C, #1A1A1A); -fx-background-radius: 6;" />
+                                                                    <Label text="Ancient Vault #05" style="-fx-text-fill: #FFFFFF; -fx-font-weight: bold; -fx-font-size: 13.0;" />
+                                                                    <Label text="🔒 Verified" style="-fx-text-fill: #8E8E93; -fx-font-size: 12.0;" />
+                                                                </VBox>
+
+                                                                <VBox prefWidth="170.0" spacing="12.0" style="-fx-background-color: #161616; -fx-padding: 12; -fx-background-radius: 10; -fx-border-color: #262626; -fx-border-radius: 10;">
+                                                                    <StackPane prefHeight="120.0" style="-fx-background-color: linear-gradient(to bottom right, #1E3A8A, #1A1A1A); -fx-background-radius: 6;" />
+                                                                    <Label text="Cyber Core #06" style="-fx-text-fill: #FFFFFF; -fx-font-weight: bold; -fx-font-size: 13.0;" />
+                                                                    <Label text="🔥 Hot Bid" style="-fx-text-fill: #10B981; -fx-font-size: 12.0;" />
+                                                                </VBox>
+
+                                                                <VBox prefWidth="170.0" spacing="12.0" style="-fx-background-color: #161616; -fx-padding: 12; -fx-background-radius: 10; -fx-border-color: #262626; -fx-border-radius: 10;">
+                                                                    <StackPane prefHeight="120.0" style="-fx-background-color: linear-gradient(to bottom right, #D4A900, #1A1A1A); -fx-background-radius: 6;" />
+                                                                    <Label text="Golden Artifact #07" style="-fx-text-fill: #FFFFFF; -fx-font-weight: bold; -fx-font-size: 13.0;" />
+                                                                    <Label text="💎 Premium" style="-fx-text-fill: #F5C518; -fx-font-size: 12.0;" />
+                                                                </VBox>
+
+                                                                <VBox prefWidth="170.0" spacing="12.0" style="-fx-background-color: #161616; -fx-padding: 12; -fx-background-radius: 10; -fx-border-color: #262626; -fx-border-radius: 10;">
+                                                                    <StackPane prefHeight="120.0" style="-fx-background-color: linear-gradient(to bottom right, #2C2C2C, #1A1A1A); -fx-background-radius: 6;" />
+                                                                    <Label text="Ancient Vault #08" style="-fx-text-fill: #FFFFFF; -fx-font-weight: bold; -fx-font-size: 13.0;" />
+                                                                    <Label text="🔒 Verified" style="-fx-text-fill: #8E8E93; -fx-font-size: 12.0;" />
+                                                                </VBox>
+
+                                                                <VBox prefWidth="170.0" spacing="12.0" style="-fx-background-color: #161616; -fx-padding: 12; -fx-background-radius: 10; -fx-border-color: #262626; -fx-border-radius: 10;">
+                                                                    <StackPane prefHeight="120.0" style="-fx-background-color: linear-gradient(to bottom right, #1E3A8A, #1A1A1A); -fx-background-radius: 6;" />
+                                                                    <Label text="Cyber Core #09" style="-fx-text-fill: #FFFFFF; -fx-font-weight: bold; -fx-font-size: 13.0;" />
+                                                                    <Label text="🔥 Hot Bid" style="-fx-text-fill: #10B981; -fx-font-size: 12.0;" />
+                                                                </VBox>
+
+                                                                <VBox prefWidth="170.0" spacing="12.0" style="-fx-background-color: #161616; -fx-padding: 12; -fx-background-radius: 10; -fx-border-color: #262626; -fx-border-radius: 10;">
+                                                                    <StackPane prefHeight="120.0" style="-fx-background-color: linear-gradient(to bottom right, #D4A900, #1A1A1A); -fx-background-radius: 6;" />
+                                                                    <Label text="Golden Artifact #10" style="-fx-text-fill: #FFFFFF; -fx-font-weight: bold; -fx-font-size: 13.0;" />
+                                                                    <Label text="💎 Premium" style="-fx-text-fill: #F5C518; -fx-font-size: 12.0;" />
+                                                                </VBox>
+
+                                                                <VBox prefWidth="170.0" spacing="12.0" style="-fx-background-color: #161616; -fx-padding: 12; -fx-background-radius: 10; -fx-border-color: #262626; -fx-border-radius: 10;">
+                                                                    <StackPane prefHeight="120.0" style="-fx-background-color: linear-gradient(to bottom right, #D4A900, #1A1A1A); -fx-background-radius: 6;" />
+                                                                    <Label text="Golden Artifact #11" style="-fx-text-fill: #FFFFFF; -fx-font-weight: bold; -fx-font-size: 13.0;" />
+                                                                    <Label text="💎 Premium" style="-fx-text-fill: #F5C518; -fx-font-size: 12.0;" />
+                                                                </VBox>
+                                                                <VBox prefWidth="170.0" spacing="12.0" style="-fx-background-color: #161616; -fx-padding: 12; -fx-background-radius: 10; -fx-border-color: #262626; -fx-border-radius: 10;">
+                                                                    <StackPane prefHeight="120.0" style="-fx-background-color: linear-gradient(to bottom right, #2C2C2C, #1A1A1A); -fx-background-radius: 6;" />
+                                                                    <Label text="Ancient Vault #12" style="-fx-text-fill: #FFFFFF; -fx-font-weight: bold; -fx-font-size: 13.0;" />
+                                                                    <Label text="🔒 Verified" style="-fx-text-fill: #8E8E93; -fx-font-size: 12.0;" />
+                                                                </VBox>
+                                                                <VBox prefWidth="170.0" spacing="12.0" style="-fx-background-color: #161616; -fx-padding: 12; -fx-background-radius: 10; -fx-border-color: #262626; -fx-border-radius: 10;">
+                                                                    <StackPane prefHeight="120.0" style="-fx-background-color: linear-gradient(to bottom right, #1E3A8A, #1A1A1A); -fx-background-radius: 6;" />
+                                                                    <Label text="Cyber Core #13" style="-fx-text-fill: #FFFFFF; -fx-font-weight: bold; -fx-font-size: 13.0;" />
+                                                                    <Label text="🔥 Hot Bid" style="-fx-text-fill: #10B981; -fx-font-size: 12.0;" />
+                                                                </VBox>
+                                                                <VBox prefWidth="170.0" spacing="12.0" style="-fx-background-color: #161616; -fx-padding: 12; -fx-background-radius: 10; -fx-border-color: #262626; -fx-border-radius: 10;">
+                                                                    <StackPane prefHeight="120.0" style="-fx-background-color: linear-gradient(to bottom right, #D4A900, #1A1A1A); -fx-background-radius: 6;" />
+                                                                    <Label text="Golden Artifact #14" style="-fx-text-fill: #FFFFFF; -fx-font-weight: bold; -fx-font-size: 13.0;" />
+                                                                    <Label text="💎 Premium" style="-fx-text-fill: #F5C518; -fx-font-size: 12.0;" />
+                                                                </VBox>
+                                                                <VBox prefWidth="170.0" spacing="12.0" style="-fx-background-color: #161616; -fx-padding: 12; -fx-background-radius: 10; -fx-border-color: #262626; -fx-border-radius: 10;">
+                                                                    <StackPane prefHeight="120.0" style="-fx-background-color: linear-gradient(to bottom right, #2C2C2C, #1A1A1A); -fx-background-radius: 6;" />
+                                                                    <Label text="Ancient Vault #15" style="-fx-text-fill: #FFFFFF; -fx-font-weight: bold; -fx-font-size: 13.0;" />
+                                                                    <Label text="🔒 Verified" style="-fx-text-fill: #8E8E93; -fx-font-size: 12.0;" />
+                                                                </VBox>
+                                                                <VBox prefWidth="170.0" spacing="12.0" style="-fx-background-color: #161616; -fx-padding: 12; -fx-background-radius: 10; -fx-border-color: #262626; -fx-border-radius: 10;">
+                                                                    <StackPane prefHeight="120.0" style="-fx-background-color: linear-gradient(to bottom right, #1E3A8A, #1A1A1A); -fx-background-radius: 6;" />
+                                                                    <Label text="Cyber Core #16" style="-fx-text-fill: #FFFFFF; -fx-font-weight: bold; -fx-font-size: 13.0;" />
+                                                                    <Label text="🔥 Hot Bid" style="-fx-text-fill: #10B981; -fx-font-size: 12.0;" />
+                                                                </VBox>
+                                                                <VBox prefWidth="170.0" spacing="12.0" style="-fx-background-color: #161616; -fx-padding: 12; -fx-background-radius: 10; -fx-border-color: #262626; -fx-border-radius: 10;">
+                                                                    <StackPane prefHeight="120.0" style="-fx-background-color: linear-gradient(to bottom right, #D4A900, #1A1A1A); -fx-background-radius: 6;" />
+                                                                    <Label text="Golden Artifact #17" style="-fx-text-fill: #FFFFFF; -fx-font-weight: bold; -fx-font-size: 13.0;" />
+                                                                    <Label text="💎 Premium" style="-fx-text-fill: #F5C518; -fx-font-size: 12.0;" />
+                                                                </VBox>
+                                                                <VBox prefWidth="170.0" spacing="12.0" style="-fx-background-color: #161616; -fx-padding: 12; -fx-background-radius: 10; -fx-border-color: #262626; -fx-border-radius: 10;">
+                                                                    <StackPane prefHeight="120.0" style="-fx-background-color: linear-gradient(to bottom right, #2C2C2C, #1A1A1A); -fx-background-radius: 6;" />
+                                                                    <Label text="Ancient Vault #18" style="-fx-text-fill: #FFFFFF; -fx-font-weight: bold; -fx-font-size: 13.0;" />
+                                                                    <Label text="🔒 Verified" style="-fx-text-fill: #8E8E93; -fx-font-size: 12.0;" />
+                                                                </VBox>
+                                                                <VBox prefWidth="170.0" spacing="12.0" style="-fx-background-color: #161616; -fx-padding: 12; -fx-background-radius: 10; -fx-border-color: #262626; -fx-border-radius: 10;">
+                                                                    <StackPane prefHeight="120.0" style="-fx-background-color: linear-gradient(to bottom right, #1E3A8A, #1A1A1A); -fx-background-radius: 6;" />
+                                                                    <Label text="Cyber Core #19" style="-fx-text-fill: #FFFFFF; -fx-font-weight: bold; -fx-font-size: 13.0;" />
+                                                                    <Label text="🔥 Hot Bid" style="-fx-text-fill: #10B981; -fx-font-size: 12.0;" />
+                                                                </VBox>
+                                                                <VBox prefWidth="170.0" spacing="12.0" style="-fx-background-color: #161616; -fx-padding: 12; -fx-background-radius: 10; -fx-border-color: #262626; -fx-border-radius: 10;">
+                                                                    <StackPane prefHeight="120.0" style="-fx-background-color: linear-gradient(to bottom right, #D4A900, #1A1A1A); -fx-background-radius: 6;" />
+                                                                    <Label text="Golden Artifact #20" style="-fx-text-fill: #FFFFFF; -fx-font-weight: bold; -fx-font-size: 13.0;" />
+                                                                    <Label text="💎 Premium" style="-fx-text-fill: #F5C518; -fx-font-size: 12.0;" />
+                                                                </VBox>
+
+                                                            </children>
+                                                        </HBox>
+                                                    </content>
+                                                </ScrollPane>
+                                            </children>
+                                        </VBox>
+
+                                    </children>
+                                </VBox>
+                            </content>
+                        </ScrollPane>
+                    </children>
+                </StackPane>
 
                 <fx:include source="../../components/Footer.fxml" />
             </children>
