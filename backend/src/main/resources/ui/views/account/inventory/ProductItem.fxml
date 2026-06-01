@@ -11,33 +11,59 @@
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.auction.app.controllers.account.inventory.ProductItemController"
-      prefWidth="220.0" prefHeight="310.0"
-      style="-fx-background-color: white; -fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #E2E8F0; -fx-border-width: 1; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4);">
+      prefWidth="210.0" prefHeight="310.0"
+      style="-fx-background-color: #1A1A1A;
+             -fx-background-radius: 10;
+             -fx-border-radius: 10;
+             -fx-border-color: rgba(255,255,255,0.08);
+             -fx-border-width: 0.5;
+             -fx-cursor: hand;">
 
     <padding>
-        <Insets top="12" right="12" bottom="12" left="12"/>
+        <Insets top="12" right="12" bottom="14" left="12"/>
     </padding>
 
-    <VBox alignment="CENTER" prefHeight="140.0" style="-fx-background-color: #F8FAFC; -fx-background-radius: 8;">
-        <ImageView fx:id="productImageView" fitWidth="180.0" fitHeight="120.0" pickOnBounds="true" preserveRatio="true"/>
+    <!-- Image area -->
+    <VBox alignment="CENTER" prefHeight="136.0"
+          style="-fx-background-color: #111111; -fx-background-radius: 7;">
+        <ImageView fx:id="productImageView"
+                   fitWidth="186.0" fitHeight="116.0"
+                   pickOnBounds="true" preserveRatio="true"/>
     </VBox>
 
-    <VBox spacing="6" VBox.vgrow="ALWAYS">
+    <!-- Content -->
+    <VBox spacing="7" VBox.vgrow="ALWAYS">
         <padding>
-            <Insets top="10"/>
+            <Insets top="11"/>
         </padding>
 
-        <Label fx:id="productNameLabel" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1E293B;" wrapText="false"/>
+        <!-- Name -->
+        <Label fx:id="productNameLabel"
+               style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #FFFFFF;"
+               wrapText="false"/>
 
+        <!-- Category tag row -->
         <HBox spacing="4" alignment="CENTER_LEFT" fx:id="tagsContainer"/>
 
-        <HBox alignment="BOTTOM_LEFT" VBox.vgrow="ALWAYS">
-            <Label text="Stock: " style="-fx-font-size: 13px; -fx-text-fill: #64748B;"/>
-            <Label fx:id="quantityLabel" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #0EA5E9;"/>
+        <!-- Divider line -->
+        <Region prefHeight="0.5"
+                style="-fx-background-color: rgba(255,255,255,0.07);"
+                maxWidth="Infinity"/>
+
+        <!-- Stock row -->
+        <HBox alignment="CENTER_LEFT" VBox.vgrow="ALWAYS">
+            <Label text="Stock  "
+                   style="-fx-font-size: 12px; -fx-text-fill: rgba(255,255,255,0.40);"/>
+            <Label fx:id="quantityLabel"
+                   style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #F5C518;"/>
             <Region HBox.hgrow="ALWAYS"/>
         </HBox>
 
+        <!-- Launch button -->
         <Button text="Launch Auction" onAction="#handleCreateAuctionClick" maxWidth="Infinity"
-                style="-fx-background-color: #10B981; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-padding: 8 0; -fx-cursor: hand;"/>
+                style="-fx-background-color: #F5C518; -fx-text-fill: #0D0D0D;
+                       -fx-font-size: 12px; -fx-font-weight: bold;
+                       -fx-background-radius: 6; -fx-padding: 9 0; -fx-cursor: hand;"/>
     </VBox>
+
 </VBox>
