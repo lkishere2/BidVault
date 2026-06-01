@@ -28,7 +28,6 @@ public class AuctionSubscriber implements MessageListener {
 
     private final SimpMessagingTemplate messagingTemplate;
 
-    // Matches the mapper used by redisTemplate — NOT the global Spring ObjectMapper
     private final ObjectMapper objectMapper = buildRedisObjectMapper();
 
     private static ObjectMapper buildRedisObjectMapper() {

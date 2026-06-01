@@ -45,6 +45,8 @@ public class ExploreViewController {
             Parent profilePane = loader.load();
 
             UserProfileController controller = loader.getController();
+
+            // FIXED: Matches your profile controller's setter injection method structure
             controller.setExploreController(this);
             controller.loadProfileData(user);
 

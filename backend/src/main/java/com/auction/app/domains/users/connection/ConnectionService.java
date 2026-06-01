@@ -5,4 +5,5 @@ import com.auction.app.domains.users.connection.dtos.UserStats;
 public interface ConnectionService {
     void toggleFollow(Long followingId);
     UserStats getUserStats(Long userId);
+    boolean isFollowing(Long followingId);
 }

@@ -22,4 +22,9 @@ public class ConnectionController {
     public ResponseEntity<UserStats> getStats(@PathVariable("user_id") Long userId) {
         return ResponseEntity.ok(connectionService.getUserStats(userId));
     }
+
+    @GetMapping("/{user_id}/is-following")
+    public ResponseEntity<Boolean> checkFollowStatus(@PathVariable("user_id") Long followingId) {
+        return ResponseEntity.ok(connectionService.isFollowing(followingId));
+    }
 }
