@@ -1,17 +1,24 @@
 import api from './axios';
 import type { FeedbackRequest, FeedbackResponse } from '../types/feedback';
-import type { Page } from '../types/pagination';
+import type { Page, Slice } from '../types/pagination';
 
 export const feedbackApi = {
-    createFeedback: (data: FeedbackRequest) => api.post<FeedbackResponse>('/feedback', data),
 
-    updateFeedback: (id: number, data: FeedbackRequest) => api.put<FeedbackResponse>(`/feedback/${id}`, data),
+    createFeedback: (data: FeedbackRequest) =>
+        api.post<FeedbackResponse>('/feedback', data),
 
-    deleteFeedback: (id: number) => api.delete<void>(`/feedback/${id}`),
+    updateFeedback: (id: number, data: FeedbackRequest) =>
+        api.put<FeedbackResponse>(`/feedback/${id}`, data),
 
-    getCurrentUserFeedback: (page = 0, size = 10) => api.get<FeedbackResponse[]>(`/feedback/my?page=${page}&size=${size}`),
+    deleteFeedback: (id: number) =>
+        api.delete<void>(`/feedback/${id}`),
 
-    getAllFeedback: (page = 0, size = 20) => api.get<Page<FeedbackResponse>>(`/feedback/all?page=${page}&size=${size}`),
+    getCurrentUserFeedback: (page = 0, size = 10) =>
+        api.get<Slice<FeedbackResponse>>(`/feedback/my?page=${page}&size=${size}`),
+
+    getAllFeedback: (page = 0, size = 20) =>
+        api.get<Page<FeedbackResponse>>(`/feedback/all?page=${page}&size=${size}`),
+
 };
 
 export default feedbackApi;

@@ -1,7 +1,10 @@
 package com.auction.app.domains.notifications;
 
+import com.auction.app.domains.notifications.dtos.NotificationResponse;
+import com.auction.app.domains.notifications.model.Notification;
+import com.auction.app.domains.notifications.model.NotificationType;
 import com.auction.app.domains.users.connection.ConnectionRepository;
-import com.auction.app.domains.users.users.User;
+import com.auction.app.domains.users.users.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -67,8 +70,6 @@ public class NotificationServiceImpl implements NotificationService {
     @Async("notificationExecutor")
     @Transactional
     public void notifyFollowersOfNewAuction(User creator) {
-        log.info("Processing bulk follower notification for {} on thread: {}",
-                creator.getDisplayName(), Thread.currentThread().getName());
 
         List<User> followers = connectionRepository.findAllFollowersByFollowingId(creator.getId());
         if (followers.isEmpty()) return;
@@ -76,7 +77,7 @@ public class NotificationServiceImpl implements NotificationService {
         String message = NotificationType.NEW_AUCTION.generateMessage(creator.getDisplayName());
         LocalDateTime now = LocalDateTime.now();
 
-        List<Notification> bulkNotifications = followers.stream()
+        List<Notification> notifications = followers.stream()
                 .map(follower -> Notification.builder()
                         .receiver(follower)
                         .sender(creator)
@@ -85,7 +86,7 @@ public class NotificationServiceImpl implements NotificationService {
                         .build())
                 .toList();
 
-        notificationRepository.saveAll(bulkNotifications);
+        notificationRepository.saveAll(notifications);
 
         NotificationResponse response = new NotificationResponse(message, now);
         for (User follower : followers) {
@@ -96,6 +97,6 @@ public class NotificationServiceImpl implements NotificationService {
             );
         }
 
-        log.info("Bulk notifications completed for {} followers.", followers.size());
+        log.info("Send notifications completed for {} followers.", followers.size());
     }
 }

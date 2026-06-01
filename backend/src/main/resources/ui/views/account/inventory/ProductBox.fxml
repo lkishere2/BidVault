@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.auction.app.controllers.account.inventory.ProductBoxController"
+      spacing="18" prefWidth="460.0"
+      style="-fx-background-color: #1A1A1A;
+             -fx-background-radius: 12;
+             -fx-border-radius: 12;
+             -fx-border-color: rgba(245,197,24,0.25);
+             -fx-border-width: 1;">
+
+    <padding>
+        <Insets top="26" right="26" bottom="26" left="26"/>
+    </padding>
+
+    <!-- Title -->
+    <VBox spacing="5">
+        <Label text="Asset Workspace"
+               style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #F5C518;"/>
+        <Label text="Modify metadata fields, replace asset files, or delete this record."
+               style="-fx-font-size: 12px; -fx-text-fill: rgba(255,255,255,0.45);"/>
+    </VBox>
+
+    <!-- Divider -->
+    <Region prefHeight="0.5" maxWidth="Infinity"
+            style="-fx-background-color: rgba(255,255,255,0.07);"/>
+
+    <!-- Fields -->
+    <VBox spacing="14">
+
+        <VBox spacing="5">
+            <Label text="Product Name *"
+                   style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: rgba(255,255,255,0.55);"/>
+            <TextField fx:id="nameField"
+                       style="-fx-background-color: #111111; -fx-text-fill: #FFFFFF;
+                              -fx-prompt-text-fill: rgba(255,255,255,0.22);
+                              -fx-background-radius: 7; -fx-border-radius: 7;
+                              -fx-border-color: rgba(255,255,255,0.10); -fx-border-width: 0.5;
+                              -fx-padding: 10 12; -fx-font-size: 13px;"/>
+        </VBox>
+
+        <VBox spacing="5">
+            <Label text="Description"
+                   style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: rgba(255,255,255,0.55);"/>
+            <TextArea fx:id="descriptionArea" prefHeight="78.0"
+                      wrapText="true"
+                      style="-fx-control-inner-background: #111111;
+                             -fx-background-color: #111111;
+                             -fx-text-fill: #FFFFFF;
+                             -fx-prompt-text-fill: rgba(255,255,255,0.22);
+                             -fx-background-radius: 7; -fx-border-radius: 7;
+                             -fx-border-color: rgba(255,255,255,0.10); -fx-border-width: 0.5;
+                             -fx-font-size: 13px;
+                             -fx-highlight-fill: #F5C518;
+                             -fx-highlight-text-fill: #0D0D0D;"/>
+        </VBox>
+
+        <HBox spacing="14">
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Stock Quantity *"
+                       style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: rgba(255,255,255,0.55);"/>
+                <TextField fx:id="quantityField"
+                           style="-fx-background-color: #111111; -fx-text-fill: #FFFFFF;
+                                  -fx-prompt-text-fill: rgba(255,255,255,0.22);
+                                  -fx-background-radius: 7; -fx-border-radius: 7;
+                                  -fx-border-color: rgba(255,255,255,0.10); -fx-border-width: 0.5;
+                                  -fx-padding: 10 12; -fx-font-size: 13px;"/>
+            </VBox>
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Category Tag *"
+                       style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: rgba(255,255,255,0.55);"/>
+                <ComboBox fx:id="tagComboBox" prefHeight="40.0" maxWidth="Infinity"
+                          style="-fx-background-color: #111111; -fx-text-fill: #FFFFFF;
+                                 -fx-background-radius: 7; -fx-border-radius: 7;
+                                 -fx-border-color: rgba(255,255,255,0.10); -fx-border-width: 0.5;"/>
+            </VBox>
+        </HBox>
+
+        <VBox spacing="5">
+            <Label text="Replace Product Image (Cloudinary Upload)"
+                   style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: rgba(255,255,255,0.55);"/>
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <TextField fx:id="fileDestinationField"
+                           editable="false" mouseTransparent="true" focusTraversable="false"
+                           promptText="Keep current image"
+                           HBox.hgrow="ALWAYS"
+                           style="-fx-background-color: #111111; -fx-text-fill: rgba(255,255,255,0.55);
+                                  -fx-prompt-text-fill: rgba(255,255,255,0.22);
+                                  -fx-background-radius: 7; -fx-border-radius: 7;
+                                  -fx-border-color: rgba(255,255,255,0.10); -fx-border-width: 0.5;
+                                  -fx-padding: 10 12; -fx-font-size: 13px;"/>
+                <Button text="Browse..." onAction="#handleFileChooseAction"
+                        style="-fx-background-color: #2A2A2A; -fx-text-fill: rgba(255,255,255,0.70);
+                               -fx-font-size: 12px; -fx-font-weight: bold;
+                               -fx-background-radius: 7;
+                               -fx-border-color: rgba(255,255,255,0.12); -fx-border-radius: 7; -fx-border-width: 0.5;
+                               -fx-cursor: hand; -fx-padding: 10 14;"/>
+            </HBox>
+        </VBox>
+
+    </VBox>
+
+    <Label fx:id="errorLabel"
+           style="-fx-text-fill: #FF4D4D; -fx-font-size: 11px;"
+           visible="false" managed="false" wrapText="true"/>
+
+    <!-- Actions -->
+    <HBox alignment="CENTER_RIGHT" spacing="10">
+        <Button text="Delete Asset" onAction="#handleDelete"
+                style="-fx-background-color: rgba(255,77,77,0.12); -fx-text-fill: #FF4D4D;
+                       -fx-font-size: 12px; -fx-font-weight: bold;
+                       -fx-background-radius: 7; -fx-cursor: hand; -fx-padding: 10 16;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Cancel" onAction="#handleCancel"
+                style="-fx-background-color: transparent; -fx-text-fill: rgba(255,255,255,0.40);
+                       -fx-font-size: 13px; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 10 18;"/>
+        <Button text="Save Changes" onAction="#handleUpdate"
+                style="-fx-background-color: #F5C518; -fx-text-fill: #0D0D0D;
+                       -fx-font-size: 13px; -fx-font-weight: bold;
+                       -fx-background-radius: 7; -fx-cursor: hand; -fx-padding: 10 22;"/>
+    </HBox>
+
+</VBox>

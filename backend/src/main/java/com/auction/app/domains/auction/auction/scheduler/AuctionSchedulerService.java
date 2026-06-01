@@ -1,0 +1,55 @@
+package com.auction.app.domains.auction.auction.scheduler;
+
+import java.time.Instant;
+import java.util.List;
+
+import com.auction.app.domains.auction.auction.AuctionRepository;
+import com.auction.app.domains.auction.auction.model.AuctionStatus;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class AuctionSchedulerService {
+
+    private final AuctionRepository auctionRepository;
+    private final AuctionExecutor auctionExecutor;
+
+    @Scheduled(fixedRate = 500)
+    public void activateUpcomingAuctions() {
+
+        List<Long> toActivateIds = auctionRepository.findUpcomingIdsToActivate(AuctionStatus.UPCOMING, Instant.now());
+        if (toActivateIds.isEmpty()) return;
+        auctionRepository.updateStatusForIds(toActivateIds, AuctionStatus.ACTIVE);
+
+        for (Long auctionId : toActivateIds) {
+            try {
+                auctionExecutor.processActiveAuctionById(auctionId);
+            } catch (Exception e) {
+                log.error("Failed to activate upcoming auction #{}: {}", auctionId, e.getMessage(), e);
+            }
+        }
+    }
+
+    @Scheduled(fixedRate = 500)
+    public void endActiveAuctions() {
+
+        List<Long> toEndIds = auctionRepository.findActiveIdsToEnd(AuctionStatus.ACTIVE, Instant.now());
+        if (toEndIds.isEmpty()) return;
+
+        auctionRepository.updateStatusForIds(toEndIds, AuctionStatus.ENDED);
+
+        for (Long auctionId : toEndIds) {
+            try {
+                log.info("Ending active auction #{}", auctionId);
+                auctionExecutor.processEndedAuctionById(auctionId);
+            } catch (Exception e) {
+                log.error("Failed to process ending for auction #{}", auctionId, e);
+            }
+        }
+    }
+}

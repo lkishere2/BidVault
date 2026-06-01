@@ -1,102 +1,95 @@
 package com.auction.app.domains.users.users;
 
-import com.auction.app.domains.users.users.dtos.EmailRequest;
-import com.auction.app.domains.users.users.dtos.PasswordRequest;
-import com.auction.app.domains.users.users.dtos.UserResponse;
-import com.auction.app.domains.users.users.dtos.UsernameRequest;
+import com.auction.app.domains.users.exceptions.InvalidPasswordException;
+import com.auction.app.domains.users.exceptions.UserUpdateException;
+import com.auction.app.domains.users.users.dtos.*;
+import com.auction.app.domains.users.users.model.User;
+import com.auction.app.infrastructure.security.SecurityUtils;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final SecurityUtils securityUtils;
 
     @Override
     public UserResponse getCurrentUserInfo() {
-        User user = currentUser();
-        return mapToResponse(user);
+        return mapToResponse(securityUtils.getCurrentUser());
+    }
+
+    @Override
+    public Page<UserResponse> searchUsersByUsername(String username, int page, int size) {
+        return userRepository.searchByUsername(username, PageRequest.of(page, size))
+                .map(this::mapToResponse);
     }
 
     @Override
     @Transactional
     public void updateUsername(UsernameRequest usernameRequest) {
-        userRepository.updateUsername(currentUser().getId(), usernameRequest.getUsername());
+        userRepository.updateUsername(securityUtils.getCurrentUserId(), usernameRequest.getUsername());
     }
 
     @Override
     @Transactional
     public void updateEmail(EmailRequest emailRequest) {
+
         String newEmail = emailRequest.getEmail();
-        //Valid check
-        if (newEmail.equals(currentUser().getEmail())) {
-            throw new RuntimeException("New email must be different from current email");
+        User user = securityUtils.getCurrentUser();
+
+        // Valid check
+        if (newEmail.equals(user.getEmail())) {
+            throw new UserUpdateException("Update failed: New email must be different from current email.");
         }
         if (userRepository.existsByEmail(newEmail)) {
-            throw new RuntimeException("Email is already in use");
+            throw new UserUpdateException("Update failed.");
         }
 
-        userRepository.updateEmail(currentUser().getId(), newEmail);
+        userRepository.updateEmail(user.getId(), newEmail);
     }
 
     @Override
     @Transactional
     public void updatePassword(PasswordRequest passwordRequest) {
-        if (!passwordEncoder.matches(passwordRequest.getCurrentPassword(), currentUser().getPassword())) {
-            throw new RuntimeException("Current password is incorrect");
+
+        User user = securityUtils.getCurrentUser();
+
+        if (!passwordEncoder.matches(passwordRequest.getCurrentPassword(), user.getPassword())) {
+            throw new InvalidPasswordException("Update failed: Current password is incorrect.");
         }
         if (passwordRequest.getCurrentPassword().equals(passwordRequest.getNewPassword())) {
-            throw new RuntimeException("New password must be different from current password");
+            throw new InvalidPasswordException("Update failed: New password must be different from current password.");
         }
 
-        userRepository.updatePassword(currentUser().getId(), passwordEncoder.encode(passwordRequest.getNewPassword()));
-    }
-
-    @Override
-    public Page<UserResponse> getAllUsers(int page, int size) {
-        // Create pagination request
-        PageRequest pageRequest = PageRequest.of(page, size);
-
-        // Fetch users from repo and map Entity to DTO (UserResponse)
-        return userRepository.findAll(pageRequest).map(this :: mapToResponse);
+        userRepository.updatePassword(user.getId(), passwordEncoder.encode(passwordRequest.getNewPassword()));
     }
 
     @Override
     @Transactional
-    public void disableUser(Long id) {
-        // Prevent admin from disabling their own account
-        if (currentUser().getId().equals(id)) {
-            throw new RuntimeException("You cannot disable your own account");
-        }
-
-        User userToDisable = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
-
-        userToDisable.setRole(Role.DISABLE);
-        userRepository.save(userToDisable);
+    public void updateProfileImage(ProfileImageRequest profileImageRequest) {
+        userRepository.updateProfileImageUrl(securityUtils.getCurrentUserId(), profileImageRequest.getProfileImageUrl());
     }
 
-    //HELPERS
-    private User currentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return (User) authentication.getPrincipal();
+    @Override
+    public Page<UserResponse> getAllUsers(int page, int size) {
+        return userRepository.findAll(PageRequest.of(page, size)).map(this :: mapToResponse);
     }
 
+    // Helpers
     private UserResponse mapToResponse(User user){
         return UserResponse.builder()
-                .username(user.getUsername())
+                .id(user.getId())
+                .username(user.getDisplayName())
                 .email(user.getEmail())
                 .balance(user.getBalance())
+                .profileImageUrl(user.getProfileImageUrl())
                 .build();
     }
 }

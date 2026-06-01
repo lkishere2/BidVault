@@ -1,6 +1,7 @@
 package com.auction.app.domains.users.connection;
 
-import com.auction.app.domains.users.users.User;
+import com.auction.app.domains.users.connection.model.Connection;
+import com.auction.app.domains.users.users.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,7 +13,7 @@ import java.util.Optional;
 @Repository
 public interface ConnectionRepository extends JpaRepository<Connection, Long> {
 
-    @Query("SELECT c.follower FROM Connection c WHERE c.following.id = :followingId")
+    @Query("SELECT c.follower FROM UserConnection c WHERE c.following.id = :followingId")
     List<User> findAllFollowersByFollowingId(@Param("followingId") Long followingId);
 
     Optional<Connection> findByFollowerIdAndFollowingId(long followerId, long followingId);

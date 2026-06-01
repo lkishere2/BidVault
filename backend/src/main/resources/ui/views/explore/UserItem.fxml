@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<HBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.auction.app.controllers.explore.UserItemController"
+      fx:id="itemRoot" spacing="16" alignment="CENTER_LEFT"
+      style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.04), 8, 0, 0, 2); -fx-border-color: #E2E8F0; -fx-border-radius: 12; -fx-border-width: 1;">
+
+    <ImageView fx:id="avatarView" fitWidth="50.0" fitHeight="50.0" pickOnBounds="true" preserveRatio="true"/>
+
+    <VBox spacing="4" HBox.hgrow="ALWAYS">
+        <Label fx:id="usernameLabel" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #1E293B;"/>
+    </VBox>
+</HBox>

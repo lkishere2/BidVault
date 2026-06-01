@@ -1,13 +1,11 @@
 package com.auction.app.domains.auction.bids;
 
-import java.security.Principal;
 import java.util.List;
 
+import com.auction.app.domains.auction.auction.AuctionService;
 import com.auction.app.domains.auction.bids.dtos.BidRequest;
 import com.auction.app.domains.auction.bids.dtos.BidResponse;
 import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
-import com.auction.app.domains.auction.auction.AuctionService;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,29 +20,25 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/auctions")
 @RequiredArgsConstructor
-@Tag(name = "Bid")
 public class BidController {
 
     private final BidService bidService;
     private final AuctionService auctionService;
 
     @MessageMapping("/auction/{auctionId}/bid")
-    public void placeBid(
-            @DestinationVariable Long auctionId,
-            @Valid @Payload BidRequest request,
-            Principal principal
-    ) {
-        bidService.placeBid(auctionId, request, principal);
+    public void placeBid(@DestinationVariable Long auctionId, @Valid @Payload BidRequest request) {
+        bidService.placeBid(auctionId, request);
     }
 
-    @GetMapping("/{auctionId}/bids")
+    @GetMapping("/bids/{auctionId}")
     public ResponseEntity<List<BidResponse>> getBidHistory(@PathVariable Long auctionId) {
         return ResponseEntity.ok(bidService.getBidHistory(auctionId));
     }
 
-    @GetMapping("/bids/me")
+    @GetMapping("/me/auctions-bid-on")
     public ResponseEntity<List<AuctionResponse>> getAuctionsBidOn() {
         List<Long> auctionIds = bidService.getAuctionsBiddenByCurrentUser();
         return ResponseEntity.ok(auctionService.getAuctionsBidOnByCurrentUser(auctionIds));
     }
+
 }

@@ -1,6 +1,8 @@
 package com.auction.app.domains.notifications;
 
-import com.auction.app.domains.users.users.User;
+import com.auction.app.domains.notifications.dtos.NotificationResponse;
+import com.auction.app.domains.notifications.model.NotificationType;
+import com.auction.app.domains.users.users.model.User;
 import org.springframework.data.domain.Slice;
 
 public interface NotificationService {

@@ -1,19 +1,19 @@
 package com.auction.app.transaction;
 
-import com.auction.app.domains.auth.exceptions.UserNotFoundException;
+import com.auction.app.domains.users.exceptions.UserNotFoundException;
 import com.auction.app.domains.transaction.dtos.ClientRequest;
-import com.auction.app.domains.transaction.Transaction;
+import com.auction.app.domains.transaction.model.Transaction;
 import com.auction.app.domains.transaction.TransactionRepository;
 import com.auction.app.domains.transaction.dtos.TransactionRequest;
 import com.auction.app.domains.transaction.dtos.TransactionResponse;
 import com.auction.app.domains.transaction.TransactionServiceImpl;
-import com.auction.app.domains.transaction.TransactionStatus;
-import com.auction.app.domains.transaction.TransactionType;
-import com.auction.app.domains.transaction.exceptions.AuthorizedException;
-import com.auction.app.domains.transaction.exceptions.PoorException;
+import com.auction.app.domains.transaction.exceptions.InsufficientFundsException;
+import com.auction.app.domains.transaction.exceptions.InvalidTransactionStateException;
 import com.auction.app.domains.transaction.exceptions.TransactionNotFoundException;
-import com.auction.app.domains.transaction.exceptions.TransactionNotPendingException;
-import com.auction.app.domains.users.users.User;
+import com.auction.app.domains.transaction.exceptions.UnauthorizedTransactionException;
+import com.auction.app.domains.transaction.model.TransactionStatus;
+import com.auction.app.domains.transaction.model.TransactionType;
+import com.auction.app.domains.users.users.model.User;
 import com.auction.app.domains.users.users.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -227,7 +227,7 @@ class TransactionServiceTest {
         when(transactionRepository.findById(10L)).thenReturn(Optional.of(transaction));
 
         assertThatThrownBy(() -> transactionService.deleteTransaction(10L))
-                .isInstanceOf(AuthorizedException.class)
+                .isInstanceOf(UnauthorizedTransactionException.class)
                 .hasMessage("Unauthorized: You do not make this transaction.");
 
         verify(transactionRepository, never()).delete(any(Transaction.class));
@@ -375,7 +375,7 @@ class TransactionServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(currentUser));
 
         assertThatThrownBy(() -> transactionService.acceptTransaction(request))
-                .isInstanceOf(TransactionNotPendingException.class)
+                .isInstanceOf(InvalidTransactionStateException.class)
                 .hasMessage("Only pending transactions can be accepted.");
     }
 
@@ -387,7 +387,7 @@ class TransactionServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(currentUser));
 
         assertThatThrownBy(() -> transactionService.acceptTransaction(request))
-                .isInstanceOf(TransactionNotPendingException.class);
+                .isInstanceOf(InvalidTransactionStateException.class);
     }
 
     @Test
@@ -398,7 +398,7 @@ class TransactionServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(currentUser));
 
         assertThatThrownBy(() -> transactionService.acceptTransaction(request))
-                .isInstanceOf(PoorException.class)
+                .isInstanceOf(InsufficientFundsException.class)
                 .hasMessage("Insufficient funds for withdrawal.");
 
         verify(userRepository, never()).save(any(User.class));
@@ -461,7 +461,7 @@ class TransactionServiceTest {
         when(transactionRepository.findById(10L)).thenReturn(Optional.of(transaction));
 
         assertThatThrownBy(() -> transactionService.cancelTransaction(10L))
-                .isInstanceOf(TransactionNotPendingException.class)
+                .isInstanceOf(InvalidTransactionStateException.class)
                 .hasMessage("Only pending transactions can be cancelled.");
     }
 
@@ -471,7 +471,7 @@ class TransactionServiceTest {
         when(transactionRepository.findById(10L)).thenReturn(Optional.of(transaction));
 
         assertThatThrownBy(() -> transactionService.cancelTransaction(10L))
-                .isInstanceOf(TransactionNotPendingException.class);
+                .isInstanceOf(InvalidTransactionStateException.class);
     }
 
     @Test

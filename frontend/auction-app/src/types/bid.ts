@@ -1,5 +1,5 @@
 export interface BidRequest {
-    amount: string; // BigDecimal -> string
+    amount: string;
 }
 
 export interface BidResponse {
@@ -7,15 +7,15 @@ export interface BidResponse {
     auctionId: number;
     bidderLabel: string;
     amount: string;
-    placedAt: string; // ISO instant
+    placedAt: string;
 }
 
 export interface BidNotificationPayload {
     auctionId: number;
-    currentPrice: string; // BigDecimal -> string
-    minNextBid: string; // BigDecimal -> string
+    currentPrice: string;
+    minNextBid: string;
     bidderLabel: string;
-    endTime: string; // ISO instant
+    endTime: string;
     extended: boolean;
     bidCount: number;
     ended: boolean;
@@ -26,6 +26,6 @@ export interface PendingBid {
     auctionId: number;
     bidderId: number;
     bidderLabel: string;
-    amount: string; // BigDecimal -> string
-    placedAt: string; // ISO instant
+    amount: string;
+    placedAt: string;
 }

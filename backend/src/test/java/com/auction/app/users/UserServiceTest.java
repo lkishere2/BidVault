@@ -1,7 +1,7 @@
 package com.auction.app.users;
 
-import com.auction.app.domains.users.users.Role;
-import com.auction.app.domains.users.users.User;
+import com.auction.app.domains.users.users.model.Role;
+import com.auction.app.domains.users.users.model.User;
 import com.auction.app.domains.users.users.UserRepository;
 import com.auction.app.domains.users.users.UserServiceImpl;
 import com.auction.app.domains.users.users.dtos.EmailRequest;
@@ -321,48 +321,6 @@ class UserServiceTest {
     // =========================================================================
 
     // --- Happy Path (1 Test) ---
-
-    @Test
-    void disableUser_WhenTargetUserExists_ShouldSetRoleDisableAndSave() {
-        User targetUser = createUser(2L, "seller", "seller@example.com", "password", Role.USER);
-        when(userRepository.findById(2L)).thenReturn(Optional.of(targetUser));
-
-        userService.disableUser(2L);
-
-        assertThat(targetUser.getRole()).isEqualTo(Role.DISABLE);
-        verify(userRepository).save(targetUser);
-    }
-
-    // --- Edge Cases (3 Tests) ---
-
-    @Test
-    void disableUser_WhenAdminDisablesOwnAccount_ShouldThrowException() {
-        assertThatThrownBy(() -> userService.disableUser(1L))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("You cannot disable your own account");
-
-        verify(userRepository, never()).save(any(User.class));
-    }
-
-    @Test
-    void disableUser_WhenUserDoesNotExist_ShouldThrowException() {
-        when(userRepository.findById(99L)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> userService.disableUser(99L))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("User not found with id: 99");
-
-        verify(userRepository, never()).save(any(User.class));
-    }
-
-    @Test
-    void disableUser_WhenIdIsNull_ShouldThrowException() {
-        assertThatThrownBy(() -> userService.disableUser(null))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("User not found with id: null");
-
-        verify(userRepository, never()).save(any(User.class));
-    }
 
     private User createUser(Long id, String username, String email, String password, Role role) {
         return User.builder()
