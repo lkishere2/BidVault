@@ -249,7 +249,10 @@ public class BidServiceImpl implements BidService {
             Instant newEndTime = now.plusSeconds(SNIPER_PROTECTION_SECONDS);
             response.setEndTime(newEndTime);
             response.setExtended(true);
-            auctionRepository.updateEndTime(auctionId, newEndTime);
+            Auction auction = findAuctionById(auctionId);
+            auction.setEndTime(newEndTime);
+            auction.setExtended(true);
+            auctionRepository.save(auction);
             log.info("[Bid Service] Auction #{} extended by 2 minutes", response.getId());
             return true;
         }

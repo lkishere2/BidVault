@@ -48,7 +48,7 @@ public class UserProfileController {
             setDefaultAvatar();
         }
 
-        // Fetch follow state from backend database and refresh numbers concurrently
+        // Check DB state on load so button correctly shows Follow or Unfollow
         checkFollowRelationshipState();
         fetchUserStats();
     }
@@ -64,7 +64,7 @@ public class UserProfileController {
                     Platform.runLater(this::updateButtonUI);
                 }
             } catch (Exception e) {
-                System.err.println("Failed to fetch follow baseline relationship state from server: " + e.getMessage());
+                System.err.println("Failed to fetch initial follow status from server: " + e.getMessage());
             }
         };
 
@@ -86,7 +86,7 @@ public class UserProfileController {
                     });
                 }
             } catch (Exception e) {
-                System.err.println("Failed to fetch user connection statistics: " + e.getMessage());
+                System.err.println("Failed to fetch connection stats: " + e.getMessage());
             }
         };
 
@@ -109,7 +109,7 @@ public class UserProfileController {
                     });
                 }
             } catch (Exception e) {
-                System.err.println("Connection status transition mutation rejected: " + e.getMessage());
+                System.err.println("Toggle follow action failed: " + e.getMessage());
             }
         };
 

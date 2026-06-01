@@ -19,7 +19,7 @@ public class AuctionSchedulerService {
     private final AuctionRepository auctionRepository;
     private final AuctionExecutor auctionExecutor;
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 500)
     public void activateUpcomingAuctions() {
 
         List<Long> toActivateIds = auctionRepository.findUpcomingIdsToActivate(AuctionStatus.UPCOMING, Instant.now());
@@ -35,7 +35,7 @@ public class AuctionSchedulerService {
         }
     }
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 500)
     public void endActiveAuctions() {
 
         List<Long> toEndIds = auctionRepository.findActiveIdsToEnd(AuctionStatus.ACTIVE, Instant.now());
@@ -45,9 +45,10 @@ public class AuctionSchedulerService {
 
         for (Long auctionId : toEndIds) {
             try {
+                log.info("Ending active auction #{}", auctionId);
                 auctionExecutor.processEndedAuctionById(auctionId);
             } catch (Exception e) {
-                log.error("Failed to process ending for auction #{}: {}", auctionId, e.getMessage(), e);
+                log.error("Failed to process ending for auction #{}", auctionId, e);
             }
         }
     }
