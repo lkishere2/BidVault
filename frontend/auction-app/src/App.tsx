@@ -14,10 +14,11 @@ import OverviewPageLoading from './pages/user/user/overview/OverViewPageLoading'
 import StoragePage from './pages/user/user/storage/StoragePage';
 import SettingPage from './pages/user/user/setting/SettingPage';
 import HubPage from './pages/user/market/hub/HubPage';
+import CommunityPage from './pages/user/community/CommunityPage';
+import ProfilePage from './pages/user/community/ProfilePage';
 import { userApi } from './api/userApi';
 import './App.css';
 
-const ExplorePage = () => <div className="p-4"><h1 className="text-xl font-bold">Explore</h1></div>;
 const MyBidsPage = () => <div className="p-4"><h1 className="text-xl font-bold">My Bids</h1></div>;
 
 const AccountBalance = () => <div><h2 className="text-xl font-bold mb-4">Balance</h2><p className="text-neutral-500 text-sm">Manage transactions and funds wallet setup.</p></div>;
@@ -70,7 +71,7 @@ function App() {
 
           setUser({ id, username, initials });
         } catch (error) {
-          console.error("Failed to sync user on load", error);
+          console.error(error);
           setUser(null);
         }
       }
@@ -110,7 +111,8 @@ function App() {
           <Route path="/verify/user" element={<VerifyPage />} />
           <Route path="/verify/forget-password" element={<ForgotPasswordVerifyPage />} />
 
-          <Route path="/explore" element={<ExplorePage />} />
+          <Route path="/community" element={<CommunityPage />} />
+          <Route path="/profile/:user_id" element={<ProfilePage />} />
           <Route path="/auctions/hub" element={<HubPage />} />
           <Route path="/auction/joined" element={<MyBidsPage />} />
 

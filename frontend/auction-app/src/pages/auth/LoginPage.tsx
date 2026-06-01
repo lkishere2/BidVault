@@ -34,7 +34,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
         onLoginSuccess(userData);
 
         // Chuyển hướng người dùng sang trang Dashboard ở đường dẫn /office
-        navigate('/home');
+        navigate('/');
     };
 
     return (

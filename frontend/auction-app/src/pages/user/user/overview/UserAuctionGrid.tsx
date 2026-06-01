@@ -7,9 +7,10 @@ import UserAuctionGridLoading from './UserAuctionGridLoading';
 
 interface UserAuctionGridProps {
     userId: number;
+    isMe?: boolean;
 }
 
-export const UserAuctionGrid: React.FC<UserAuctionGridProps> = ({ userId }) => {
+export const UserAuctionGrid: React.FC<UserAuctionGridProps> = ({ userId, isMe = false }) => {
     const [auctions, setAuctions] = useState<AuctionResponse[]>([]);
     const [selectedAuction, setSelectedAuction] = useState<AuctionResponse | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -20,14 +21,22 @@ export const UserAuctionGrid: React.FC<UserAuctionGridProps> = ({ userId }) => {
         const fetchAuctions = async () => {
             setIsLoading(true);
             try {
-                const res = await auctionApi.getMyAuctions(0, 10);
+                const res = isMe
+                    ? await auctionApi.getMyAuctions(0, 10)
+                    : await auctionApi.getDiscoverableAuctions({ status: 'ACTIVE' }, 0, 20);
+
                 if (cancelled) return;
 
-                // Keep your flexible data parsing just in case the backend paginates differently
                 const data = res.data as unknown as { content?: AuctionResponse[] } | AuctionResponse[];
-                setAuctions(Array.isArray(data) ? data : (data?.content ?? []));
+                let rawList = Array.isArray(data) ? data : (data?.content ?? []);
+
+                if (!isMe) {
+                    rawList = rawList.filter(auction => auction.sellerId === userId);
+                }
+
+                setAuctions(rawList);
             } catch (error) {
-                console.error("Failed to load auctions:", error);
+                console.error(error);
             } finally {
                 if (!cancelled) {
                     setIsLoading(false);
@@ -38,10 +47,10 @@ export const UserAuctionGrid: React.FC<UserAuctionGridProps> = ({ userId }) => {
         fetchAuctions();
 
         return () => { cancelled = true; };
-    }, [userId]);
+    }, [userId, isMe]);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '32px' }}>
             <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '600', color: '#1f2937' }}>Auctions</h3>
             {isLoading ? (
                 <UserAuctionGridLoading />

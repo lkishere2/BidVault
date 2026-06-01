@@ -23,7 +23,7 @@ const NAV = [
             { label: 'My Bids', path: '/auction/joined' },
         ],
     },
-    { label: 'Community', path: '/explore' },
+    { label: 'Community', path: '/community' },
 ];
 
 export default function Header({ user, isLoggedIn = !!user, isAdmin = false, onLogout, onLogin }: HeaderProps) {
