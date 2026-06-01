@@ -1,5 +1,12 @@
 package com.auction.app.domains.auction.auction.notification;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
@@ -8,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import com.auction.app.domains.auction.bids.dtos.BidFeedEvent;
 import com.auction.app.domains.auction.bids.dtos.BidNotificationPayload;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +27,22 @@ import java.io.IOException;
 public class AuctionSubscriber implements MessageListener {
 
     private final SimpMessagingTemplate messagingTemplate;
-    private final ObjectMapper objectMapper;
+
+    private final ObjectMapper objectMapper = buildRedisObjectMapper();
+
+    private static ObjectMapper buildRedisObjectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        mapper.configure(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN, true);
+        mapper.configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, true);
+        mapper.activateDefaultTyping(
+                LaissezFaireSubTypeValidator.instance,
+                ObjectMapper.DefaultTyping.NON_FINAL,
+                JsonTypeInfo.As.PROPERTY
+        );
+        return mapper;
+    }
 
     private static final String NOTIFY_PREFIX = "auction:notify:";
     private static final String BIDS_SUFFIX = ":bids";
@@ -48,7 +69,6 @@ public class AuctionSubscriber implements MessageListener {
         log.info("WebSocket push → {} — price ${}", destination, payload.getCurrentPrice());
     }
 
-    // Now handles a single BidFeedEvent — appended to the live feed on the client
     private void subscribeToBidFeedChannel(Message message, String channel) throws IOException {
         BidFeedEvent event = objectMapper.readValue(message.getBody(), BidFeedEvent.class);
         Long auctionId = extractAuctionId(channel);

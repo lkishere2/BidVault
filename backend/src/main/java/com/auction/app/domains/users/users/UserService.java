@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 
 public interface UserService {
     UserResponse getCurrentUserInfo();
+    Page<UserResponse> searchUsersByUsername(String username, int page, int size);
     void updateUsername(UsernameRequest usernameRequest);
     void updateEmail(EmailRequest emailRequest);
     void updatePassword(PasswordRequest passwordRequest);

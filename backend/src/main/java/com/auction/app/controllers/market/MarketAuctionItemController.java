@@ -51,14 +51,9 @@ public class MarketAuctionItemController {
         }
     }
 
-    // ------------------------------------------------------------------
-    // Helpers
-    // ------------------------------------------------------------------
-
     private void loadImage(String url) {
         if (url != null && !url.isBlank()) {
             try {
-                // Load async (background thread) to avoid blocking the UI
                 Image image = new Image(url, 220, 130, false, true, true);
                 productImage.setImage(image);
             } catch (Exception e) {
@@ -71,7 +66,6 @@ public class MarketAuctionItemController {
     }
 
     private void applyImagePlaceholder() {
-        // Grey placeholder when no image is available
         productImage.setStyle("-fx-background-color: #F1F5F9;");
     }
 

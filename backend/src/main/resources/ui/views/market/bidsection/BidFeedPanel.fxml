@@ -7,7 +7,6 @@
       fx:controller="com.auction.app.controllers.market.bidsection.BidFeedPanelController"
       spacing="0" style="-fx-background-color: #0F1117;">
 
-    <!-- Header -->
     <HBox alignment="CENTER_LEFT" spacing="10"
           style="-fx-padding: 20 24 20 24;
                  -fx-border-color: #1E2433;
@@ -21,14 +20,12 @@
                style="-fx-font-size: 11px; -fx-text-fill: #6B7280;"/>
     </HBox>
 
-    <!-- Feed list -->
     <ListView fx:id="feedListView" VBox.vgrow="ALWAYS"
               style="-fx-background-color: transparent;
                      -fx-background: transparent;
                      -fx-border-color: transparent;
                      -fx-padding: 8 0 8 0;"/>
 
-    <!-- Empty state -->
     <Label fx:id="emptyLabel" text="No bids yet. Be the first!"
            alignment="CENTER" maxWidth="Infinity"
            managed="false" visible="false"

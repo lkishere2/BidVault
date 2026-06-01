@@ -26,6 +26,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Page<UserResponse> searchUsersByUsername(String username, int page, int size) {
+        return userRepository.searchByUsername(username, PageRequest.of(page, size))
+                .map(this::mapToResponse);
+    }
+
+    @Override
     @Transactional
     public void updateUsername(UsernameRequest usernameRequest) {
         userRepository.updateUsername(securityUtils.getCurrentUserId(), usernameRequest.getUsername());
@@ -79,6 +85,7 @@ public class UserServiceImpl implements UserService {
     // Helpers
     private UserResponse mapToResponse(User user){
         return UserResponse.builder()
+                .id(user.getId())
                 .username(user.getDisplayName())
                 .email(user.getEmail())
                 .balance(user.getBalance())

@@ -4,39 +4,81 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
 
 <HBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.auction.app.controllers.account.profile.UserStatsBoxController"
-      spacing="32" alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-padding: 24; -fx-background-radius: 12;">
+      spacing="28" alignment="CENTER_LEFT"
+      style="-fx-background-color: transparent; -fx-padding: 0 0 22 0;">
 
-    <VBox alignment="CENTER">
-        <VBox style="-fx-border-color: #E2E8F0; -fx-border-width: 2; -fx-border-radius: 100; -fx-padding: 4;">
-            <ImageView fx:id="avatarImageView" fitWidth="90.0" fitHeight="90.0" pickOnBounds="true"/>
+    <!-- Avatar with gold ring — Instagram style -->
+    <StackPane>
+        <!-- Outer gold gradient ring -->
+        <VBox prefWidth="102" prefHeight="102" alignment="CENTER"
+              style="-fx-background-color: #F5C518;
+                     -fx-background-radius: 100;">
+            <!-- Inner dark gap ring -->
+            <VBox prefWidth="96" prefHeight="96" alignment="CENTER"
+                  style="-fx-background-color: #0D0D0D; -fx-background-radius: 100;">
+                <!-- Avatar circle clip area -->
+                <VBox alignment="CENTER" prefWidth="88" prefHeight="88"
+                      style="-fx-background-color: #2A2A2A; -fx-background-radius: 100; -fx-border-radius: 100;">
+                    <ImageView fx:id="avatarImageView"
+                               fitWidth="88.0" fitHeight="88.0"
+                               pickOnBounds="true" preserveRatio="true"/>
+                </VBox>
+            </VBox>
         </VBox>
-    </VBox>
+    </StackPane>
 
-    <VBox spacing="12" HBox.hgrow="ALWAYS">
-        <HBox spacing="16" alignment="CENTER_LEFT">
-            <Label fx:id="usernameLabel" text="username" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #0F172A;"/>
-            <Label text="Verified Seller" style="-fx-background-color: #F0FDF4; -fx-text-fill: #16A34A; -fx-font-size: 11px; -fx-font-weight: bold; -fx-padding: 4 8; -fx-background-radius: 20;"/>
+    <!-- Stats + info -->
+    <VBox spacing="14" HBox.hgrow="ALWAYS">
+
+        <!-- Username row -->
+        <HBox spacing="14" alignment="CENTER_LEFT">
+            <Label fx:id="usernameLabel" text="username"
+                   style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #FFFFFF;"/>
+            <Label text="✦ Verified Seller"
+                   style="-fx-background-color: rgba(245,197,24,0.12);
+                          -fx-text-fill: #F5C518;
+                          -fx-font-size: 11px; -fx-font-weight: bold;
+                          -fx-padding: 4 10; -fx-background-radius: 20;
+                          -fx-border-color: rgba(245,197,24,0.30);
+                          -fx-border-radius: 20; -fx-border-width: 0.5;"/>
         </HBox>
 
-        <HBox spacing="24" alignment="CENTER_LEFT">
-            <HBox spacing="4">
-                <Label fx:id="auctionCountLabel" text="0" style="-fx-font-weight: bold; -fx-text-fill: #0F172A; -fx-font-size: 14px;"/>
-                <Label text="auctions" style="-fx-text-fill: #64748B; -fx-font-size: 14px;"/>
-            </HBox>
-            <HBox spacing="4">
-                <Label fx:id="itemsCountLabel" text="0" style="-fx-font-weight: bold; -fx-text-fill: #0F172A; -fx-font-size: 14px;"/>
-                <Label text="vault items" style="-fx-text-fill: #64748B; -fx-font-size: 14px;"/>
-            </HBox>
+        <!-- Instagram-style stat counters -->
+        <HBox spacing="32" alignment="CENTER_LEFT">
+            <!-- Auctions count -->
+            <VBox spacing="1" alignment="CENTER">
+                <Label fx:id="auctionCountLabel" text="0"
+                       style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #FFFFFF;"/>
+                <Label text="auctions"
+                       style="-fx-font-size: 12px; -fx-text-fill: rgba(255,255,255,0.45);"/>
+            </VBox>
+            <!-- Divider dot -->
+            <Label text="·" style="-fx-text-fill: rgba(255,255,255,0.15); -fx-font-size: 20px;"/>
+            <!-- Vault items count -->
+            <VBox spacing="1" alignment="CENTER">
+                <Label fx:id="itemsCountLabel" text="0"
+                       style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #FFFFFF;"/>
+                <Label text="vault items"
+                       style="-fx-font-size: 12px; -fx-text-fill: rgba(255,255,255,0.45);"/>
+            </VBox>
         </HBox>
 
-        <VBox spacing="2">
-            <Label fx:id="displayNameLabel" text="Account Holder Name" style="-fx-font-weight: bold; -fx-text-fill: #1E293B; -fx-font-size: 14px;"/>
-            <Label text="BidVault platform collector workspace portfolio." style="-fx-text-fill: #64748B; -fx-font-size: 12px;"/>
+        <!-- Display name + bio -->
+        <VBox spacing="3">
+            <Label fx:id="displayNameLabel" text="Account Holder Name"
+                   style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #FFFFFF;"/>
+            <Label text="BidVault platform collector workspace portfolio."
+                   style="-fx-font-size: 12px; -fx-text-fill: rgba(255,255,255,0.45);"/>
         </VBox>
+
     </VBox>
+
 </HBox>

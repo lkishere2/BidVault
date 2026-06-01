@@ -16,14 +16,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(
-        name = "auctions",
-        indexes = {
-                @Index(name = "idx_auctions_seller_start_time", columnList = "seller_id, start_time DESC"),
-                @Index(name = "idx_auctions_status", columnList = "status"),
-                @Index(name = "idx_auctions_end_time", columnList = "end_time")
-        }
-)
+@Table(name = "auctions")
 public class Auction {
 
     @Id

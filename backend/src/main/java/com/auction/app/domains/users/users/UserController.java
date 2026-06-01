@@ -20,6 +20,14 @@ public class UserController {
         return ResponseEntity.ok(userService.getCurrentUserInfo());
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<Page<UserResponse>> searchUsersByUsername(
+            @RequestParam String username,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(userService.searchUsersByUsername(username, page, size));
+    }
+
     @PatchMapping("/update-username")
     public ResponseEntity<Void> updateUsername(@Valid @RequestBody UsernameRequest userRequest) {
         userService.updateUsername(userRequest);

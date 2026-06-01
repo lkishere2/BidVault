@@ -6,7 +6,6 @@ import com.auction.app.domains.auction.auction.AuctionService;
 import com.auction.app.domains.auction.bids.dtos.BidRequest;
 import com.auction.app.domains.auction.bids.dtos.BidResponse;
 import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/auctions")
 @RequiredArgsConstructor
-@Tag(name = "Bid")
 public class BidController {
 
     private final BidService bidService;

@@ -24,7 +24,7 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
     )
     Page<Long> findIdsBySellerIdOrderByStartTime(@Param("sellerId") Long sellerId, Pageable pageable);
 
-    @Query(value = "SELECT DISTINCT a.* FROM auctions a " +
+    @Query(value = "SELECT DISTINCT a.id FROM auctions a " +
             "LEFT JOIN products p ON a.product_id = p.id " +
             "WHERE (" +
             "    (CAST(:status AS VARCHAR) IS NULL AND a.status IN ('UPCOMING', 'ACTIVE')) " +
@@ -53,15 +53,15 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
                     "AND (CAST(:startTime AS TIMESTAMP) IS NULL OR a.start_time >= :startTime) " +
                     "AND (CAST(:endTime AS TIMESTAMP) IS NULL OR a.end_time <= :endTime)",
             nativeQuery = true)
-    Page<Auction> findAuctions(
-            @Param("productName") String productName,
-            @Param("tags") String[] tags,
-            @Param("hasTags") boolean hasTags,
-            @Param("startTime") Instant startTime,
-            @Param("endTime") Instant endTime,
-            @Param("minStartingPrice") BigDecimal minStartingPrice,
-            @Param("status") String status,
-            Pageable pageable
+    Page<Long> findAuctionIds(
+       @Param("productName") String productName,
+       @Param("tags") String[] tags,
+       @Param("hasTags") boolean hasTags,
+       @Param("startTime") Instant startTime,
+       @Param("endTime") Instant endTime,
+       @Param("minStartingPrice") BigDecimal minStartingPrice,
+       @Param("status") String status,
+       Pageable pageable
     );
 
     @Query("SELECT a FROM Auction a JOIN FETCH a.seller JOIN FETCH a.product WHERE a.id = :id")
@@ -88,9 +88,4 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
     @Transactional
     @Query("UPDATE Auction a SET a.status = :newStatus WHERE a.id IN :ids")
     int updateStatusForIds(@Param("ids") List<Long> ids, @Param("newStatus") AuctionStatus newStatus);
-
-    @Modifying(clearAutomatically = true)
-    @Transactional
-    @Query("UPDATE Auction a SET a.endTime = :endTime WHERE a.id = :id")
-    void updateEndTime(@Param("id") Long id, @Param("endTime") Instant endTime);
 }

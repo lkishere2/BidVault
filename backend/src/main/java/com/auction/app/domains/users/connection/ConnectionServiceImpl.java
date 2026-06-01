@@ -65,4 +65,12 @@ public class ConnectionServiceImpl implements ConnectionService {
         return new UserStats(followersCount, followingCount);
     }
 
+    @Override
+    public boolean isFollowing(Long followingId) {
+        User currentLoggedInUser = securityUtils.getCurrentUser();
+        if (currentLoggedInUser == null) return false;
+
+        return connectionRepository.findByFollowerIdAndFollowingId(currentLoggedInUser.getId(), followingId).isPresent();
+    }
+
 }

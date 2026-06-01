@@ -220,25 +220,25 @@ public class AuctionRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // 1. Test filtering by product name substring match (case insensitive)
-        Page<Auction> resultsByName = auctionRepository.findAuctions(
+        Page<Long> resultsByName = auctionRepository.findAuctionIds(
                 "15 pro", null, false, null, null, null, null, pageable
         );
         assertThat(resultsByName.getContent()).hasSize(1);
-        assertThat(resultsByName.getContent().get(0).getId()).isEqualTo(auction.getId());
+        assertThat(resultsByName.getContent().get(0)).isEqualTo(auction.getId());
 
         // 2. Test filtering by Tags matching requirements
-        Page<Auction> resultsWithMatchingTag = auctionRepository.findAuctions(
+        Page<Long> resultsWithMatchingTag = auctionRepository.findAuctionIds(
                 null, new String[]{"ELECTRONICS"}, true, null, null, null, null, pageable
         );
         assertThat(resultsWithMatchingTag.getContent()).hasSize(1);
 
-        Page<Auction> resultsWithUnmatchedTag = auctionRepository.findAuctions(
+        Page<Long> resultsWithUnmatchedTag = auctionRepository.findAuctionIds(
                 null, new String[]{"BOOKS"}, true, null, null, null, null, pageable
         );
         assertThat(resultsWithUnmatchedTag.getContent()).isEmpty();
 
         // 3. Test filtering by dynamic status values
-        Page<Auction> resultsByStatus = auctionRepository.findAuctions(
+        Page<Long> resultsByStatus = auctionRepository.findAuctionIds(
                 null, null, false, null, null, null, "UPCOMING", pageable
         );
         assertThat(resultsByStatus.getContent()).hasSize(1);

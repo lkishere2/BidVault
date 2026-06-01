@@ -13,7 +13,5 @@ public interface AuctionService {
     AuctionResponse getAuction(Long auctionId);
     List<AuctionResponse> getAuctionsBidOnByCurrentUser(List<Long> auctionIds);
     Page<AuctionResponse> getDiscoverableAuctions(AuctionFindingRequest request, Pageable pageable);
-    // Fix #16: these two methods existed only on the impl — add them to the interface so they
-    // are accessible polymorphically (tests, other services wired to AuctionService)
     Page<AuctionResponse> getMyAuctions(Pageable pageable);
 }

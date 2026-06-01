@@ -2,6 +2,7 @@ package com.auction.app.infrastructure.config;
 
 import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
 import com.auction.app.domains.auction.auction.notification.AuctionSubscriber;
+import com.auction.app.domains.auction.bids.dtos.PendingBid;
 import com.auction.app.infrastructure.security.CachedUserDetails;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -81,6 +82,31 @@ public class RedisConfig {
         return template;
     }
 
+    @Bean
+    public RedisTemplate<String, PendingBid> pendingBidRedisTemplate(
+            RedisConnectionFactory connectionFactory) {
+
+        RedisTemplate<String, PendingBid> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        mapper.configure(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN, true);
+        mapper.configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, true);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        Jackson2JsonRedisSerializer<PendingBid> serializer =
+                new Jackson2JsonRedisSerializer<>(mapper, PendingBid.class);
+
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(serializer);
+        template.setHashValueSerializer(serializer);
+
+        template.afterPropertiesSet();
+        return template;
+    }
 
     @Bean
     public RedisTemplate<String, CachedUserDetails> userDetailsRedisTemplate(

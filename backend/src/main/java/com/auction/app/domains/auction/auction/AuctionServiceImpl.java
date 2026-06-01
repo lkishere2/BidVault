@@ -1,8 +1,6 @@
 package com.auction.app.domains.auction.auction;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +11,8 @@ import com.auction.app.domains.auction.auction.dtos.AuctionRequest;
 import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
 import com.auction.app.domains.auction.auction.model.Auction;
 import com.auction.app.domains.auction.auction.model.AuctionStatus;
-import com.auction.app.domains.auction.auction.redis.AuctionRedisPort;
+import com.auction.app.domains.auction.auction.redis.AuctionRedisService;
+import com.auction.app.domains.auction.auction.validator.AuctionValidatorService;
 import com.auction.app.domains.auction.exceptions.*;
 import com.auction.app.domains.notifications.NotificationService;
 import com.auction.app.domains.products.exceptions.ProductNotFoundException;
@@ -21,7 +20,6 @@ import com.auction.app.domains.users.users.model.User;
 import com.auction.app.infrastructure.security.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,28 +37,30 @@ public class AuctionServiceImpl implements AuctionService {
 
     private final AuctionRepository auctionRepository;
     private final ProductRepository productRepository;
-    private final AuctionRedisPort cache;
+    private final AuctionValidatorService auctionValidatorService;
+    private final AuctionRedisService cache;
     private final NotificationService notificationService;
     private final SecurityUtils securityUtils;
 
     public Page<AuctionResponse> getMyAuctions(Pageable pageable) {
 
-        // Create the page first
+        log.info("[Auction Service - Get My Auctions] Creating the page for pagination");
         Pageable sortedPageable = PageRequest.of(
                 pageable.getPageNumber(),
                 pageable.getPageSize(),
                 Sort.by(Sort.Direction.DESC, "startTime")
         );
 
-        // The query is kinda long, consider using local host DB or change geo position to Singapore
+        // TODO: Migrate the DB to Singapore for faster query
+        log.info("[Auction Service - Get My Auctions] Fetching auction IDs for the current user from database");
         Page<Long> idPage = auctionRepository.findIdsBySellerIdOrderByStartTime(securityUtils.getCurrentUserId(), sortedPageable);
         List<Long> ids = idPage.getContent();
         if (ids.isEmpty()) return Page.empty(pageable);
 
-        // Use MGET in Redis to avoid multiple network round-trips
+        log.info("[Auction Service - Get My Auctions] Using MGET in Redis to avoid multiple network round-trips");
         List<AuctionResponse> cached = cache.getAuctionResponses(ids);
 
-        // Handle cache missing, repopulate Redis and fetch response from DB
+        log.info("[Auction Service - Get My Auctions] Handling cache missing, repopulating Redis and fetching response from DB");
         Map<Long, Integer> idToIndex = new HashMap<>();
         List<Long> missedIds = new ArrayList<>();
         for (int i = 0; i < ids.size(); i++) {
@@ -77,45 +77,42 @@ public class AuctionServiceImpl implements AuctionService {
                 cached.set(idToIndex.get(auction.getId()), response);
                 toCache.put(auction.getId(), response);
             }
-
-            // Fix #8 / #15: cacheAuctionResponses now pipelines individual SET EX calls
-            // so each entry gets a proper TTL instead of living forever via multiSet
             cache.cacheAuctionResponses(toCache);
         }
 
-        // Return the response
+        log.info("[Auction Service - Get My Auctions] Returning the final paginated response");
         return new PageImpl<>(cached, pageable, idPage.getTotalElements());
     }
 
     @Transactional
     public AuctionResponse createAuction(AuctionRequest request) {
 
-        // First, we fetch the current user
         User seller = securityUtils.getCurrentUser();
+        log.info("[Auction Service - Create Auction] Initiating auction creation for seller ID: {}", seller.getId());
 
-        // Then, we validate some info to start the auction
-        validateTime(request.getStartTime(), request.getEndTime());
+        auctionValidatorService.validateTime(request.getStartTime(), request.getEndTime());
         Product product = findProductByIdAndOwnerId(request.getProductId(), seller.getId());
-        validateQuantity(request.getQuantity(), product.getQuantity());
+        auctionValidatorService.validateQuantity(request.getQuantity(), product.getQuantity());
+        log.info("[Auction Service - Create Auction] Validation successful for product ID: {}", request.getProductId());
 
-        // Update the quantity in the storage
         product.setQuantity(product.getQuantity() - request.getQuantity());
         productRepository.save(product);
+        log.info("[Auction Service - Create Auction] Deducted {} units from stock. New stock balance: {}", request.getQuantity(), product.getQuantity());
 
         Auction auction = mapToEntity(request, product, seller);
         auctionRepository.save(auction);
         AuctionResponse response = AuctionResponse.from(auction);
+        log.info("[Auction Service - Create Auction] Auction record successfully persisted in DB with ID: {}", auction.getId());
 
-        // Fix #7: cache write was inside the transaction — if the transaction rolled back,
-        // the cache would hold a response for an auction that doesn't exist in the DB.
-        // Moved to afterCommit so the write only happens once the DB row is guaranteed durable.
         TransactionSynchronizationManager.registerSynchronization(
                 new TransactionSynchronization() {
                     @Override
                     public void afterCommit() {
+                        log.info("[Auction Service - Create Auction] Transaction committed successfully. Executing post-commit hooks for auction ID: {}", auction.getId());
                         cache.cacheAuctionResponse(auction.getId(), response);
-                        // Notify to all followers
+                        log.info("[Auction Service - Create Auction] Auction ID: {} successfully synced to cache", auction.getId());
                         notificationService.notifyFollowersOfNewAuction(seller);
+                        log.info("[Auction Service - Create Auction] Followers notified of new auction from seller ID: {}", seller.getId());
                     }
                 }
         );
@@ -126,29 +123,30 @@ public class AuctionServiceImpl implements AuctionService {
     @Transactional
     public AuctionResponse cancelAuction(Long auctionId) {
 
-        // First, we fetch the user and the wanted auction
         User seller = securityUtils.getCurrentUser();
         Auction auction = findByIdWithDetails(auctionId);
+        log.info("[Auction Service - Cancel Auction] First, we fetch the user and the wanted auction details for ID: {}", auctionId);
 
-        // Then, we validate some info
-        validateUser(auction.getSeller(), seller);
-        validateAuctionCancellation(auction);
+        auctionValidatorService.validateUser(auction.getSeller(), seller);
+        auctionValidatorService.validateAuctionCancellation(auction);
+        log.info("[Auction Service - Cancel Auction] Then, we validate user permission and status requirements");
 
-        // Update the storage
         Product product = auction.getProduct();
         product.setQuantity(product.getQuantity() + auction.getAuctionedQuantity());
         productRepository.save(product);
+        log.info("[Auction Service - Cancel Auction] Restored allocated quantity back into the product storage");
 
-        // Change the status of the auction to CANCELLED
         auction.setStatus(AuctionStatus.CANCELLED);
         AuctionResponse response = AuctionResponse.from(auction);
         auctionRepository.save(auction);
+        log.info("[Auction Service - Cancel Auction] Changed the status of the auction to CANCELLED for ID: {}", auctionId);
 
         TransactionSynchronizationManager.registerSynchronization(
                 new TransactionSynchronization() {
                     @Override
                     public void afterCommit() {
                         cache.cacheAuctionResponse(auctionId, response);
+                        log.info("[Auction Service - Cancel Auction] Transaction committed, synchronized cancelled status to cache for ID: {}", auctionId);
                     }
                 }
         );
@@ -158,16 +156,15 @@ public class AuctionServiceImpl implements AuctionService {
 
     public AuctionResponse getAuction(Long auctionId) {
 
-        AuctionResponse cached = null;
         try {
-            cached = cache.getAuctionResponse(auctionId);
-            // Fix #18: log message previously said "Cache auction" on a read — renamed to "Cache hit"
-            log.info("[Auction Service - Get Auction] Cache hit for auction #{}", auctionId);
+            AuctionResponse cached = cache.getAuctionResponse(auctionId);
+            if (cached != null) {
+                log.info("[Auction Service - Get Auction] Cache hit for auction #{}", auctionId);
+                return cached;
+            }
         } catch (Exception e) {
             log.error("[Auction Service - Get Auction] Failed to read cache for auction #{}, error: {}", auctionId, e.getMessage());
         }
-
-        if (cached != null) return cached;
 
         Auction auction = auctionRepository.findByIdWithDetails(auctionId)
                 .orElseThrow(() -> new AuctionNotFoundException("Auction not found"));
@@ -176,6 +173,7 @@ public class AuctionServiceImpl implements AuctionService {
         log.info("[Auction Service - Get Auction] Cache miss, fallback to DB!");
         cache.cacheAuctionResponse(auctionId, response);
         return response;
+
     }
 
     public List<AuctionResponse> getAuctionsBidOnByCurrentUser(List<Long> auctionIds) {
@@ -189,20 +187,32 @@ public class AuctionServiceImpl implements AuctionService {
 
     @Transactional(readOnly = true)
     public Page<AuctionResponse> getDiscoverableAuctions(AuctionFindingRequest request, Pageable pageable) {
+        log.info("[Auction Service - Get Discoverable Auctions] Mapping tag enums to string values for native query execution");
 
-        // Map tag enums to string values for native query execution
-        String[] tagStrings = (request.getTags() != null) ? request.getTags().stream().map(Enum::name).toArray(String[]::new) : new String[0];
+        String[] tagStrings = (request.getTags() != null)
+                ? request.getTags().stream().map(Enum::name).toArray(String[]::new)
+                : new String[0];
 
         boolean hasTags = tagStrings.length > 0;
         String statusString = (request.getStatus() != null) ? request.getStatus().name() : null;
+        
+        Page<Long> idPage = auctionRepository.findAuctionIds(
+                request.getProductName(), tagStrings, hasTags,
+                request.getStartTime(), request.getEndTime(),
+                request.getMinStartingPrice(), statusString, pageable
+        );
 
-        return auctionRepository.findAuctions(request.getProductName(), tagStrings, hasTags,
-                request.getStartTime(), request.getEndTime(), request.getMinStartingPrice(),
-                statusString, pageable
-        ).map(AuctionResponse::from);
+        List<Long> ids = idPage.getContent();
+        if (ids.isEmpty()) return Page.empty(pageable);
+        
+        List<AuctionResponse> responses = auctionRepository.findByIdsWithDetails(ids)
+                .stream()
+                .map(AuctionResponse::from)
+                .toList();
+
+        return new PageImpl<>(responses, pageable, idPage.getTotalElements());
     }
 
-    // Helpers
     private Auction findByIdWithDetails(Long auctionId) {
         return auctionRepository.findByIdWithDetails(auctionId)
                 .orElseThrow(() -> new AuctionNotFoundException("Auction not found"));
@@ -213,38 +223,9 @@ public class AuctionServiceImpl implements AuctionService {
                 .orElseThrow(() -> new ProductNotFoundException("Product not found in your inventory"));
     }
 
-    private void validateTime(Instant startTime, Instant endTime) {
-        if (!endTime.isAfter(startTime)) {
-            throw new InvalidEndTimeException("End time must be after start time");
-        }
-    }
-
-    private void validateQuantity(Integer requestedQuantity, Integer currentQuantity) {
-        if (requestedQuantity > currentQuantity) {
-            throw new InvalidProductQuantity(
-                    "Requested quantity (" + requestedQuantity + ") exceeds available stock (" + currentQuantity + ")"
-            );
-        }
-    }
-
-    private void validateUser(User seller, User currentUser) {
-        if (!seller.getId().equals(currentUser.getId())) {
-            throw new BadCredentialsException("You are not the seller of this auction");
-        }
-    }
-
-    private void validateAuctionCancellation(Auction auction) {
-        if (auction.getStatus() != AuctionStatus.UPCOMING) {
-            throw new NotUpcommingAuctionException("Only UPCOMING auctions can be cancelled");
-        }
-    }
-
     private Auction mapToEntity(AuctionRequest request, Product product, User seller) {
         BigDecimal startPrice = request.getStartingPrice();
 
-        // Fix #13: minBidIncrement was calculated twice — once inline here and once inside
-        // recalculateMinBidIncrement(). Removed the redundant inline calculation; the builder
-        // sets a temporary placeholder and recalculateMinBidIncrement() is the single source of truth.
         Auction auction = Auction.builder()
                 .seller(seller)
                 .product(product)
