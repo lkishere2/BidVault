@@ -1,4 +1,4 @@
 export interface UserStats {
-    followersCount : number;
-    followingCount : number;
+    followersCount: number;
+    followingCount: number;
 }

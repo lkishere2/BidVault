@@ -5,7 +5,7 @@
 
 <HBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.auction.app.controllers.market.MarketSearchBarController"
-      spacing="12" alignment="CENTER_LEFT"
+      spacing="10" alignment="CENTER_LEFT"
       style="-fx-background-color: #0D0D0D; -fx-border-color: #F5C518; -fx-border-width: 0 0 1 0;">
     <padding>
         <Insets top="14" right="20" bottom="14" left="20"/>
@@ -18,9 +18,16 @@
                       -fx-border-color: #F5C518; -fx-border-radius: 8px;
                       -fx-background-color: #FFFFFF; -fx-text-fill: #0D0D0D;"/>
 
+    <TextField fx:id="tagsField"
+               promptText="Tags (e.g. VINTAGE, RARE)"
+               prefHeight="38" prefWidth="160"
+               style="-fx-background-radius: 8px;
+                      -fx-border-color: #F5C518; -fx-border-radius: 8px;
+                      -fx-background-color: #FFFFFF; -fx-text-fill: #0D0D0D;"/>
+
     <TextField fx:id="minPriceField"
                promptText="Min price ($)"
-               prefHeight="38" prefWidth="120"
+               prefHeight="38" prefWidth="100"
                style="-fx-background-radius: 8px;
                       -fx-border-color: #F5C518;
                       -fx-border-radius: 8px;
@@ -28,17 +35,34 @@
                       -fx-text-fill: #0D0D0D;"/>
 
     <ComboBox fx:id="statusComboBox"
-              prefHeight="38" prefWidth="150"
+              prefHeight="38" prefWidth="120"
               style="-fx-background-color: #FFFFFF;
                      -fx-border-color: #F5C518;
                      -fx-background-radius: 8px;
                      -fx-border-radius: 8px;"/>
 
-    <Button fx:id="searchButton"
-            text="Search" prefHeight="38"
+    <DatePicker fx:id="startTimePicker"
+                promptText="Start Date"
+                prefHeight="38" prefWidth="130"
+                style="-fx-background-color: #FFFFFF;
+                       -fx-border-color: #F5C518;
+                       -fx-background-radius: 8px;
+                       -fx-border-radius: 8px;"/>
+
+    <DatePicker fx:id="endTimePicker"
+                promptText="End Date"
+                prefHeight="38" prefWidth="130"
+                style="-fx-background-color: #FFFFFF;
+                       -fx-border-color: #F5C518;
+                       -fx-background-radius: 8px;
+                       -fx-border-radius: 8px;"/>
+
+    <Button text="Search"
             onAction="#handleSearchAction"
-            style="-fx-background-color: #F5C518; -fx-text-fill: #0D0D0D; -fx-font-weight: bold;
+            prefHeight="38" prefWidth="90"
+            style="-fx-background-color: #F5C518;
+                   -fx-text-fill: #0D0D0D;
+                   -fx-font-weight: bold;
                    -fx-background-radius: 8px;
-                   -fx-cursor: hand;
-                   -fx-padding: 0 20 0 20;"/>
+                   -fx-cursor: hand;"/>
 </HBox>

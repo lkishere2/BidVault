@@ -1,13 +1,13 @@
 export interface BidRequest {
-    amount: string;
+    amount: string; // Khớp với BigDecimal (hoặc string nếu bạn chuộng ép chuỗi)
 }
 
 export interface BidResponse {
     bidId: number;
     auctionId: number;
     bidderLabel: string;
-    amount: string;
-    placedAt: string;
+    amount: string;  // Đồng bộ với backend
+    placedAt: string; // ISO String tương ứng với Instant
 }
 
 export interface BidNotificationPayload {

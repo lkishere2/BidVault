@@ -2,41 +2,37 @@ package com.auction.app.controllers.market;
 
 import com.auction.app.domains.auction.auction.dtos.AuctionFindingRequest;
 import com.auction.app.domains.auction.auction.model.AuctionStatus;
+import com.auction.app.domains.products.model.Tag;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-/**
- * Controller for the search/filter bar embedded via {@code <fx:include>} in MarketView.fxml.
- *
- * <p>Must be a Spring {@code @Component} so the Spring-aware FXML controller factory can
- * inject it as a nested controller into {@link MarketViewController} via the
- * {@code @FXML private MarketSearchBarController searchBarController} field.
- *
- * <p>Only the three publicly-discoverable statuses are offered:
- * {@code UPCOMING}, {@code ACTIVE}, and {@code ENDED}. {@code CANCELLED} auctions
- * are never shown on the market.
- */
 @Component
 public class MarketSearchBarController {
 
-    /** Discoverable statuses — CANCELLED is intentionally excluded. */
     private static final List<AuctionStatus> DISCOVERABLE_STATUSES = List.of(
             AuctionStatus.UPCOMING,
             AuctionStatus.ACTIVE,
             AuctionStatus.ENDED
     );
 
-    @FXML private TextField  searchField;
-    @FXML private TextField  minPriceField;
+    @FXML private TextField searchField;
+    @FXML private TextField tagsField;
+    @FXML private TextField minPriceField;
     @FXML private ComboBox<AuctionStatus> statusComboBox;
-    @FXML private Button     searchButton;
+    @FXML private DatePicker startTimePicker;
+    @FXML private DatePicker endTimePicker;
 
     private Runnable onSearchTriggered;
 
@@ -45,18 +41,17 @@ public class MarketSearchBarController {
         statusComboBox.setItems(FXCollections.observableArrayList(DISCOVERABLE_STATUSES));
         statusComboBox.setValue(AuctionStatus.ACTIVE);
 
-        // Numeric-only guard for the price field
         minPriceField.textProperty().addListener((obs, oldVal, newVal) -> {
             if (!newVal.matches("\\d*(\\.\\d*)?")) {
                 minPriceField.setText(oldVal);
             }
         });
 
-        // Also trigger search on Enter inside the text field
         searchField.setOnAction(e -> handleSearchAction());
+        tagsField.setOnAction(e -> handleSearchAction());
+        minPriceField.setOnAction(e -> handleSearchAction());
     }
 
-    /** Called by {@link MarketViewController} after include injection is complete. */
     public void setOnSearchTriggered(Runnable callback) {
         this.onSearchTriggered = callback;
     }
@@ -68,15 +63,27 @@ public class MarketSearchBarController {
         }
     }
 
-    /**
-     * Builds a query request from the current field values.
-     * Empty strings become {@code null}; empty price becomes {@code BigDecimal.ZERO}.
-     */
     public AuctionFindingRequest buildRequest() {
         AuctionFindingRequest request = new AuctionFindingRequest();
 
         String query = searchField.getText().trim();
         request.setProductName(query.isEmpty() ? null : query);
+
+        String tagsText = tagsField.getText().trim();
+        if (!tagsText.isEmpty()) {
+            try {
+                Set<Tag> tagsSet = Arrays.stream(tagsText.split(","))
+                        .map(String::trim)
+                        .filter(tag -> !tag.isEmpty())
+                        .map(tag -> Tag.valueOf(tag.toUpperCase()))
+                        .collect(Collectors.toSet());
+                request.setTags(tagsSet.isEmpty() ? null : tagsSet);
+            } catch (IllegalArgumentException e) {
+                request.setTags(null);
+            }
+        } else {
+            request.setTags(null);
+        }
 
         String priceText = minPriceField.getText().trim();
         if (!priceText.isEmpty()) {
@@ -90,6 +97,26 @@ public class MarketSearchBarController {
         }
 
         request.setStatus(statusComboBox.getValue());
+
+        if (startTimePicker.getValue() != null) {
+            Instant startInstant = startTimePicker.getValue()
+                    .atStartOfDay(ZoneId.systemDefault())
+                    .toInstant();
+            request.setStartTime(startInstant);
+        } else {
+            request.setStartTime(null);
+        }
+
+        if (endTimePicker.getValue() != null) {
+            Instant endInstant = endTimePicker.getValue()
+                    .atTime(23, 59, 59)
+                    .atZone(ZoneId.systemDefault())
+                    .toInstant();
+            request.setEndTime(endInstant);
+        } else {
+            request.setEndTime(null);
+        }
+
         return request;
     }
 }

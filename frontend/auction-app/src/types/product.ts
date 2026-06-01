@@ -15,9 +15,9 @@ export type Tag =
 export interface ProductRequest {
     productName: string;
     description?: string;
-    quantity: number;
+    quantity: number;          // Đã khớp với Integer bên Backend
     productImageUrl?: string;
-    tags?: Tag[] | Set<Tag>;
+    tags?: Tag[];              // JSON gửi lên sẽ là mảng chuỗi, tự động map sang Set<Tag> ở Spring Boot
 }
 
 export interface ProductResponse {
@@ -26,7 +26,6 @@ export interface ProductResponse {
     description?: string;
     quantity: number;
     productImageUrl?: string;
-    tags?: Tag[] | Set<Tag>;
-    createdAt: string;
+    tags?: Tag[];              // Đồng bộ nhận về danh sách tag
+    createdAt: string;         // Khớp với LocalDateTime từ Backend dưới dạng ISO String
 }
-
