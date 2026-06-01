@@ -13,12 +13,11 @@ import OverviewPage from './pages/user/user/overview/OverviewPage';
 import OverviewPageLoading from './pages/user/user/overview/OverViewPageLoading';
 import StoragePage from './pages/user/user/storage/StoragePage';
 import SettingPage from './pages/user/user/setting/SettingPage';
+import HubPage from './pages/user/market/hub/HubPage';
 import { userApi } from './api/userApi';
 import './App.css';
 
-const OfficeDashboard = () => <div className="p-4"><h1 className="text-xl font-bold">Dashboard</h1></div>;
 const ExplorePage = () => <div className="p-4"><h1 className="text-xl font-bold">Explore</h1></div>;
-const AllAuctionsPage = () => <div className="p-4"><h1 className="text-xl font-bold">All Auctions</h1></div>;
 const MyBidsPage = () => <div className="p-4"><h1 className="text-xl font-bold">My Bids</h1></div>;
 
 const AccountBalance = () => <div><h2 className="text-xl font-bold mb-4">Balance</h2><p className="text-neutral-500 text-sm">Manage transactions and funds wallet setup.</p></div>;
@@ -66,7 +65,7 @@ function App() {
           const initials = username
             .split(/[\s._-]+/)
             .slice(0, 2)
-            .map((w: string) => w[0]?.toUpperCase() ?? '')
+            .map((w: string) => w?.toUpperCase() ?? '')
             .join('');
 
           setUser({ id, username, initials });
@@ -111,9 +110,8 @@ function App() {
           <Route path="/verify/user" element={<VerifyPage />} />
           <Route path="/verify/forget-password" element={<ForgotPasswordVerifyPage />} />
 
-          <Route path="/office" element={<OfficeDashboard />} />
           <Route path="/explore" element={<ExplorePage />} />
-          <Route path="/auctions/hub" element={<AllAuctionsPage />} />
+          <Route path="/auctions/hub" element={<HubPage />} />
           <Route path="/auction/joined" element={<MyBidsPage />} />
 
           <Route path="/account" element={<AccountNavbar />}>

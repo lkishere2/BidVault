@@ -21,7 +21,6 @@ const NAV = [
         sub: [
             { label: 'All Auctions', path: '/auctions/hub' },
             { label: 'My Bids', path: '/auction/joined' },
-            { label: 'Live Now', path: '/auctions/live' },
         ],
     },
     { label: 'Community', path: '/explore' },
