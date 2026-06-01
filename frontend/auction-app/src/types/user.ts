@@ -4,6 +4,7 @@ export interface UserResponse {
     email: string;
     balance: string;
     profileImageUrl?: string;
+    role: 'ADMIN' | 'USER';
 }
 
 export interface UsernameRequest {

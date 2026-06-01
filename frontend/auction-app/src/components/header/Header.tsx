@@ -31,6 +31,8 @@ export default function Header({ user, isLoggedIn = !!user, isAdmin = false, onL
     const [mobileOpen, setMobileOpen] = useState(false);
     const close = () => setMobileOpen(false);
 
+    const displayAdmin = isAdmin || user?.role === 'ADMIN' || user?.role === 'admin';
+
     return (
         <header className="sticky top-0 z-[100] w-full bg-white border-b border-[#0D0D0D]">
             <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 h-[60px] sm:h-[68px] lg:h-[72px] flex items-center justify-between gap-6">
@@ -58,7 +60,7 @@ export default function Header({ user, isLoggedIn = !!user, isAdmin = false, onL
                     <div className="hidden sm:flex items-center gap-2">
                         {isLoggedIn && user ? (
                             <>
-                                {isAdmin && <AdminButton />}
+                                {displayAdmin && <AdminButton />}
                                 <ProfileButton username={user.username} initials={user.initials} />
                                 <button
                                     type="button"
@@ -124,7 +126,7 @@ export default function Header({ user, isLoggedIn = !!user, isAdmin = false, onL
                     <div className="mt-2 pt-2 border-t border-neutral-100">
                         {isLoggedIn && user ? (
                             <div className="flex flex-col gap-2">
-                                {isAdmin && (
+                                {displayAdmin && (
                                     <div className="px-3 pb-2 border-b border-neutral-100 flex justify-center" onClick={close}>
                                         <AdminButton />
                                     </div>

@@ -3,6 +3,9 @@ import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 import Header from './components/header/Header';
 import Footer from './components/footer/Footer';
 import HomePage from './pages/user/home/HomePage';
+import AdminPage from './pages/admin/home/AdminPage';
+import AdminNavbar from './pages/admin/AdminNavbar';
+import TransactionPage from './pages/admin/transaction/TransactionPage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import VerifyPage from './pages/auth/VerifyPage';
@@ -11,6 +14,7 @@ import ForgotPasswordVerifyPage from './pages/auth/ForgotPasswordVerifyPage';
 import AccountNavbar from './pages/user/user/AccountNavbar';
 import OverviewPage from './pages/user/user/overview/OverviewPage';
 import OverviewPageLoading from './pages/user/user/overview/OverViewPageLoading';
+import BalancePage from './pages/user/user/balance/BalancePage';
 import StoragePage from './pages/user/user/storage/StoragePage';
 import SettingPage from './pages/user/user/setting/SettingPage';
 import HubPage from './pages/user/market/hub/HubPage';
@@ -20,19 +24,20 @@ import { userApi } from './api/userApi';
 import './App.css';
 
 const MyBidsPage = () => <div className="p-4"><h1 className="text-xl font-bold">My Bids</h1></div>;
+const AdminUserControlPage = () => <div className="p-4"><h1 className="text-xl font-bold">User Control Panel</h1></div>;
 
-const AccountBalance = () => <div><h2 className="text-xl font-bold mb-4">Balance</h2><p className="text-neutral-500 text-sm">Manage transactions and funds wallet setup.</p></div>;
+type UserData = { id?: string | number; username: string; initials: string; role?: string };
 
 function RootLayout({
   user, isLoggedIn, onLogout,
 }: {
-  user?: { username: string; initials: string };
+  user?: UserData;
   isLoggedIn: boolean;
   onLogout: () => void;
 }) {
   return (
-    <div className="flex flex-col min-h-screen">
-      <Header user={user} isLoggedIn={isLoggedIn} onLogout={onLogout} />
+    <div className="flex flex-col min-h-screen bg-neutral-50/50">
+      <Header user={user} isLoggedIn={isLoggedIn} isAdmin={user?.role === 'ADMIN'} onLogout={onLogout} />
       <main className="flex-1">
         <Outlet />
       </main>
@@ -40,8 +45,6 @@ function RootLayout({
     </div>
   );
 }
-
-type UserData = { id?: string | number; username: string; initials: string };
 
 function readSavedUser(): UserData | null {
   try {
@@ -62,14 +65,14 @@ function App() {
       if (token && !user?.id) {
         try {
           const response = await userApi.getInfo();
-          const { id, username } = response.data;
+          const { id, username, role } = response.data;
           const initials = username
             .split(/[\s._-]+/)
             .slice(0, 2)
-            .map((w: string) => w?.toUpperCase() ?? '')
+            .map((w: string) => w.toUpperCase())
             .join('');
 
-          setUser({ id, username, initials });
+          setUser({ id, username, initials, role });
         } catch (error) {
           console.error(error);
           setUser(null);
@@ -127,9 +130,15 @@ function App() {
                 )
               }
             />
-            <Route path="balance" element={<AccountBalance />} />
+            <Route path="balance" element={<BalancePage />} />
             <Route path="storage" element={<StoragePage />} />
             <Route path="settings" element={<SettingPage />} />
+          </Route>
+
+          <Route path="/admin" element={<AdminNavbar />}>
+            <Route index element={<AdminPage />} />
+            <Route path="user-control" element={<AdminUserControlPage />} />
+            <Route path="transaction-request" element={<TransactionPage />} />
           </Route>
 
         </Route>
