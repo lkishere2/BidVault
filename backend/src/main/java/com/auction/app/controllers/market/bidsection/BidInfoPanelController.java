@@ -17,6 +17,8 @@ import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.security.concurrent.DelegatingSecurityContextRunnable;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +29,11 @@ import java.time.temporal.ChronoUnit;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+// Fix: singleton scope meant all windows shared one instance — @FXML fields pointed to
+// whichever window loaded last, so STOMP callbacks updated the wrong UI nodes and the
+// WebSocket appeared broken. Prototype scope gives each window its own fresh instance
+// with its own correctly-injected @FXML references.
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class BidInfoPanelController {
 
     @FXML private ImageView productImage;

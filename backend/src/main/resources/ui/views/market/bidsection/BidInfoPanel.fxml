@@ -4,8 +4,12 @@
 <?import javafx.scene.image.*?>
 <?import javafx.geometry.Insets?>
 
+<!-- fx:controller omitted deliberately.
+     Controller is supplied via FXMLLoader.setController(applicationContext.getBean(...))
+     in BidSectionController before load() is called. JavaFX 21 throws
+     "Controller value already specified" if fx:controller is also present.
+     The IDE warning is a false positive — ignore it. -->
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.auction.app.controllers.market.bidsection.BidInfoPanelController"
       prefWidth="420.0" spacing="0"
       style="-fx-background-color: #0F1117; -fx-border-color: #1E2433; -fx-border-width: 0 1 0 0;">
 

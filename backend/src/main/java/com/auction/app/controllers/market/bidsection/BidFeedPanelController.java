@@ -15,6 +15,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -26,6 +28,11 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+// Fix: singleton scope meant all windows shared one instance — @FXML fields pointed to
+// whichever window loaded last, so STOMP callbacks updated the wrong UI nodes and the
+// WebSocket appeared broken. Prototype scope gives each window its own fresh instance
+// with its own correctly-injected @FXML references.
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class BidFeedPanelController {
 
     @FXML private ListView<BidFeedEvent> feedListView;
@@ -118,11 +125,11 @@ public class BidFeedPanelController {
 
     private class BidFeedCell extends ListCell<BidFeedEvent> {
 
-        private final HBox  root       = new HBox(12);
-        private final VBox  textBox    = new VBox(2);
-        private final Label nameLabel  = new Label();
+        private final HBox  root        = new HBox(12);
+        private final VBox  textBox     = new VBox(2);
+        private final Label nameLabel   = new Label();
         private final Label amountLabel = new Label();
-        private final Label timeLabel  = new Label();
+        private final Label timeLabel   = new Label();
 
         BidFeedCell() {
             root.setAlignment(Pos.CENTER_LEFT);
