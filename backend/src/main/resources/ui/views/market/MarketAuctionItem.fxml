@@ -10,12 +10,11 @@
       onMouseClicked="#handleCardClick"
       prefWidth="220.0"
       spacing="8.0"
-      style="-fx-background-color: #FFFFFF; -fx-background-radius: 8px; -fx-border-color: #E2E8F0; -fx-border-radius: 8px; -fx-border-width: 1px; -fx-cursor: hand;"
+      style="-fx-background-color: #FFFFFF; -fx-background-radius: 8px; -fx-border-color: #D4A900; -fx-border-radius: 8px; -fx-border-width: 1px; -fx-cursor: hand;"
       xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1">
     <children>
 
-        <!-- Product image -->
         <ImageView fx:id="productImage"
                    fitWidth="220" fitHeight="130"
                    preserveRatio="false"
@@ -24,22 +23,19 @@
         <VBox spacing="8" style="-fx-padding: 12 16 16 16;">
 
             <HBox alignment="CENTER_LEFT">
-                <Label fx:id="statusTag" text=""/>
+                <Label fx:id="statusTag" text="" style="-fx-text-fill: #D4A900; -fx-font-weight: bold;"/>
             </HBox>
 
             <Label fx:id="titleLabel" text="" wrapText="true"
-                   style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #1E293B;"/>
-
-            <VBox spacing="2">
-                <Label fx:id="priceCaptionLabel" text=""
-                       style="-fx-font-size: 10px; -fx-text-fill: #94A3B8;"/>
-                <Label fx:id="priceLabel" text=""
-                       style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1E293B;"/>
-                <VBox.margin><Insets top="4.0"/></VBox.margin>
-            </VBox>
+                   style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #0D0D0D;"/> <VBox spacing="2">
+            <Label fx:id="priceCaptionLabel" text=""
+                   style="-fx-font-size: 10px; -fx-text-fill: #777777;"/> <Label fx:id="priceLabel" text=""
+                                                                                 style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #D4A900;"> <VBox.margin><Insets top="4.0"/></VBox.margin>
+        </Label>
+        </VBox>
 
             <Label fx:id="contextHintLabel" text=""
-                   style="-fx-font-size: 11px; -fx-text-fill: #94A3B8;"/>
+                   style="-fx-font-size: 11px; -fx-text-fill: #777777;"/>
 
         </VBox>
     </children>
