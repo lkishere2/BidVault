@@ -41,7 +41,7 @@ export const UserInfo: React.FC<UserInfoProps> = ({ userId, currentUserId }) => 
                         const searchRes = await userApi.searchUsers('', 0, 100);
                         // Defensively check both .items and .content arrays from the response
                         const items = searchRes?.data?.items || searchRes?.data?.content || [];
-                        userDetail = items.find((u: any) => u.id === userId) || null;
+                        userDetail = items.find((u: UserResponse) => u.id === userId) || null;
                     } catch (err) {
                         console.error("Error searching user list:", err);
                     }
@@ -53,7 +53,8 @@ export const UserInfo: React.FC<UserInfoProps> = ({ userId, currentUserId }) => 
                         id: userId,
                         username: `User #${userId}`,
                         email: '',
-                        balance: '0'
+                        balance: '0',
+                        role: 'USER',
                     };
                 }
 

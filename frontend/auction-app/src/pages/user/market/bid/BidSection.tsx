@@ -1,5 +1,5 @@
 import { X, Gavel, Clock, TrendingUp, Users, ArrowUpRight } from 'lucide-react';
-import type { AuctionResponse } from '../../../types/auction';
+import type { AuctionResponse } from '../../../../types/auction';
 
 interface BidSectionProps {
     auction: AuctionResponse;

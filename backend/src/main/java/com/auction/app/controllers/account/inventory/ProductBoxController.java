@@ -67,7 +67,7 @@ public class ProductBoxController {
         if (product.getTags() != null && !product.getTags().isEmpty()) {
             tagComboBox.setValue(product.getTags().iterator().next());
         } else {
-            tagComboBox.setValue(Tag.OTHER);
+            tagComboBox.setValue(Tag.OTHERS);
         }
     }
 

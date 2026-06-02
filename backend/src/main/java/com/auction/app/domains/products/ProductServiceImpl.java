@@ -99,7 +99,7 @@ public class ProductServiceImpl implements ProductService {
 
     private Set<Tag> resolveTags(Set<Tag> tags) {
         if (tags == null || tags.isEmpty()) {
-            return Set.of(Tag.OTHER);
+            return Set.of(Tag.OTHERS);
         }
         return tags;
     }

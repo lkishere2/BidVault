@@ -47,7 +47,7 @@ public class AddProductBoxController {
     @FXML
     public void initialize() {
         tagComboBox.setItems(FXCollections.observableArrayList(Tag.values()));
-        tagComboBox.setValue(Tag.OTHER);
+        tagComboBox.setValue(Tag.OTHERS);
         errorLabel.setVisible(false);
         errorLabel.setManaged(false);
         selectedImageFile = null;

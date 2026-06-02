@@ -62,26 +62,26 @@ function App() {
     const syncUser = async () => {
       const token = localStorage.getItem('accessToken');
 
-      if (token && !user?.id) {
-        try {
-          const response = await userApi.getInfo();
-          const { id, username, role } = response.data;
-          const initials = username
-            .split(/[\s._-]+/)
-            .slice(0, 2)
-            .map((w: string) => w.toUpperCase())
-            .join('');
+      if (!token) return;
 
-          setUser({ id, username, initials, role });
-        } catch (error) {
-          console.error(error);
-          setUser(null);
-        }
+      try {
+        const response = await userApi.getInfo();
+        const { id, username, role } = response.data;
+        const initials = username
+          .split(/[\s._-]+/)
+          .slice(0, 2)
+          .map((w: string) => w[0].toUpperCase())
+          .join('');
+
+        setUser({ id, username, initials, role });
+      } catch (error) {
+        console.error(error);
+        setUser(null);
       }
     };
 
     syncUser();
-  }, [user?.id]);
+  }, []);
 
   useEffect(() => {
     if (user) {

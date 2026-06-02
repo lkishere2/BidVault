@@ -1,12 +1,14 @@
 import React from 'react';
+import { Rocket } from 'lucide-react';
 import type { ProductResponse } from '../../../../types/product';
 
 interface UserItemProps {
     product: ProductResponse;
     onClick: () => void;
+    onLaunch: () => void;
 }
 
-export const UserItem: React.FC<UserItemProps> = ({ product, onClick }) => {
+export const UserItem: React.FC<UserItemProps> = ({ product, onClick, onLaunch }) => {
     const imageUrl = product.productImageUrl
         ? product.productImageUrl.startsWith('http')
             ? product.productImageUrl
@@ -25,7 +27,8 @@ export const UserItem: React.FC<UserItemProps> = ({ product, onClick }) => {
                 transition: 'transform 0.2s ease, box-shadow 0.2s ease',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '12px'
+                gap: '12px',
+                position: 'relative',
             }}
             onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-2px)';
@@ -51,6 +54,33 @@ export const UserItem: React.FC<UserItemProps> = ({ product, onClick }) => {
                     </p>
                 )}
             </div>
+
+            <button
+                onClick={(e) => { e.stopPropagation(); onLaunch(); }}
+                style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    width: '100%',
+                    padding: '8px 0',
+                    background: '#F5C518',
+                    color: '#0D0D0D',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    transition: 'opacity 0.15s ease',
+                    marginTop: 'auto',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.85')}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+            >
+                <Rocket size={14} strokeWidth={2.5} />
+                Launch Auction
+            </button>
         </div>
     );
 };

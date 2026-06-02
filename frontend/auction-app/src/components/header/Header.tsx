@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Gavel, LogOut, Menu, X } from 'lucide-react';
+import { Gavel, Menu, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import NavItem from './NavItem';
 import LoginButton from './LoginButton';
 import ProfileButton from './ProfileButton';
 import AdminButton from './AdminButton';
+import LogoutButton from './LogoutButton';
 
 interface HeaderProps {
     user?: { username: string; initials: string; role?: string };
@@ -62,19 +63,10 @@ export default function Header({ user, isLoggedIn = !!user, isAdmin = false, onL
                             <>
                                 {displayAdmin && <AdminButton />}
                                 <ProfileButton username={user.username} initials={user.initials} />
-                                <button
-                                    type="button"
-                                    onClick={onLogout}
-                                    title="Log out"
-                                    className="w-[38px] h-[38px] sm:w-[42px] sm:h-[42px] rounded-full border border-neutral-200 flex items-center justify-center text-neutral-400 hover:border-red-400 hover:text-red-500 transition-colors bg-white cursor-pointer"
-                                >
-                                    <LogOut size={14} strokeWidth={2} />
-                                </button>
+                                <LogoutButton onClick={onLogout} variant="desktop" />
                             </>
                         ) : (
-                            <div onClick={onLogin}>
-                                <LoginButton />
-                            </div>
+                            <LoginButton onClick={onLogin} />
                         )}
                     </div>
 
@@ -133,18 +125,12 @@ export default function Header({ user, isLoggedIn = !!user, isAdmin = false, onL
                                 )}
                                 <div className="flex items-center justify-between px-3 py-2">
                                     <ProfileButton username={user.username} initials={user.initials} />
-                                    <button
-                                        type="button"
-                                        onClick={() => { onLogout?.(); close(); }}
-                                        className="flex items-center gap-1.5 text-[12px] font-semibold text-red-500 bg-transparent border-0 cursor-pointer pl-4"
-                                    >
-                                        <LogOut size={13} strokeWidth={2} /> Log out
-                                    </button>
+                                    <LogoutButton onClick={() => { onLogout?.(); close(); }} variant="mobile" />
                                 </div>
                             </div>
                         ) : (
-                            <div onClick={() => { onLogin?.(); close(); }} className="w-full flex justify-center py-2">
-                                <LoginButton />
+                            <div className="w-full flex justify-center py-2">
+                                <LoginButton onClick={() => { onLogin?.(); close(); }} />
                             </div>
                         )}
                     </div>
