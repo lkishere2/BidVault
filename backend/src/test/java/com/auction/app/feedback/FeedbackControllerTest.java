@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
@@ -32,13 +31,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(
-        controllers = FeedbackController.class,
-        excludeFilters = @ComponentScan.Filter(
-                type = FilterType.ASSIGNABLE_TYPE,
-                classes = JwtAuthenticationFilter.class
-        )
-)
+@WebMvcTest(controllers = FeedbackController.class, excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = JwtAuthenticationFilter.class))
 @AutoConfigureMockMvc(addFilters = false)
 class FeedbackControllerTest {
 
@@ -63,8 +56,8 @@ class FeedbackControllerTest {
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/feedback")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.content").value("Great auction experience!"));
@@ -79,8 +72,8 @@ class FeedbackControllerTest {
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/feedback")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
         verifyNoInteractions(feedbackService);
@@ -93,8 +86,8 @@ class FeedbackControllerTest {
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/feedback")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
         verifyNoInteractions(feedbackService);
@@ -112,8 +105,8 @@ class FeedbackControllerTest {
 
         // Act & Assert
         mockMvc.perform(put("/api/v1/feedback/{id}", 1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.content").value("Updated feedback content"));
@@ -128,8 +121,8 @@ class FeedbackControllerTest {
 
         // Act & Assert
         mockMvc.perform(put("/api/v1/feedback/{id}", 1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
         verifyNoInteractions(feedbackService);
@@ -142,8 +135,8 @@ class FeedbackControllerTest {
 
         // Act & Assert
         mockMvc.perform(put("/api/v1/feedback/{id}", 1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
         verifyNoInteractions(feedbackService);
@@ -172,8 +165,8 @@ class FeedbackControllerTest {
 
         // Act & Assert
         mockMvc.perform(get("/api/v1/feedback/my")
-                        .param("page", "0")
-                        .param("size", "10"))
+                .param("page", "0")
+                .param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].id").value(1))
                 .andExpect(jsonPath("$.content[0].content").value("My feedback"));
@@ -204,9 +197,9 @@ class FeedbackControllerTest {
         Page<FeedbackResponse> mockPage = new PageImpl<>(List.of(feedbackResponse));
         when(feedbackService.getAllFeedback(0, 20)).thenReturn(mockPage);
 
-        mockMvc.perform(get("/api/v1/feedback/all")  // ← sửa chỗ này
-                        .param("page", "0")
-                        .param("size", "20"))
+        mockMvc.perform(get("/api/v1/feedback/all") // ← sửa chỗ này
+                .param("page", "0")
+                .param("size", "20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].id").value(1))
                 .andExpect(jsonPath("$.content[0].content").value("Some feedback"));
@@ -219,7 +212,7 @@ class FeedbackControllerTest {
         Page<FeedbackResponse> mockPage = new PageImpl<>(List.of());
         when(feedbackService.getAllFeedback(0, 20)).thenReturn(mockPage);
 
-        mockMvc.perform(get("/api/v1/feedback/all"))  // ← sửa chỗ này
+        mockMvc.perform(get("/api/v1/feedback/all")) // ← sửa chỗ này
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content").isEmpty());

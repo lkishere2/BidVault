@@ -24,7 +24,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -53,8 +52,7 @@ class UserServiceTest {
         currentUser.setBalance(new BigDecimal("150.00"));
 
         SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(currentUser, null)
-        );
+                new UsernamePasswordAuthenticationToken(currentUser, null));
     }
 
     @AfterEach
@@ -89,8 +87,7 @@ class UserServiceTest {
     @Test
     void getCurrentUserInfo_WhenPrincipalIsNotUser_ShouldThrowException() {
         SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken("not-a-user", null)
-        );
+                new UsernamePasswordAuthenticationToken("not-a-user", null));
 
         assertThatThrownBy(() -> userService.getCurrentUserInfo())
                 .isInstanceOf(ClassCastException.class);

@@ -1,4 +1,4 @@
-import { Gavel, Users, Clock, TrendingUp, ArrowUpRight } from 'lucide-react';
+import { Gavel, Users, Clock, ArrowUpRight } from 'lucide-react';
 import type { AuctionResponse } from '../../../../types/auction';
 import type { BidNotificationPayload } from '../../../../types/bid';
 import { useEffect, useState } from 'react';
@@ -22,6 +22,7 @@ export default function BidInfoPanel({ auction, ticker, onPlaceBid }: BidInfoPan
     const minBidIncrement = ticker ? ticker.minNextBid : auction.minBidIncrement;
     const isEnded = ticker ? ticker.ended : auction.status === 'ENDED';
     const isExtended = ticker ? ticker.extended : auction.extended;
+    const topBidder = ticker ? ticker.bidderLabel : auction.winnerLabel;
 
     const [timeLeft, setTimeLeft] = useState<string>('');
     const [bidAmount, setBidAmount] = useState<string>('');
@@ -90,21 +91,27 @@ export default function BidInfoPanel({ auction, ticker, onPlaceBid }: BidInfoPan
                 </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 mb-5">
-                <div className="bg-neutral-50 rounded-xl p-3 text-center">
+            <div className="grid grid-cols-2 gap-3 mb-5">
+                <div className="bg-neutral-50 rounded-xl p-3 text-center flex flex-col justify-center items-center">
                     <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1">Current Bid</p>
                     <p className="text-[15px] font-black text-[#0D0D0D]">{formatPrice(currentPrice)}</p>
                 </div>
-                <div className="bg-neutral-50 rounded-xl p-3 text-center">
+                <div className="bg-neutral-50 rounded-xl p-3 text-center flex flex-col justify-center items-center">
                     <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1">Min Increment</p>
                     <p className="text-[15px] font-black text-[#0D0D0D]">{formatPrice(minBidIncrement)}</p>
                 </div>
-                <div className="bg-neutral-50 rounded-xl p-3 text-center">
+                <div className="bg-neutral-50 rounded-xl p-3 text-center flex flex-col justify-center items-center">
                     <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1">Bids</p>
                     <div className="flex items-center justify-center gap-1">
                         <Users size={11} className="text-neutral-400" />
                         <p className="text-[15px] font-black text-[#0D0D0D]">{bidCount}</p>
                     </div>
+                </div>
+                <div className="bg-neutral-50 rounded-xl p-3 text-center flex flex-col justify-center items-center overflow-hidden">
+                    <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1">Top Bidder</p>
+                    <p className="text-[15px] font-black text-[#0D0D0D] truncate w-full px-1">
+                        {topBidder || 'None'}
+                    </p>
                 </div>
             </div>
 
@@ -142,11 +149,10 @@ export default function BidInfoPanel({ auction, ticker, onPlaceBid }: BidInfoPan
                         }
                     }}
                     disabled={isEnded || !bidAmount}
-                    className={`w-full h-[48px] rounded-xl text-[14px] font-bold flex items-center justify-center gap-2 transition-all ${
-                        isEnded || !bidAmount
-                            ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
-                            : 'bg-[#0D0D0D] text-white hover:bg-[#1A1A1A] cursor-pointer'
-                    }`}
+                    className={`w-full h-[48px] rounded-xl text-[14px] font-bold flex items-center justify-center gap-2 transition-all ${isEnded || !bidAmount
+                        ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
+                        : 'bg-[#0D0D0D] text-white hover:bg-[#1A1A1A] cursor-pointer'
+                        }`}
                 >
                     <Gavel size={16} strokeWidth={2} />
                     {isEnded ? 'Auction Ended' : 'Place Bid'}

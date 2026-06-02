@@ -45,20 +45,17 @@ class TransactionRepositoryTest {
                 client,
                 "100.00",
                 TransactionType.DEPOSIT,
-                TransactionStatus.PENDING
-        ));
+                TransactionStatus.PENDING));
         withdrawal = transactionRepository.saveAndFlush(createTransaction(
                 client,
                 "25.00",
                 TransactionType.WITHDRAWAL,
-                TransactionStatus.SUCCESS
-        ));
+                TransactionStatus.SUCCESS));
         transactionRepository.saveAndFlush(createTransaction(
                 otherClient,
                 "75.00",
                 TransactionType.DEPOSIT,
-                TransactionStatus.PENDING
-        ));
+                TransactionStatus.PENDING));
     }
 
     // =========================================================================
@@ -71,8 +68,7 @@ class TransactionRepositoryTest {
     void getTransactionByUserId_WhenUserHasTransactions_ShouldReturnOnlyThatUsersTransactions() {
         Page<Transaction> result = transactionRepository.getTransactionByUserId(
                 PageRequest.of(0, 10),
-                client.getId()
-        );
+                client.getId());
 
         assertThat(result.getContent()).hasSize(2);
         assertThat(result.getContent())
@@ -84,8 +80,7 @@ class TransactionRepositoryTest {
     void getTransactionByUserId_WhenPageSizeIsOne_ShouldReturnOneTransactionAndTotalCount() {
         Page<Transaction> result = transactionRepository.getTransactionByUserId(
                 PageRequest.of(0, 1),
-                client.getId()
-        );
+                client.getId());
 
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getTotalElements()).isEqualTo(2);
@@ -95,8 +90,7 @@ class TransactionRepositoryTest {
     void getTransactionByUserId_WhenSecondPageRequested_ShouldReturnRemainingTransaction() {
         Page<Transaction> result = transactionRepository.getTransactionByUserId(
                 PageRequest.of(1, 1),
-                client.getId()
-        );
+                client.getId());
 
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getTotalElements()).isEqualTo(2);
@@ -108,8 +102,7 @@ class TransactionRepositoryTest {
     void getTransactionByUserId_WhenUserDoesNotExist_ShouldReturnEmptyPage() {
         Page<Transaction> result = transactionRepository.getTransactionByUserId(
                 PageRequest.of(0, 10),
-                999L
-        );
+                999L);
 
         assertThat(result.getContent()).isEmpty();
     }
@@ -118,8 +111,7 @@ class TransactionRepositoryTest {
     void getTransactionByUserId_WhenUserIdIsNull_ShouldReturnEmptyPage() {
         Page<Transaction> result = transactionRepository.getTransactionByUserId(
                 PageRequest.of(0, 10),
-                null
-        );
+                null);
 
         assertThat(result.getContent()).isEmpty();
     }
@@ -128,8 +120,7 @@ class TransactionRepositoryTest {
     void getTransactionByUserId_WhenPageIsPastLastPage_ShouldReturnEmptyContentWithTotalCount() {
         Page<Transaction> result = transactionRepository.getTransactionByUserId(
                 PageRequest.of(5, 10),
-                client.getId()
-        );
+                client.getId());
 
         assertThat(result.getContent()).isEmpty();
         assertThat(result.getTotalElements()).isEqualTo(2);
@@ -176,7 +167,8 @@ class TransactionRepositoryTest {
 
     @Test
     void save_WhenAmountIsNull_ShouldViolateNotNullConstraint() {
-        Transaction transaction = createTransaction(client, "10.00", TransactionType.DEPOSIT, TransactionStatus.PENDING);
+        Transaction transaction = createTransaction(client, "10.00", TransactionType.DEPOSIT,
+                TransactionStatus.PENDING);
         transaction.setAmount(null);
 
         assertThatThrownBy(() -> transactionRepository.saveAndFlush(transaction))

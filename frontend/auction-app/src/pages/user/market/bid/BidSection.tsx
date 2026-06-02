@@ -5,6 +5,7 @@ import { Client } from '@stomp/stompjs';
 import BidInfoPanel from './BidInfoPanel';
 import BidFeedPanel from './BidFeedPanel';
 import type { BidFeedEvent, BidNotificationPayload } from '../../../../types/bid';
+import { bidApi } from '../../../../api/bidApi';
 
 interface BidSectionProps {
     auction: AuctionResponse;
@@ -20,14 +21,26 @@ export default function BidSection({ auction, onClose }: BidSectionProps) {
     useEffect(() => {
         // Prevent body scroll
         document.body.style.overflow = 'hidden';
+
+        // Fetch initial bid history
+        bidApi.getBidHistory(auction.id, 0, 50).then(res => {
+            const history = res.data.content.map(b => ({
+                bidId: b.bidId,
+                bidderLabel: b.bidderLabel,
+                amount: b.amount,
+                placedAt: b.placedAt
+            }));
+            setBids(history);
+        }).catch(err => console.error('Failed to fetch initial bid history:', err));
+
         return () => {
             document.body.style.overflow = 'auto';
         };
-    }, []);
+    }, [auction.id]);
 
     useEffect(() => {
         const wsUrl = (import.meta.env.VITE_WS_URL as string) || 'ws://localhost:8000/ws';
-        
+
         const client = new Client({
             brokerURL: wsUrl,
             reconnectDelay: 5000,
@@ -35,7 +48,7 @@ export default function BidSection({ auction, onClose }: BidSectionProps) {
             heartbeatOutgoing: 4000,
             onConnect: () => {
                 setIsConnected(true);
-                
+
                 // Subscribe to ticker updates
                 client.subscribe(`/topic/auction/${auction.id}`, (message) => {
                     if (message.body) {
@@ -120,7 +133,7 @@ export default function BidSection({ auction, onClose }: BidSectionProps) {
                     <div className="w-full sm:w-1/2 overflow-y-auto min-h-0">
                         <BidInfoPanel auction={auction} ticker={ticker} onPlaceBid={handlePlaceBid} />
                     </div>
-                    
+
                     {/* Right: Feed Panel */}
                     <div className="w-full sm:w-1/2 overflow-y-auto min-h-0 border-t sm:border-t-0 sm:border-l border-neutral-100">
                         <BidFeedPanel bids={bids} isConnected={isConnected} />

@@ -39,7 +39,7 @@ export default function BidFeedPanel({ bids, isConnected }: BidFeedPanelProps) {
                 )}
             </div>
 
-            <div 
+            <div
                 ref={scrollRef}
                 className="flex-1 overflow-y-auto p-5 scroll-smooth"
             >

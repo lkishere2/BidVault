@@ -4,11 +4,11 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 
 import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
 import com.auction.app.domains.auction.auction.notification.AuctionPublisher;
@@ -52,7 +52,6 @@ public class BidServiceImpl implements BidService {
     private final BidValidatorService bidValidatorService;
     private final BidServiceImpl self;
 
-    @Autowired
     public BidServiceImpl(
             AuctionRepository auctionRepository,
             BidRepository bidRepository,
@@ -99,11 +98,13 @@ public class BidServiceImpl implements BidService {
 
         try {
             cache.enqueueBid(auctionId, queued);
-            log.info("[Bid Service - Place Bid] Bid queued successfully — auction #{}, bidder #{}, amount ${}", auctionId, bidder.getId(), request.getAmount());
+            log.info("[Bid Service - Place Bid] Bid queued successfully — auction #{}, bidder #{}, amount ${}",
+                    auctionId, bidder.getId(), request.getAmount());
         } catch (Exception e) {
             pendingBid.setStatus(BidStatus.REFUNDED);
             bidRepository.save(pendingBid);
-            log.error("[Bid Service - Place Bid] Failed to queue new bid — bid #{} marked REFUNDED, error: {}", pendingBid.getId(), e.getMessage());
+            log.error("[Bid Service - Place Bid] Failed to queue new bid — bid #{} marked REFUNDED, error: {}",
+                    pendingBid.getId(), e.getMessage());
             return;
         }
 
@@ -116,7 +117,8 @@ public class BidServiceImpl implements BidService {
         while (true) {
             log.info("[Bid Service - Process Bid] De-queuing next bid for auction #{}", auctionId);
             PendingBid pendingBid = cache.dequeueBid(auctionId);
-            if (pendingBid == null) break;
+            if (pendingBid == null)
+                break;
 
             Bid bid = findBidById(pendingBid.getBidId());
 
@@ -126,7 +128,8 @@ public class BidServiceImpl implements BidService {
             if (!bidValidatorService.isBidEligible(response, pendingBid.getAmount())) {
                 bid.setStatus(BidStatus.REFUNDED);
                 bidRepository.save(bid);
-                log.info("[Bid Service - Process Bid] Bid #{} rejected — marked REFUNDED. auction #{}", bid.getId(), auctionId);
+                log.info("[Bid Service - Process Bid] Bid #{} rejected — marked REFUNDED. auction #{}", bid.getId(),
+                        auctionId);
                 continue;
             }
 
@@ -134,7 +137,8 @@ public class BidServiceImpl implements BidService {
             if (!bidValidatorService.hasSufficientBalance(bidder, pendingBid.getAmount())) {
                 bid.setStatus(BidStatus.REFUNDED);
                 bidRepository.save(bid);
-                log.info("[Bid Service - Process Bid] Bid #{} rejected — insufficient balance. bidder #{}", bid.getId(), pendingBid.getBidderId());
+                log.info("[Bid Service - Process Bid] Bid #{} rejected — insufficient balance. bidder #{}", bid.getId(),
+                        pendingBid.getBidderId());
                 continue;
             }
 
@@ -159,7 +163,8 @@ public class BidServiceImpl implements BidService {
             response.setWinnerId(pendingBid.getBidderId());
             response.setWinnerLabel(pendingBid.getBidderLabel());
             cache.cacheAuctionResponse(auctionId, response);
-            log.info("[Bid Service - Process Bid] Bid #{} promoted to HELD — auction #{}, price ${}, bidder #{}", bid.getId(), auctionId, pendingBid.getAmount(), pendingBid.getBidderId());
+            log.info("[Bid Service - Process Bid] Bid #{} promoted to HELD — auction #{}, price ${}, bidder #{}",
+                    bid.getId(), auctionId, pendingBid.getAmount(), pendingBid.getBidderId());
 
             publisher.publish(BidNotificationPayload.builder()
                     .auctionId(auctionId)
@@ -174,11 +179,9 @@ public class BidServiceImpl implements BidService {
     }
 
     @Override
-    public List<BidResponse> getBidHistory(Long auctionId) {
-        return bidRepository.findByAuctionIdOrderByPlacedAtDesc(auctionId)
-                .stream()
-                .map(BidResponse::from)
-                .toList();
+    public Slice<BidResponse> getBidHistory(Long auctionId, Pageable pageable) {
+        return bidRepository.findByAuctionIdOrderByPlacedAtDesc(auctionId, pageable)
+                .map(BidResponse::from);
     }
 
     @Override
@@ -242,7 +245,8 @@ public class BidServiceImpl implements BidService {
                 .forEach(oldBid -> {
                     oldBid.setStatus(BidStatus.REFUNDED);
                     bidRepository.save(oldBid);
-                    log.info("[Bid Service] Bid #{} flipped to REFUNDED — outbid on auction #{}", oldBid.getId(), auctionId);
+                    log.info("[Bid Service] Bid #{} flipped to REFUNDED — outbid on auction #{}", oldBid.getId(),
+                            auctionId);
                 });
     }
 
