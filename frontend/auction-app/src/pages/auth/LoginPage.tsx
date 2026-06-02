@@ -21,7 +21,6 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
         try {
             await authApi.resendVerificationCode(alert.email);
             setAlert(null);
-            // Điều hướng mượt mà sang luồng xác thực người dùng kèm theo context email
             navigate('/verify/user', { state: { email: alert.email } });
         } catch (error) {
             console.error('Failed to automatically trigger verification re-send drop:', error);

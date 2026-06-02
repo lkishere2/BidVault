@@ -3,11 +3,20 @@ import { useNavigate } from 'react-router-dom';
 interface ProfileButtonProps {
     username: string;
     initials: string;
+    profileImageUrl?: string;
     onLogout?: () => void;
 }
 
-export default function ProfileButton({ username, initials }: ProfileButtonProps) {
+export default function ProfileButton({ username, initials, profileImageUrl }: ProfileButtonProps) {
     const navigate = useNavigate();
+    // Accept snake_case as well if provided in props
+    const rawProfile = (profileImageUrl as any) ?? (profileImageUrl as any) ?? undefined;
+    const resolvedProfile = rawProfile;
+    const avatarUrl = resolvedProfile
+        ? resolvedProfile.startsWith('http')
+            ? resolvedProfile
+            : `https://res.cloudinary.com/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload/${resolvedProfile}`
+        : null;
 
     return (
         <button
@@ -28,23 +37,28 @@ export default function ProfileButton({ username, initials }: ProfileButtonProps
             onMouseEnter={(e) => (e.currentTarget.style.background = '#F9F9F9')}
             onMouseLeave={(e) => (e.currentTarget.style.background = '#FFFFFF')}
         >
-            <div
-                style={{
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '50%',
-                    background: '#F5C518',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    color: '#0D0D0D',
-                    letterSpacing: '0.02em',
-                    flexShrink: 0,
-                }}
-            >
-                {initials}
+            <div style={{ width: '32px', height: '32px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
+                {avatarUrl ? (
+                    <img src={avatarUrl} alt={`${username} avatar`} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                ) : (
+                    <div
+                        style={{
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '50%',
+                            background: '#F5C518',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '12px',
+                            fontWeight: 700,
+                            color: '#0D0D0D',
+                            letterSpacing: '0.02em',
+                        }}
+                    >
+                        {initials}
+                    </div>
+                )}
             </div>
 
             <span

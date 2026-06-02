@@ -21,12 +21,15 @@ import HubPage from './pages/user/market/hub/HubPage';
 import CommunityPage from './pages/user/community/CommunityPage';
 import ProfilePage from './pages/user/community/ProfilePage';
 import { userApi } from './api/userApi';
+import { authApi } from './api/authApi';
 import './App.css';
+import NotFoundPage from './pages/NotFoundPage';
+import AuthCallbackPage from './pages/auth/AuthCallbackPage';
 
 const MyBidsPage = () => <div className="p-4"><h1 className="text-xl font-bold">My Bids</h1></div>;
 const AdminUserControlPage = () => <div className="p-4"><h1 className="text-xl font-bold">User Control Panel</h1></div>;
 
-type UserData = { id?: string | number; username: string; initials: string; role?: string };
+type UserData = { id?: string | number; username: string; initials: string; role?: string; profileImageUrl?: string };
 
 function RootLayout({
   user, isLoggedIn, onLogout,
@@ -65,14 +68,17 @@ function App() {
       if (token && !user?.id) {
         try {
           const response = await userApi.getInfo();
-          const { id, username, role } = response.data;
+          const { id, username, role, profileImageUrl, profile_image_url } = response.data as any;
           const initials = username
             .split(/[\s._-]+/)
             .slice(0, 2)
             .map((w: string) => w.toUpperCase())
             .join('');
 
-          setUser({ id, username, initials, role });
+          // Prefer camelCase, fallback to snake_case if present
+          const rawProfile = profileImageUrl ?? profile_image_url;
+
+          setUser({ id, username, initials, role, profileImageUrl: rawProfile });
         } catch (error) {
           console.error(error);
           setUser(null);
@@ -92,7 +98,15 @@ function App() {
   }, [user]);
 
   const handleLoginSuccess = (userData: UserData) => setUser(userData);
-  const handleLogout = () => setUser(null);
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      setUser(null);
+    }
+  };
 
   return (
     <BrowserRouter>
@@ -106,11 +120,12 @@ function App() {
             />
           }
         >
+          <Route path="*" element={<NotFoundPage />} />
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
+          <Route path="/oauth2/callback" element={<AuthCallbackPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forget-password" element={<ForgotPasswordPage />} />
-
           <Route path="/verify/user" element={<VerifyPage />} />
           <Route path="/verify/forget-password" element={<ForgotPasswordVerifyPage />} />
 

@@ -5,6 +5,8 @@ import com.auction.app.domains.auth.exceptions.RefreshTokenNotFoundException;
 import com.auction.app.domains.auth.exceptions.RefreshTokenSuspiciousActivityException;
 import com.auction.app.domains.users.users.model.User;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     private static final String REFRESH_PREFIX = "refresh:";
     private static final String BLACKLIST_PREFIX = "blacklist:";
 
+    @Transactional
     public String generateRefreshToken(User user, HttpServletRequest request) {
         String userId = String.valueOf(user.getId());
 

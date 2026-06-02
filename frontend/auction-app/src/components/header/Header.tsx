@@ -7,7 +7,7 @@ import ProfileButton from './ProfileButton';
 import AdminButton from './AdminButton';
 
 interface HeaderProps {
-    user?: { username: string; initials: string; role?: string };
+    user?: { username: string; initials: string; role?: string; profileImageUrl?: string };
     isLoggedIn?: boolean;
     isAdmin?: boolean;
     onLogout?: () => void;
@@ -61,7 +61,7 @@ export default function Header({ user, isLoggedIn = !!user, isAdmin = false, onL
                         {isLoggedIn && user ? (
                             <>
                                 {displayAdmin && <AdminButton />}
-                                <ProfileButton username={user.username} initials={user.initials} />
+                                <ProfileButton username={user.username} initials={user.initials} profileImageUrl={(user as any).profileImageUrl ?? (user as any).profile_image_url} />
                                 <button
                                     type="button"
                                     onClick={onLogout}
@@ -132,7 +132,7 @@ export default function Header({ user, isLoggedIn = !!user, isAdmin = false, onL
                                     </div>
                                 )}
                                 <div className="flex items-center justify-between px-3 py-2">
-                                    <ProfileButton username={user.username} initials={user.initials} />
+                                    <ProfileButton username={user.username} initials={user.initials} profileImageUrl={(user as any).profileImageUrl ?? (user as any).profile_image_url} />
                                     <button
                                         type="button"
                                         onClick={() => { onLogout?.(); close(); }}

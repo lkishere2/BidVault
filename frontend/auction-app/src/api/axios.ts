@@ -1,7 +1,6 @@
 import axios from 'axios';
 import type { AxiosRequestConfig } from 'axios';
 
-// Our base URL
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
 
 const SKIP_REFRESH_PATHS = [
@@ -92,9 +91,13 @@ export async function logout(): Promise<void> {
     try {
         const refreshToken = localStorage.getItem('refreshToken');
 
-        // Send the refresh token to the backend so it can be blacklisted/invalidated
+        // Send the refresh token to the backend in the header so it can be blacklisted/invalidated
         if (refreshToken) {
-            await api.post('/auth/logout', { refreshToken });
+            await api.post('/auth/logout', undefined, {
+                headers: {
+                    'X-Refresh-Token': refreshToken,
+                },
+            });
         } else {
             await api.post('/auth/logout');
         }
