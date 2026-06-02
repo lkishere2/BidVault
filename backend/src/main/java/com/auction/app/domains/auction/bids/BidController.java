@@ -9,6 +9,8 @@ import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -36,9 +38,9 @@ public class BidController {
     }
 
     @GetMapping("/me/auctions-bid-on")
-    public ResponseEntity<List<AuctionResponse>> getAuctionsBidOn() {
-        List<Long> auctionIds = bidService.getAuctionsBiddenByCurrentUser();
-        return ResponseEntity.ok(auctionService.getAuctionsBidOnByCurrentUser(auctionIds));
+    public ResponseEntity<Page<AuctionResponse>> getAuctionsBidOn(Pageable pageable) {
+        Page<Long> idPage = bidService.getAuctionsBiddenByCurrentUser(pageable);
+        return ResponseEntity.ok(auctionService.getAuctionsBidOnByCurrentUser(idPage, pageable));
     }
 
 }

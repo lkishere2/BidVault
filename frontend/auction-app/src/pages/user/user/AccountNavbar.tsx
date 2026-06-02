@@ -1,5 +1,5 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Wallet, Box, Settings } from 'lucide-react';
+import { LayoutDashboard, Wallet, Box, Settings, Bell } from 'lucide-react';
 
 export default function AccountNavbar() {
     const navigate = useNavigate();
@@ -9,6 +9,7 @@ export default function AccountNavbar() {
         { label: 'Overview', path: '/account/overview', icon: <LayoutDashboard size={16} /> },
         { label: 'Balance', path: '/account/balance', icon: <Wallet size={16} /> },
         { label: 'Storage', path: '/account/storage', icon: <Box size={16} /> },
+        { label: 'Notifications', path: '/account/notifications', icon: <Bell size={16} /> },
         { label: 'Settings', path: '/account/settings', icon: <Settings size={16} /> },
     ];
 
@@ -36,7 +37,6 @@ export default function AccountNavbar() {
                 </nav>
             </aside>
 
-            {/* Dynamic Content Frame */}
             <section className="flex-1 min-w-0 bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm">
                 <Outlet />
             </section>

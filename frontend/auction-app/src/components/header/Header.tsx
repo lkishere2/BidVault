@@ -6,6 +6,9 @@ import LoginButton from './LoginButton';
 import ProfileButton from './ProfileButton';
 import AdminButton from './AdminButton';
 import LogoutButton from './LogoutButton';
+import NotificationButton from './NotificationButton';
+import NotificationDropdown from './NotificationDropdown';
+import { notificationApi } from '../../api/notificationApi';
 
 interface HeaderProps {
     user?: { username: string; initials: string; role?: string };
@@ -30,9 +33,33 @@ const NAV = [
 export default function Header({ user, isLoggedIn = !!user, isAdmin = false, onLogout, onLogin }: HeaderProps) {
     const navigate = useNavigate();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [notifOpen, setNotifOpen] = useState(false);
+    const [notifications, setNotifications] = useState<{ id: number; message: string; sendAt: string; read?: boolean }[]>([]);
+    const [notifLoading, setNotifLoading] = useState(false);
     const close = () => setMobileOpen(false);
 
     const displayAdmin = isAdmin || user?.role === 'ADMIN' || user?.role === 'admin';
+
+    const handleNotifOpen = async () => {
+        const opening = !notifOpen;
+        setNotifOpen(opening);
+        if (opening && notifications.length === 0) {
+            try {
+                setNotifLoading(true);
+                const response = await notificationApi.getMyNotificationsFeed(0, 8);
+                setNotifications(response.data.content.map((n: { id: number; message: string; sendAt: string }) => ({
+                    ...n,
+                    read: false,
+                })));
+            } catch {
+                // silently fail — dropdown shows empty state
+            } finally {
+                setNotifLoading(false);
+            }
+        }
+    };
+
+    const unreadCount = notifications.filter(n => !n.read).length;
 
     return (
         <header className="sticky top-0 z-[100] w-full bg-white border-b border-[#0D0D0D]">
@@ -62,6 +89,20 @@ export default function Header({ user, isLoggedIn = !!user, isAdmin = false, onL
                         {isLoggedIn && user ? (
                             <>
                                 {displayAdmin && <AdminButton />}
+                                <div className="relative">
+                                    <NotificationButton
+                                        unreadCount={unreadCount}
+                                        isOpen={notifOpen}
+                                        onClick={handleNotifOpen}
+                                    />
+                                    <NotificationDropdown
+                                        isOpen={notifOpen}
+                                        onClose={() => setNotifOpen(false)}
+                                        notifications={notifications}
+                                        isLoading={notifLoading}
+                                        onMarkAllRead={() => setNotifications(prev => prev.map(n => ({ ...n, read: true })))}
+                                    />
+                                </div>
                                 <ProfileButton username={user.username} initials={user.initials} />
                                 <LogoutButton onClick={onLogout} variant="desktop" />
                             </>

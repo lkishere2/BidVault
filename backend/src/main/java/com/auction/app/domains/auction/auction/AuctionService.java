@@ -11,7 +11,7 @@ public interface AuctionService {
     AuctionResponse createAuction(AuctionRequest request);
     AuctionResponse cancelAuction(Long auctionId);
     AuctionResponse getAuction(Long auctionId);
-    List<AuctionResponse> getAuctionsBidOnByCurrentUser(List<Long> auctionIds);
+    Page<AuctionResponse> getAuctionsBidOnByCurrentUser(Page<Long> auctionIdPage, Pageable pageable);
     Page<AuctionResponse> getDiscoverableAuctions(AuctionFindingRequest request, Pageable pageable);
     Page<AuctionResponse> getMyAuctions(Pageable pageable);
 }

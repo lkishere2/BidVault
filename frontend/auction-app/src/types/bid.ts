@@ -29,3 +29,12 @@ export interface PendingBid {
     amount: string;
     placedAt: string;
 }
+
+export interface BidFeedEvent {
+    bidId: number;
+    auctionId: number;
+    bidderId: number;
+    bidderLabel: string;
+    amount: string;
+    placedAt: string;
+}
