@@ -40,8 +40,33 @@ public class NotificationServiceImpl implements NotificationService {
                 .map(entity -> new NotificationResponse(
                         entity.getId(),
                         entity.getMessage(),
-                        entity.getSendAt()
+                        entity.getSendAt(),
+                        entity.isHasRead()
                 ));
+    }
+
+    @Override
+    @Transactional
+    public void markAsRead(long id, long userId) {
+        notificationRepository.markAsRead(id, userId);
+    }
+
+    @Override
+    @Transactional
+    public void markAllAsRead(long userId) {
+        notificationRepository.markAllAsRead(userId);
+    }
+
+    @Override
+    @Transactional
+    public void markAsUnread(long id, long userId) {
+        notificationRepository.markAsUnread(id, userId);
+    }
+
+    @Override
+    @Transactional
+    public void markAllAsUnread(long userId) {
+        notificationRepository.markAllAsUnread(userId);
     }
 
     @Override
@@ -57,7 +82,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .build();
         notificationRepository.save(notification);
 
-        NotificationResponse response = new NotificationResponse(notification.getId(), message, notification.getSendAt());
+        NotificationResponse response = new NotificationResponse(notification.getId(), message, notification.getSendAt(), notification.isHasRead());
 
         messagingTemplate.convertAndSendToUser(
                 receiver.getDisplayName(),
@@ -93,7 +118,7 @@ public class NotificationServiceImpl implements NotificationService {
             messagingTemplate.convertAndSendToUser(
                     follower.getDisplayName(),
                     "/queue/notifications",
-                    new NotificationResponse(null, message, now)
+                    new NotificationResponse(null, message, now, false)
             );
         }
 

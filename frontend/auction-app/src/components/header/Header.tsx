@@ -47,9 +47,9 @@ export default function Header({ user, isLoggedIn = !!user, isAdmin = false, onL
             try {
                 setNotifLoading(true);
                 const response = await notificationApi.getMyNotificationsFeed(0, 8);
-                setNotifications(response.data.content.map((n: { id: number; message: string; sendAt: string }) => ({
+                setNotifications(response.data.content.map((n: { id: number; message: string; sendAt: string; hasRead: boolean }) => ({
                     ...n,
-                    read: false,
+                    read: n.hasRead,
                 })));
             } catch {
                 // silently fail — dropdown shows empty state
@@ -60,6 +60,29 @@ export default function Header({ user, isLoggedIn = !!user, isAdmin = false, onL
     };
 
     const unreadCount = notifications.filter(n => !n.read).length;
+
+    const handleMarkAllRead = async () => {
+        try {
+            await notificationApi.markAllAsRead();
+            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+        } catch {
+            // silently fail
+        }
+    };
+
+    const handleToggleRead = async (id: number, currentReadStatus: boolean) => {
+        try {
+            if (currentReadStatus) {
+                await notificationApi.markAsUnread(id);
+                setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: false } : n));
+            } else {
+                await notificationApi.markAsRead(id);
+                setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+            }
+        } catch {
+            // silently fail
+        }
+    };
 
     return (
         <header className="sticky top-0 z-[100] w-full bg-white border-b border-[#0D0D0D]">
@@ -100,7 +123,8 @@ export default function Header({ user, isLoggedIn = !!user, isAdmin = false, onL
                                         onClose={() => setNotifOpen(false)}
                                         notifications={notifications}
                                         isLoading={notifLoading}
-                                        onMarkAllRead={() => setNotifications(prev => prev.map(n => ({ ...n, read: true })))}
+                                        onMarkAllRead={handleMarkAllRead}
+                                        onToggleRead={handleToggleRead}
                                     />
                                 </div>
                                 <ProfileButton username={user.username} initials={user.initials} />
