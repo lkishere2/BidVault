@@ -119,6 +119,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .email(user.getEmail())
                 .amount(transaction.getAmount())
                 .type(transaction.getType())
+                .status(transaction.getStatus())
                 .createdAt(transaction.getCreatedAt())
                 .build();
     }

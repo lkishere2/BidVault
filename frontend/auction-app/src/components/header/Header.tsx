@@ -1,11 +1,15 @@
 import { useState } from 'react';
-import { Gavel, LogOut, LogIn, Menu, X } from 'lucide-react';
+import { Gavel, LogOut, Menu, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import NavItem from './NavItem';
+import LoginButton from './LoginButton';
+import ProfileButton from './ProfileButton';
+import AdminButton from './AdminButton';
 
 interface HeaderProps {
-    user?: { username: string; initials: string };
+    user?: { username: string; initials: string; role?: string };
     isLoggedIn?: boolean;
+    isAdmin?: boolean;
     onLogout?: () => void;
     onLogin?: () => void;
 }
@@ -17,24 +21,21 @@ const NAV = [
         sub: [
             { label: 'All Auctions', path: '/auctions/hub' },
             { label: 'My Bids', path: '/auction/joined' },
-            { label: 'Live Now', path: '/auctions/live' },
         ],
     },
-    { label: 'Community', path: '/explore' },
+    { label: 'Community', path: '/community' },
 ];
 
-export default function Header({ user, isLoggedIn = !!user, onLogout, onLogin }: HeaderProps) {
+export default function Header({ user, isLoggedIn = !!user, isAdmin = false, onLogout, onLogin }: HeaderProps) {
     const navigate = useNavigate();
     const [mobileOpen, setMobileOpen] = useState(false);
     const close = () => setMobileOpen(false);
 
+    const displayAdmin = isAdmin || user?.role === 'ADMIN' || user?.role === 'admin';
+
     return (
         <header className="sticky top-0 z-[100] w-full bg-white border-b border-[#0D0D0D]">
-
-            {/* ── Main bar ── */}
             <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 h-[60px] sm:h-[68px] lg:h-[72px] flex items-center justify-between gap-6">
-
-                {/* Logo */}
                 <button
                     type="button"
                     onClick={() => navigate('/')}
@@ -49,32 +50,18 @@ export default function Header({ user, isLoggedIn = !!user, onLogout, onLogin }:
                     </span>
                 </button>
 
-                {/* Desktop nav — centred in remaining space */}
                 <nav className="hidden md:flex items-center gap-0 flex-1 justify-center">
                     {NAV.map(item => (
                         <NavItem key={item.label} {...item} />
                     ))}
                 </nav>
 
-                {/* Right — auth + hamburger */}
                 <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-
-                    {/* Auth: desktop (sm+) */}
                     <div className="hidden sm:flex items-center gap-2">
                         {isLoggedIn && user ? (
                             <>
-                                <button
-                                    type="button"
-                                    onClick={() => navigate('/account')}
-                                    className="flex items-center gap-2 h-[38px] sm:h-[42px] pl-1.5 pr-4 bg-white border border-[#0D0D0D] rounded-full cursor-pointer hover:bg-neutral-50 transition-colors"
-                                >
-                                    <div className="w-[27px] h-[27px] sm:w-[30px] sm:h-[30px] rounded-full bg-[#F5C518] flex items-center justify-center text-[10px] sm:text-[11px] font-bold text-[#0D0D0D] flex-shrink-0">
-                                        {user.initials}
-                                    </div>
-                                    <span className="text-[13px] font-semibold text-[#0D0D0D] max-w-[96px] truncate">
-                                        {user.username}
-                                    </span>
-                                </button>
+                                {displayAdmin && <AdminButton />}
+                                <ProfileButton username={user.username} initials={user.initials} />
                                 <button
                                     type="button"
                                     onClick={onLogout}
@@ -85,17 +72,12 @@ export default function Header({ user, isLoggedIn = !!user, onLogout, onLogin }:
                                 </button>
                             </>
                         ) : (
-                            <button
-                                type="button"
-                                onClick={onLogin ?? (() => navigate('/login'))}
-                                className="h-[38px] sm:h-[42px] px-5 bg-[#0D0D0D] text-white rounded-full text-[13px] font-semibold cursor-pointer border-0 hover:opacity-80 transition-opacity"
-                            >
-                                Log in
-                            </button>
+                            <div onClick={onLogin}>
+                                <LoginButton />
+                            </div>
                         )}
                     </div>
 
-                    {/* Hamburger: mobile only */}
                     <button
                         type="button"
                         onClick={() => setMobileOpen(v => !v)}
@@ -107,15 +89,13 @@ export default function Header({ user, isLoggedIn = !!user, onLogout, onLogin }:
                 </div>
             </div>
 
-            {/* ── Mobile slide-down panel ── */}
             <div
                 className="md:hidden border-t border-neutral-100 overflow-hidden transition-all duration-300"
-                style={{ maxHeight: mobileOpen ? '360px' : '0px', opacity: mobileOpen ? 1 : 0 }}
+                style={{ maxHeight: mobileOpen ? '420px' : '0px', opacity: mobileOpen ? 1 : 0 }}
             >
                 <nav className="flex flex-col px-4 pt-2 pb-3 gap-0.5">
                     {NAV.map(item =>
                         item.sub ? (
-                            // Mobile: flatten sub-items under a header label
                             <div key={item.label}>
                                 <p className="px-3 pt-3 pb-1 text-[10px] font-bold tracking-[.12em] uppercase text-neutral-400">
                                     {item.label}
@@ -143,37 +123,33 @@ export default function Header({ user, isLoggedIn = !!user, onLogout, onLogin }:
                         )
                     )}
 
-                    {/* Auth row inside mobile panel */}
                     <div className="mt-2 pt-2 border-t border-neutral-100">
                         {isLoggedIn && user ? (
-                            <div className="flex items-center justify-between px-3 py-2">
-                                <div className="flex items-center gap-2.5">
-                                    <div className="w-[30px] h-[30px] rounded-full bg-[#F5C518] flex items-center justify-center text-[11px] font-bold text-[#0D0D0D]">
-                                        {user.initials}
+                            <div className="flex flex-col gap-2">
+                                {displayAdmin && (
+                                    <div className="px-3 pb-2 border-b border-neutral-100 flex justify-center" onClick={close}>
+                                        <AdminButton />
                                     </div>
-                                    <span className="text-[13px] font-semibold text-[#0D0D0D]">{user.username}</span>
+                                )}
+                                <div className="flex items-center justify-between px-3 py-2">
+                                    <ProfileButton username={user.username} initials={user.initials} />
+                                    <button
+                                        type="button"
+                                        onClick={() => { onLogout?.(); close(); }}
+                                        className="flex items-center gap-1.5 text-[12px] font-semibold text-red-500 bg-transparent border-0 cursor-pointer pl-4"
+                                    >
+                                        <LogOut size={13} strokeWidth={2} /> Log out
+                                    </button>
                                 </div>
-                                <button
-                                    type="button"
-                                    onClick={() => { onLogout?.(); close(); }}
-                                    className="flex items-center gap-1.5 text-[12px] font-semibold text-red-500 bg-transparent border-0 cursor-pointer"
-                                >
-                                    <LogOut size={13} strokeWidth={2} /> Log out
-                                </button>
                             </div>
                         ) : (
-                            <button
-                                type="button"
-                                onClick={() => { (onLogin ?? (() => navigate('/login')))(); close(); }}
-                                className="w-full flex items-center justify-center gap-2 py-3 bg-[#0D0D0D] text-white rounded-xl text-[13px] font-semibold cursor-pointer border-0 hover:opacity-85 transition-opacity"
-                            >
-                                <LogIn size={14} strokeWidth={2} /> Log in
-                            </button>
+                            <div onClick={() => { onLogin?.(); close(); }} className="w-full flex justify-center py-2">
+                                <LoginButton />
+                            </div>
                         )}
                     </div>
                 </nav>
             </div>
-
         </header>
     );
 }

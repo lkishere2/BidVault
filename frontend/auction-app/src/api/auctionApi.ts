@@ -3,38 +3,24 @@ import type { AuctionRequest, AuctionResponse, AuctionFindingRequest } from '../
 import type { Page } from '../types/pagination';
 
 export const auctionApi = {
-
-    // 1. Tạo cuộc đấu giá mới
-    createAuction: (data: AuctionRequest) =>
-        api.post<AuctionResponse>('/api/v1/auctions/create', data),
-
-    // 2. Hủy cuộc đấu giá
-    cancelAuction: (auctionId: number) =>
-        api.delete<AuctionResponse>(`/api/v1/auctions/cancel/${auctionId}`),
-
-    // 3. Lấy chi tiết một cuộc đấu giá
-    getAuction: (auctionId: number) =>
-        api.get<AuctionResponse>(`/api/v1/auctions/get/${auctionId}`),
-
-    // 4. Tìm kiếm / Khám phá các cuộc đấu giá (Sửa đổi: Chuyển sang params)
-    getDiscoverableAuctions: (data: AuctionFindingRequest, page: number = 0, size: number = 10) =>
-        api.get<Page<AuctionResponse>>('/api/v1/auctions/discover', {
-            params: {
-                ...data,
-                page,
-                size
+    createAuction: (data: AuctionRequest) => api.post<AuctionResponse>('/auctions/create', data),
+    cancelAuction: (auctionId: number) => api.delete<AuctionResponse>(`/auctions/cancel/${auctionId}`),
+    getAuction: (auctionId: number) => api.get<AuctionResponse>(`/auctions/get/${auctionId}`),
+    getDiscoverableAuctions: (data: AuctionFindingRequest, page: number, size: number) =>
+        api.get<Page<AuctionResponse>>('/auctions/discover', {
+            params: { ...data, page, size },
+            paramsSerializer: (params) => {
+                const searchParams = new URLSearchParams();
+                Object.keys(params).forEach(key => {
+                    const value = params[key];
+                    if (value !== undefined && value !== null) {
+                        if (Array.isArray(value)) value.forEach(val => searchParams.append(key, val));
+                        else searchParams.append(key, value);
+                    }
+                });
+                return searchParams.toString();
             }
         }),
-
-    // 5. Lấy danh sách đấu giá của tôi (Sửa đổi: Đổi từ Array sang Page và thêm phân trang)
-    getMyAuctions: (pageNo: number = 0, size: number = 10) =>
-        api.get<Page<AuctionResponse>>('/api/v1/auctions/me', {
-            params: {
-                pageNo,
-                size
-            }
-        }),
-
+    getMyAuctions: (pageNo: number = 0, size: number = 10) => api.get<Page<AuctionResponse>>(`/auctions/me?pageNo=${pageNo}&size=${size}`),
 };
-
 export default auctionApi;

@@ -2,34 +2,42 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 import Header from './components/header/Header';
 import Footer from './components/footer/Footer';
-import HomePage from './pages/general/home/HomePage';
+import HomePage from './pages/user/home/HomePage';
+import AdminPage from './pages/admin/home/AdminPage';
+import AdminNavbar from './pages/admin/AdminNavbar';
+import TransactionPage from './pages/admin/transaction/TransactionPage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import VerifyPage from './pages/auth/VerifyPage';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import ForgotPasswordVerifyPage from './pages/auth/ForgotPasswordVerifyPage';
-import { ProfilePage } from './pages/general/profile/ProfilePage';
-import { InventoryPage } from './pages/general/storage/InventoryPage';
+import AccountNavbar from './pages/user/user/AccountNavbar';
+import OverviewPage from './pages/user/user/overview/OverviewPage';
+import OverviewPageLoading from './pages/user/user/overview/OverViewPageLoading';
+import BalancePage from './pages/user/user/balance/BalancePage';
+import StoragePage from './pages/user/user/storage/StoragePage';
+import SettingPage from './pages/user/user/setting/SettingPage';
+import HubPage from './pages/user/market/hub/HubPage';
+import CommunityPage from './pages/user/community/CommunityPage';
+import ProfilePage from './pages/user/community/ProfilePage';
+import { userApi } from './api/userApi';
 import './App.css';
 
-// ── Placeholder pages ──
-const OfficeDashboard = () => <div className="p-8"><h1 className="text-2xl font-bold">Dashboard</h1></div>;
-const ExplorePage = () => <div className="p-8"><h1 className="text-2xl font-bold">Explore</h1></div>;
-const AllAuctionsPage = () => <div className="p-8"><h1 className="text-2xl font-bold">All Auctions</h1></div>;
-const MyBidsPage = () => <div className="p-8"><h1 className="text-2xl font-bold">My Bids</h1></div>;
-const AccountPage = () => <div className="p-8"><h1 className="text-2xl font-bold">Account</h1></div>;
+const MyBidsPage = () => <div className="p-4"><h1 className="text-xl font-bold">My Bids</h1></div>;
+const AdminUserControlPage = () => <div className="p-4"><h1 className="text-xl font-bold">User Control Panel</h1></div>;
 
-// ── Root layout: Header + page content + Footer on every route ──
+type UserData = { id?: string | number; username: string; initials: string; role?: string };
+
 function RootLayout({
   user, isLoggedIn, onLogout,
 }: {
-  user?: { username: string; initials: string };
+  user?: UserData;
   isLoggedIn: boolean;
   onLogout: () => void;
 }) {
   return (
-    <div className="flex flex-col min-h-screen">
-      <Header user={user} isLoggedIn={isLoggedIn} onLogout={onLogout} />
+    <div className="flex flex-col min-h-screen bg-neutral-50/50">
+      <Header user={user} isLoggedIn={isLoggedIn} isAdmin={user?.role === 'ADMIN'} onLogout={onLogout} />
       <main className="flex-1">
         <Outlet />
       </main>
@@ -38,9 +46,6 @@ function RootLayout({
   );
 }
 
-type UserData = { id?: string; username: string; initials: string };
-
-// ── Initialise from localStorage synchronously so no effect needed ──
 function readSavedUser(): UserData | null {
   try {
     const raw = localStorage.getItem('bidvault_user');
@@ -53,7 +58,31 @@ function readSavedUser(): UserData | null {
 function App() {
   const [user, setUser] = useState<UserData | null>(readSavedUser);
 
-  // Keep localStorage in sync whenever user changes
+  useEffect(() => {
+    const syncUser = async () => {
+      const token = localStorage.getItem('accessToken');
+
+      if (token && !user?.id) {
+        try {
+          const response = await userApi.getInfo();
+          const { id, username, role } = response.data;
+          const initials = username
+            .split(/[\s._-]+/)
+            .slice(0, 2)
+            .map((w: string) => w.toUpperCase())
+            .join('');
+
+          setUser({ id, username, initials, role });
+        } catch (error) {
+          console.error(error);
+          setUser(null);
+        }
+      }
+    };
+
+    syncUser();
+  }, [user?.id]);
+
   useEffect(() => {
     if (user) {
       localStorage.setItem('bidvault_user', JSON.stringify(user));
@@ -68,7 +97,6 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* All routes share the root layout (header + footer) */}
         <Route
           element={
             <RootLayout
@@ -78,24 +106,41 @@ function App() {
             />
           }
         >
-          {/* Public */}
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forget-password" element={<ForgotPasswordPage />} />
 
-          {/* Token checks */}
           <Route path="/verify/user" element={<VerifyPage />} />
           <Route path="/verify/forget-password" element={<ForgotPasswordVerifyPage />} />
 
-          {/* App pages */}
-          <Route path="/office" element={<OfficeDashboard />} />
-          <Route path="/explore" element={<ExplorePage />} />
-          <Route path="/auctions/hub" element={<AllAuctionsPage />} />
+          <Route path="/community" element={<CommunityPage />} />
+          <Route path="/profile/:user_id" element={<ProfilePage />} />
+          <Route path="/auctions/hub" element={<HubPage />} />
           <Route path="/auction/joined" element={<MyBidsPage />} />
-          <Route path="/account" element={<AccountPage />} />
-          <Route path="/profile/:userId" element={<ProfilePage />} />
-          <Route path="/inventory" element={<InventoryPage />} />
+
+          <Route path="/account" element={<AccountNavbar />}>
+            <Route
+              path="overview"
+              element={
+                user?.id ? (
+                  <OverviewPage userId={Number(user.id)} />
+                ) : (
+                  <OverviewPageLoading />
+                )
+              }
+            />
+            <Route path="balance" element={<BalancePage />} />
+            <Route path="storage" element={<StoragePage />} />
+            <Route path="settings" element={<SettingPage />} />
+          </Route>
+
+          <Route path="/admin" element={<AdminNavbar />}>
+            <Route index element={<AdminPage />} />
+            <Route path="user-control" element={<AdminUserControlPage />} />
+            <Route path="transaction-request" element={<TransactionPage />} />
+          </Route>
+
         </Route>
       </Routes>
     </BrowserRouter>

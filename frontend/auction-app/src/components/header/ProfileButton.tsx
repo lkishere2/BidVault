@@ -11,7 +11,7 @@ export default function ProfileButton({ username, initials }: ProfileButtonProps
 
     return (
         <button
-            onClick={() => navigate('/office')}
+            onClick={() => navigate('/account/overview')}
             style={{
                 display: 'inline-flex',
                 alignItems: 'center',

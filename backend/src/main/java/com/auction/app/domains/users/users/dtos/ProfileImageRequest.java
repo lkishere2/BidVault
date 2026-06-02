@@ -10,4 +10,5 @@ public class ProfileImageRequest {
     @NotBlank(message = "Profile image URL cannot be blank")
     @URL(message = "Must be a valid URL string")
     private String profileImageUrl;
+
 }

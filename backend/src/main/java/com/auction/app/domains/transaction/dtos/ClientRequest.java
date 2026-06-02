@@ -1,5 +1,6 @@
 package com.auction.app.domains.transaction.dtos;
 
+import com.auction.app.domains.transaction.model.TransactionStatus;
 import com.auction.app.domains.transaction.model.TransactionType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,5 +21,6 @@ public class ClientRequest {
     private String email;
     private BigDecimal amount;
     private TransactionType type;
+    private TransactionStatus status;
     private LocalDateTime createdAt;
 }
