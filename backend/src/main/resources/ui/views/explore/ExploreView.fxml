@@ -1,16 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.StackPane?>
-
+<?import javafx.scene.layout.BorderPane?>
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.auction.app.controllers.explore.ExploreViewController"
-            prefWidth="960.0" prefHeight="640.0" style="-fx-background-color: #F8FAFC;">
-
-    <left>
-        <fx:include source="../home/Navbar.fxml"/>
-    </left>
+            prefWidth="960.0" prefHeight="640.0" style="-fx-background-color: #0D0D0D;"> <left>
+    <fx:include source="../home/Navbar.fxml"/>
+</left>
 
     <center>
         <StackPane fx:id="exploreContentArea" style="-fx-padding: 32;"/>
