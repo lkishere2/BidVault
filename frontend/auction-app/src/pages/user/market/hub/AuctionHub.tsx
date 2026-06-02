@@ -5,7 +5,7 @@ import type { Page } from '../../../../types/pagination';
 import auctionApi from '../../../../api/auctionApi';
 import AuctionItem from './AuctionItem';
 import AuctionItemSkeleton from './AuctionItemSkeleton';
-import BidSection from '../BidSection';
+import BidSection from '../bid/BidSection';
 
 const PAGE_SIZE = 12;
 

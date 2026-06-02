@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -82,6 +83,15 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll(PageRequest.of(page, size)).map(this :: mapToResponse);
     }
 
+    @Override
+    @Transactional
+    public List<UserResponse> getTop8Users() {
+        return userRepository.findTopUsersByFollowers(PageRequest.of(0, 8))
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
     // Helpers
     private UserResponse mapToResponse(User user){
         return UserResponse.builder()
@@ -91,6 +101,7 @@ public class UserServiceImpl implements UserService {
                 .balance(user.getBalance())
                 .profileImageUrl(user.getProfileImageUrl())
                 .role(user.getRole() != null ? user.getRole().name() : "USER")
+                .followersCount(user.getFollowers() != null ? user.getFollowers().size() : 0)
                 .build();
     }
 }

@@ -40,4 +40,8 @@ public class Notification {
     @Builder.Default
     private LocalDateTime sendAt = LocalDateTime.now();
 
+    @Column(name = "has_read")
+    @Builder.Default
+    private boolean hasRead = false;
+
 }

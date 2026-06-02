@@ -9,12 +9,17 @@ import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -31,14 +36,18 @@ public class BidController {
     }
 
     @GetMapping("/bids/{auctionId}")
-    public ResponseEntity<List<BidResponse>> getBidHistory(@PathVariable Long auctionId) {
-        return ResponseEntity.ok(bidService.getBidHistory(auctionId));
+    public ResponseEntity<Slice<BidResponse>> getBidHistory(
+            @PathVariable Long auctionId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(bidService.getBidHistory(auctionId, pageable));
     }
 
     @GetMapping("/me/auctions-bid-on")
-    public ResponseEntity<List<AuctionResponse>> getAuctionsBidOn() {
-        List<Long> auctionIds = bidService.getAuctionsBiddenByCurrentUser();
-        return ResponseEntity.ok(auctionService.getAuctionsBidOnByCurrentUser(auctionIds));
+    public ResponseEntity<Page<AuctionResponse>> getAuctionsBidOn(Pageable pageable) {
+        Page<Long> idPage = bidService.getAuctionsBiddenByCurrentUser(pageable);
+        return ResponseEntity.ok(auctionService.getAuctionsBidOnByCurrentUser(idPage, pageable));
     }
 
 }

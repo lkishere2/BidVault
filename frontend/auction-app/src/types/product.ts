@@ -10,7 +10,7 @@ export type Tag =
     | 'GARDENING'
     | 'GAMES'
     | 'ONLINE_ITEM'
-    | 'OTHER';
+    | 'OTHERS';
 
 export interface ProductRequest {
     productName: string;

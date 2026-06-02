@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Outlet, useLocation } from 'react-router-dom';
 import Header from './components/header/Header';
 import Footer from './components/footer/Footer';
 import HomePage from './pages/user/home/HomePage';
 import AdminPage from './pages/admin/home/AdminPage';
 import AdminNavbar from './pages/admin/AdminNavbar';
 import TransactionPage from './pages/admin/transaction/TransactionPage';
+import { UserControlPage } from './pages/admin/user/UserControlPage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import VerifyPage from './pages/auth/VerifyPage';
@@ -17,9 +18,11 @@ import OverviewPageLoading from './pages/user/user/overview/OverViewPageLoading'
 import BalancePage from './pages/user/user/balance/BalancePage';
 import StoragePage from './pages/user/user/storage/StoragePage';
 import SettingPage from './pages/user/user/setting/SettingPage';
+import NotificationPage from './pages/user/user/notification/NotificationPage';
 import HubPage from './pages/user/market/hub/HubPage';
 import CommunityPage from './pages/user/community/CommunityPage';
 import ProfilePage from './pages/user/community/ProfilePage';
+import JoinedAuctionsPage from './pages/user/market/joins/JoinedAuctionsPage';
 import { userApi } from './api/userApi';
 import { authApi } from './api/authApi';
 import './App.css';
@@ -38,13 +41,16 @@ function RootLayout({
   isLoggedIn: boolean;
   onLogout: () => void;
 }) {
+  const location = useLocation();
+  const isAuthPage = ['/login', '/register', '/forget-password', '/verify'].some(path => location.pathname.startsWith(path));
+
   return (
     <div className="flex flex-col min-h-screen bg-neutral-50/50">
-      <Header user={user} isLoggedIn={isLoggedIn} isAdmin={user?.role === 'ADMIN'} onLogout={onLogout} />
-      <main className="flex-1">
+      {!isAuthPage && <Header user={user} isLoggedIn={isLoggedIn} isAdmin={user?.role === 'ADMIN'} onLogout={onLogout} />}
+      <main className="flex-1 flex flex-col">
         <Outlet />
       </main>
-      <Footer />
+      {!isAuthPage && <Footer />}
     </div>
   );
 }
@@ -85,9 +91,8 @@ function App() {
         }
       }
     };
-
     syncUser();
-  }, [user?.id]);
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -132,7 +137,7 @@ function App() {
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/profile/:user_id" element={<ProfilePage />} />
           <Route path="/auctions/hub" element={<HubPage />} />
-          <Route path="/auction/joined" element={<MyBidsPage />} />
+          <Route path="/auction/joined" element={<JoinedAuctionsPage />} />
 
           <Route path="/account" element={<AccountNavbar />}>
             <Route
@@ -147,12 +152,13 @@ function App() {
             />
             <Route path="balance" element={<BalancePage />} />
             <Route path="storage" element={<StoragePage />} />
+            <Route path="notifications" element={<NotificationPage />} />
             <Route path="settings" element={<SettingPage />} />
           </Route>
 
           <Route path="/admin" element={<AdminNavbar />}>
             <Route index element={<AdminPage />} />
-            <Route path="user-control" element={<AdminUserControlPage />} />
+            <Route path="user-control" element={<UserControlPage />} />
             <Route path="transaction-request" element={<TransactionPage />} />
           </Route>
 

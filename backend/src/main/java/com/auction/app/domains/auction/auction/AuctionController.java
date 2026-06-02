@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -66,6 +67,11 @@ public class AuctionController {
         AuctionFindingRequest request = new AuctionFindingRequest(productName, tags, startTime, endTime, minStartingPrice, status);
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(auctionService.getDiscoverableAuctions(request, pageable));
+    }
+
+    @GetMapping("/top")
+    public ResponseEntity<List<AuctionResponse>> getTopAuctions() {
+        return ResponseEntity.ok(auctionService.getTop10ActiveAuctions());
     }
 
 }

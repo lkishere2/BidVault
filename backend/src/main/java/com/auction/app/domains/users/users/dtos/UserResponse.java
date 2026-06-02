@@ -16,4 +16,5 @@ public class UserResponse {
     private BigDecimal balance;
     private String profileImageUrl;
     private String role;
+    private Integer followersCount;
 }

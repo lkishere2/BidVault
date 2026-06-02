@@ -9,4 +9,8 @@ public interface NotificationService {
     Slice<NotificationResponse> getNotificationsFeed(long receiverId, int page, int size);
     void createAndSend(User receiver, User sender, NotificationType type);
     void notifyFollowersOfNewAuction(User creator);
+    void markAsRead(long id, long userId);
+    void markAllAsRead(long userId);
+    void markAsUnread(long id, long userId);
+    void markAllAsUnread(long userId);
 }

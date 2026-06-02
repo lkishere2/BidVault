@@ -1,10 +1,14 @@
 import { useState } from 'react';
-import { Gavel, LogOut, Menu, X } from 'lucide-react';
+import { Gavel, Menu, X, LogOut} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import NavItem from './NavItem';
 import LoginButton from './LoginButton';
 import ProfileButton from './ProfileButton';
 import AdminButton from './AdminButton';
+import LogoutButton from './LogoutButton';
+import NotificationButton from './NotificationButton';
+import NotificationDropdown from './NotificationDropdown';
+import { notificationApi } from '../../api/notificationApi';
 
 interface HeaderProps {
     user?: { username: string; initials: string; role?: string; profileImageUrl?: string };
@@ -29,9 +33,56 @@ const NAV = [
 export default function Header({ user, isLoggedIn = !!user, isAdmin = false, onLogout, onLogin }: HeaderProps) {
     const navigate = useNavigate();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [notifOpen, setNotifOpen] = useState(false);
+    const [notifications, setNotifications] = useState<{ id: number; message: string; sendAt: string; read?: boolean }[]>([]);
+    const [notifLoading, setNotifLoading] = useState(false);
     const close = () => setMobileOpen(false);
 
     const displayAdmin = isAdmin || user?.role === 'ADMIN' || user?.role === 'admin';
+
+    const handleNotifOpen = async () => {
+        const opening = !notifOpen;
+        setNotifOpen(opening);
+        if (opening && notifications.length === 0) {
+            try {
+                setNotifLoading(true);
+                const response = await notificationApi.getMyNotificationsFeed(0, 8);
+                setNotifications(response.data.content.map((n: { id: number; message: string; sendAt: string; hasRead: boolean }) => ({
+                    ...n,
+                    read: n.hasRead,
+                })));
+            } catch {
+                // silently fail — dropdown shows empty state
+            } finally {
+                setNotifLoading(false);
+            }
+        }
+    };
+
+    const unreadCount = notifications.filter(n => !n.read).length;
+
+    const handleMarkAllRead = async () => {
+        try {
+            await notificationApi.markAllAsRead();
+            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+        } catch {
+            // silently fail
+        }
+    };
+
+    const handleToggleRead = async (id: number, currentReadStatus: boolean) => {
+        try {
+            if (currentReadStatus) {
+                await notificationApi.markAsUnread(id);
+                setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: false } : n));
+            } else {
+                await notificationApi.markAsRead(id);
+                setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+            }
+        } catch {
+            // silently fail
+        }
+    };
 
     return (
         <header className="sticky top-0 z-[100] w-full bg-white border-b border-[#0D0D0D]">
@@ -61,6 +112,21 @@ export default function Header({ user, isLoggedIn = !!user, isAdmin = false, onL
                         {isLoggedIn && user ? (
                             <>
                                 {displayAdmin && <AdminButton />}
+                                <div className="relative">
+                                    <NotificationButton
+                                        unreadCount={unreadCount}
+                                        isOpen={notifOpen}
+                                        onClick={handleNotifOpen}
+                                    />
+                                    <NotificationDropdown
+                                        isOpen={notifOpen}
+                                        onClose={() => setNotifOpen(false)}
+                                        notifications={notifications}
+                                        isLoading={notifLoading}
+                                        onMarkAllRead={handleMarkAllRead}
+                                        onToggleRead={handleToggleRead}
+                                    />
+                                </div>
                                 <ProfileButton username={user.username} initials={user.initials} profileImageUrl={(user as any).profileImageUrl ?? (user as any).profile_image_url} />
                                 <button
                                     type="button"
@@ -72,9 +138,7 @@ export default function Header({ user, isLoggedIn = !!user, isAdmin = false, onL
                                 </button>
                             </>
                         ) : (
-                            <div onClick={onLogin}>
-                                <LoginButton />
-                            </div>
+                            <LoginButton onClick={onLogin} />
                         )}
                     </div>
 
@@ -143,8 +207,8 @@ export default function Header({ user, isLoggedIn = !!user, isAdmin = false, onL
                                 </div>
                             </div>
                         ) : (
-                            <div onClick={() => { onLogin?.(); close(); }} className="w-full flex justify-center py-2">
-                                <LoginButton />
+                            <div className="w-full flex justify-center py-2">
+                                <LoginButton onClick={() => { onLogin?.(); close(); }} />
                             </div>
                         )}
                     </div>

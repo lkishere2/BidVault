@@ -12,5 +12,5 @@ public enum Tag {
     GARDENING,
     GAMES,
     ONLINE_ITEM,
-    OTHER;
+    OTHERS;
 }

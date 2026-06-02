@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.auction.app.controllers.account.DashboardViewController"
+           style="-fx-background-color: #0D0D0D;"
+           prefWidth="800" prefHeight="680">
+
+    <VBox spacing="0" alignment="TOP_CENTER" maxWidth="Infinity" maxHeight="Infinity">
+
+        <!-- ══════════════════════════════════════════
+             TOP TICKER STRIP — scrolling activity feed
+             ══════════════════════════════════════════ -->
+        <HBox fx:id="tickerStrip" alignment="CENTER_LEFT" spacing="0"
+              style="-fx-background-color: #111111;
+                     -fx-border-color: transparent transparent rgba(245,197,24,0.15) transparent;
+                     -fx-border-width: 0 0 0.5 0;
+                     -fx-padding: 9 24 9 24;">
+            <Label text="● MARKET OPEN"
+                   style="-fx-text-fill: #00D68F; -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 0 18 0 0;"/>
+            <Label fx:id="tickerLabel"
+                   text="DEPOSIT  +$100,000,000  ·  2h ago          BURGATTI  bid placed  $8,200  ·  5h ago          GFF  auction launched  ·  1d ago"
+                   style="-fx-text-fill: rgba(255,255,255,0.35); -fx-font-size: 10px;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="liveClockLabel" text="00:00:00"
+                   style="-fx-text-fill: rgba(255,255,255,0.25); -fx-font-size: 10px; -fx-font-weight: bold;"/>
+        </HBox>
+
+        <!-- ══════════════════════════════════════════
+             HERO SECTION — centered quote + tagline
+             ══════════════════════════════════════════ -->
+        <VBox alignment="CENTER" spacing="18" VBox.vgrow="ALWAYS">
+            <padding>
+                <Insets top="0" right="60" bottom="0" left="60"/>
+            </padding>
+
+            <!-- Decorative top line -->
+            <HBox alignment="CENTER" spacing="12">
+                <Region prefHeight="0.5" prefWidth="60"
+                        style="-fx-background-color: rgba(245,197,24,0.30);"/>
+                <Label text="B I D V A U L T"
+                       style="-fx-text-fill: rgba(245,197,24,0.40); -fx-font-size: 10px;
+                              -fx-font-weight: bold; -fx-letter-spacing: 0.3em;"/>
+                <Region prefHeight="0.5" prefWidth="60"
+                        style="-fx-background-color: rgba(245,197,24,0.30);"/>
+            </HBox>
+
+            <!-- Main quote -->
+            <Label fx:id="heroQuoteLabel"
+                   text="Markets are live.&#10;Your vault is ready."
+                   style="-fx-text-fill: #FFFFFF;
+                          -fx-font-size: 38px;
+                          -fx-font-weight: bold;
+                          -fx-alignment: CENTER;
+                          -fx-text-alignment: CENTER;
+                          -fx-line-spacing: 6;"
+                   wrapText="true"
+                   alignment="CENTER"
+                   maxWidth="560"/>
+
+            <!-- Gold accent underline -->
+            <Region prefHeight="2" prefWidth="80"
+                    style="-fx-background-color: #F5C518; -fx-background-radius: 2;"/>
+
+            <!-- Sub-tagline -->
+            <Label text="One platform. Every bid. Total control."
+                   style="-fx-text-fill: rgba(255,255,255,0.35);
+                          -fx-font-size: 14px;
+                          -fx-alignment: CENTER;"
+                   alignment="CENTER"/>
+
+            <!-- ══════════════════════════════════════
+                 LIVE STAT CHIPS — balance · auctions · vault
+                 ══════════════════════════════════════ -->
+            <HBox spacing="16" alignment="CENTER" style="-fx-padding: 12 0 0 0;">
+
+                <!-- Balance chip -->
+                <VBox spacing="4" alignment="CENTER"
+                      style="-fx-background-color: #1A1A1A;
+                             -fx-background-radius: 10;
+                             -fx-border-color: rgba(245,197,24,0.20);
+                             -fx-border-radius: 10; -fx-border-width: 0.5;
+                             -fx-padding: 14 24;">
+                    <Label text="BALANCE"
+                           style="-fx-text-fill: rgba(255,255,255,0.35); -fx-font-size: 9px; -fx-font-weight: bold;"/>
+                    <Label fx:id="statBalanceLabel" text="0.00"
+                           style="-fx-text-fill: #F5C518; -fx-font-size: 20px; -fx-font-weight: bold;"/>
+                    <Label text="Available"
+                           style="-fx-text-fill: rgba(255,255,255,0.25); -fx-font-size: 10px;"/>
+                </VBox>
+
+                <!-- Auctions chip -->
+                <VBox spacing="4" alignment="CENTER"
+                      style="-fx-background-color: #1A1A1A;
+                             -fx-background-radius: 10;
+                             -fx-border-color: rgba(255,255,255,0.07);
+                             -fx-border-radius: 10; -fx-border-width: 0.5;
+                             -fx-padding: 14 24;">
+                    <Label text="AUCTIONS"
+                           style="-fx-text-fill: rgba(255,255,255,0.35); -fx-font-size: 9px; -fx-font-weight: bold;"/>
+                    <Label fx:id="statAuctionsLabel" text="0"
+                           style="-fx-text-fill: #FFFFFF; -fx-font-size: 20px; -fx-font-weight: bold;"/>
+                    <Label text="Active"
+                           style="-fx-text-fill: rgba(255,255,255,0.25); -fx-font-size: 10px;"/>
+                </VBox>
+
+                <!-- Vault chip -->
+                <VBox spacing="4" alignment="CENTER"
+                      style="-fx-background-color: #1A1A1A;
+                             -fx-background-radius: 10;
+                             -fx-border-color: rgba(255,255,255,0.07);
+                             -fx-border-radius: 10; -fx-border-width: 0.5;
+                             -fx-padding: 14 24;">
+                    <Label text="VAULT ITEMS"
+                           style="-fx-text-fill: rgba(255,255,255,0.35); -fx-font-size: 9px; -fx-font-weight: bold;"/>
+                    <Label fx:id="statVaultLabel" text="0"
+                           style="-fx-text-fill: #FFFFFF; -fx-font-size: 20px; -fx-font-weight: bold;"/>
+                    <Label text="In Storage"
+                           style="-fx-text-fill: rgba(255,255,255,0.25); -fx-font-size: 10px;"/>
+                </VBox>
+
+            </HBox>
+
+            <!-- ══════════════════════════════════════
+                 FLOATING TRADER QUOTE BUBBLE
+                 ══════════════════════════════════════ -->
+            <StackPane fx:id="quoteBubbleContainer" maxWidth="520"
+                       style="-fx-padding: 22 0 0 0;">
+
+                <!-- Ambient blue inner glow layer -->
+                <VBox style="-fx-background-color: #0a1628;
+                             -fx-background-radius: 18;
+                             -fx-padding: 20 26 20 26;">
+                </VBox>
+
+                <!-- Gold border bubble card -->
+                <VBox fx:id="quoteBubble"
+                      spacing="10" alignment="CENTER"
+                      style="-fx-background-color: #0D0D0D;
+                             -fx-background-radius: 18;
+                             -fx-border-color: #F5C518;
+                             -fx-border-radius: 18;
+                             -fx-border-width: 1.5;
+                             -fx-padding: 20 26 20 26;
+                             -fx-effect: dropshadow(gaussian, rgba(245,197,24,0.28), 18, 0.3, 0, 0);
+                             -fx-cursor: hand;">
+
+                    <!-- Open-quote accent -->
+                    <Label text="&quot;"
+                           style="-fx-text-fill: rgba(245,197,24,0.25);
+                                  -fx-font-size: 42px;
+                                  -fx-font-style: italic;
+                                  -fx-padding: -10 0 -16 0;"/>
+
+                    <!-- Quote text — braille-like: light on dark, spaced -->
+                    <Label fx:id="traderQuoteLabel"
+                           text="The stock market is a device for transferring money from the impatient to the patient."
+                           style="-fx-text-fill: rgba(255,255,255,0.80);
+                                  -fx-font-size: 13px;
+                                  -fx-font-style: italic;
+                                  -fx-alignment: CENTER;
+                                  -fx-text-alignment: CENTER;
+                                  -fx-line-spacing: 3;
+                                  -fx-effect: dropshadow(gaussian, rgba(245,197,24,0.20), 6, 0, 0, 0);"
+                           wrapText="true"
+                           alignment="CENTER"
+                           maxWidth="460"/>
+
+                    <!-- Thin gold divider -->
+                    <Region prefHeight="0.5" prefWidth="60"
+                            style="-fx-background-color: rgba(245,197,24,0.35);"/>
+
+                    <!-- Author — gold, letter-spaced -->
+                    <Label fx:id="traderQuoteAuthorLabel" text="— Warren Buffett"
+                           style="-fx-text-fill: #F5C518;
+                                  -fx-font-size: 11px;
+                                  -fx-font-weight: bold;
+                                  -fx-effect: dropshadow(gaussian, rgba(245,197,24,0.50), 8, 0, 0, 0);"/>
+
+                </VBox>
+            </StackPane>
+
+        </VBox>
+
+        <!-- ══════════════════════════════════════════
+             BOTTOM STATUS BAR
+             ══════════════════════════════════════════ -->
+        <HBox alignment="CENTER_LEFT" spacing="0"
+              style="-fx-background-color: #111111;
+                     -fx-border-color: rgba(255,255,255,0.06) transparent transparent transparent;
+                     -fx-border-width: 0.5 0 0 0;
+                     -fx-padding: 10 24 10 24;">
+            <Label text="v1.0.0  ·  Stable JVM UI  ·  Connection Build"
+                   style="-fx-text-fill: rgba(255,255,255,0.18); -fx-font-size: 10px;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="© 2026 BidVault Engine Platform Systems"
+                   style="-fx-text-fill: rgba(255,255,255,0.18); -fx-font-size: 10px;"/>
+        </HBox>
+
+    </VBox>
+
+</StackPane>
+

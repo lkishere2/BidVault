@@ -27,15 +27,11 @@ export default function RegisterBox({ onError }: RegisterBoxProps) {
         }
 
         setIsLoading(true);
-        try {
-            await authApi.register({ username: name, email, password });
-            navigate('/verify/user', { state: { email } });
-        } catch (error: any) {
-            const errorMsg = error.response?.data?.message || 'Failed to complete registration. Please try again.';
-            onError('Registration Failed', errorMsg);
-        } finally {
-            setIsLoading(false);
-        }
+        // Navigate immediately without waiting for the backend response
+        authApi.register({ username: name, email, password }).catch((error: any) => {
+             console.error('Registration failed in background:', error);
+        });
+        navigate('/verify/user', { state: { email } });
     };
 
     return (

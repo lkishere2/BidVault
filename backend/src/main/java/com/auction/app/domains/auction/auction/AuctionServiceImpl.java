@@ -176,13 +176,15 @@ public class AuctionServiceImpl implements AuctionService {
 
     }
 
-    public List<AuctionResponse> getAuctionsBidOnByCurrentUser(List<Long> auctionIds) {
-        if (auctionIds.isEmpty()) return List.of();
+    public Page<AuctionResponse> getAuctionsBidOnByCurrentUser(Page<Long> idPage, Pageable pageable) {
+        if (idPage.isEmpty()) return Page.empty(pageable);
 
-        return auctionRepository.findByIdsWithDetails(auctionIds)
+        List<AuctionResponse> responses = auctionRepository.findByIdsWithDetails(idPage.getContent())
                 .stream()
                 .map(AuctionResponse::from)
                 .toList();
+                
+        return new PageImpl<>(responses, pageable, idPage.getTotalElements());
     }
 
     @Transactional(readOnly = true)
@@ -211,6 +213,13 @@ public class AuctionServiceImpl implements AuctionService {
                 .toList();
 
         return new PageImpl<>(responses, pageable, idPage.getTotalElements());
+    }
+
+    public List<AuctionResponse> getTop10ActiveAuctions() {
+        return auctionRepository.findTopAuctionsByBidCount(AuctionStatus.ACTIVE, PageRequest.of(0, 10))
+                .stream()
+                .map(AuctionResponse::from)
+                .toList();
     }
 
     private Auction findByIdWithDetails(Long auctionId) {

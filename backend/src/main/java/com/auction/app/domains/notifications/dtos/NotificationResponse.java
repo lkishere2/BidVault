@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 public class NotificationResponse {
+    private Long id;
     private String message;
     private LocalDateTime sendAt;
+    private boolean hasRead;
 }

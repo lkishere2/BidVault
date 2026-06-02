@@ -1,4 +1,6 @@
+import { useState, useEffect } from 'react';
 import UserItem from './UserItem';
+import { userApi } from '../../../api/userApi';
 
 export interface TopUser {
     id: string;
@@ -7,18 +9,24 @@ export interface TopUser {
     followers: number;
 }
 
-const MOCK_USERS: TopUser[] = [
-    { id: '1', name: 'Eleanor Voss', followers: 48200, avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150' },
-    { id: '2', name: 'Marcus Hale', followers: 41800, avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150' },
-    { id: '3', name: 'Irina Sorel', followers: 37500, avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=150' },
-    { id: '4', name: 'David Kwon', followers: 29300, avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150' },
-    { id: '5', name: 'Sylvia Crane', followers: 24700, avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150' },
-    { id: '6', name: 'Theo Marchetti', followers: 19100, avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=150' },
-    { id: '7', name: 'Nadia Osei', followers: 14600, avatar: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&q=80&w=150' },
-    { id: '8', name: 'Luca Ferreira', followers: 11200, avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=150' },
-];
-
 export default function UserSection() {
+    const [users, setUsers] = useState<TopUser[]>([]);
+
+    useEffect(() => {
+        userApi.getTopUsers().then(res => {
+            const mapped = res.data.map(u => ({
+                id: String(u.id),
+                name: u.username,
+                avatar: u.profileImageUrl
+                    ? u.profileImageUrl.startsWith('http')
+                        ? u.profileImageUrl
+                        : `https://res.cloudinary.com/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload/${u.profileImageUrl}`
+                    : `https://ui-avatars.com/api/?name=${encodeURIComponent(u.username)}&background=F5C518&color=0D0D0D&size=128&font-weight=bold`,
+                followers: u.followersCount || 0
+            }));
+            setUsers(mapped);
+        }).catch(err => console.error(err));
+    }, []);
     return (
         <section
             id="sec-users"
@@ -39,7 +47,7 @@ export default function UserSection() {
                     </h2>
                 </div>
                 <a
-                    href="#"
+                    href="/community"
                     className="text-[12px] font-bold tracking-[.08em] uppercase text-[#F5C518] border-b border-[#F5C518]/40 pb-1 no-underline transition hover:opacity-70"
                 >
                     View all →
@@ -54,7 +62,7 @@ export default function UserSection() {
                   xs   → 2 cols  (4 rows of 2)
             */}
             <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-8 gap-x-6 gap-y-10">
-                {MOCK_USERS.map((user, i) => (
+                {users.map((user, i) => (
                     <UserItem key={user.id} user={user} rank={i + 1} />
                 ))}
             </div>

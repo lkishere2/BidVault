@@ -13,7 +13,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -99,7 +98,7 @@ public class ProductServiceImpl implements ProductService {
 
     private Set<Tag> resolveTags(Set<Tag> tags) {
         if (tags == null || tags.isEmpty()) {
-            return Set.of(Tag.OTHER);
+            return Set.of(Tag.OTHERS);
         }
         return tags;
     }

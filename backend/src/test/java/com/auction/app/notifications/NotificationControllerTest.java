@@ -72,7 +72,7 @@ class NotificationControllerTest {
     @Test
     void getMyNotificationsFeed_WhenValidParams_ShouldReturnSliceWithData() throws Exception {
         LocalDateTime sendAt = LocalDateTime.of(2026, 5, 27, 9, 0);
-        NotificationResponse response = new NotificationResponse("testuser has followed you!", sendAt);
+        NotificationResponse response = new NotificationResponse(1L, "testuser has followed you!", sendAt, false);
         Slice<NotificationResponse> slice = new SliceImpl<>(List.of(response));
 
         when(notificationService.getNotificationsFeed(1L, 0, 20)).thenReturn(slice);
@@ -116,7 +116,7 @@ class NotificationControllerTest {
     @Test
     void getMyNotificationsFeed_WhenDataReturned_ShouldMapMessageCorrectly() throws Exception {
         String expectedMessage = "khanhkaiser has followed you!";
-        NotificationResponse response = new NotificationResponse(expectedMessage, LocalDateTime.of(2026, 5, 27, 10, 0));
+        NotificationResponse response = new NotificationResponse(1L, expectedMessage, LocalDateTime.of(2026, 5, 27, 10, 0), false);
 
         when(notificationService.getNotificationsFeed(1L, 0, 20)).thenReturn(new SliceImpl<>(List.of(response)));
 
@@ -128,9 +128,9 @@ class NotificationControllerTest {
     @Test
     void getMyNotificationsFeed_WhenMultipleNotifications_ShouldReturnAllNotifications() throws Exception {
         List<NotificationResponse> responses = List.of(
-                new NotificationResponse("user1 has followed you!", LocalDateTime.of(2026, 5, 27, 9, 0)),
-                new NotificationResponse("user2 has created a new auction, stay tuned!", LocalDateTime.of(2026, 5, 27, 9, 5)),
-                new NotificationResponse("user3 has followed you!", LocalDateTime.of(2026, 5, 27, 9, 10))
+                new NotificationResponse(1L, "user1 has followed you!", LocalDateTime.of(2026, 5, 27, 9, 0), false),
+                new NotificationResponse(2L, "user2 has created a new auction, stay tuned!", LocalDateTime.of(2026, 5, 27, 9, 5), false),
+                new NotificationResponse(3L, "user3 has followed you!", LocalDateTime.of(2026, 5, 27, 9, 10), false)
         );
 
         when(notificationService.getNotificationsFeed(1L, 0, 20)).thenReturn(new SliceImpl<>(responses));
@@ -168,7 +168,7 @@ class NotificationControllerTest {
     @Test
     void getMyNotificationsFeed_WhenMoreDataExists_ShouldReturnLastFalse() throws Exception {
         Slice<NotificationResponse> slice = new SliceImpl<>(
-                List.of(new NotificationResponse("msg", LocalDateTime.of(2026, 5, 27, 11, 0))),
+                List.of(new NotificationResponse(1L, "msg", LocalDateTime.of(2026, 5, 27, 11, 0), false)),
                 PageRequest.of(0, 1),
                 true
         );
@@ -185,7 +185,7 @@ class NotificationControllerTest {
     @Test
     void getMyNotificationsFeed_WhenNoMoreDataExists_ShouldReturnLastTrue() throws Exception {
         Slice<NotificationResponse> slice = new SliceImpl<>(
-                List.of(new NotificationResponse("msg", LocalDateTime.of(2026, 5, 27, 11, 30))),
+                List.of(new NotificationResponse(1L, "msg", LocalDateTime.of(2026, 5, 27, 11, 30), false)),
                 PageRequest.of(0, 10),
                 false
         );

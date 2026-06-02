@@ -1,64 +1,85 @@
 import React, { useEffect, useState } from 'react';
 import { productApi } from '../../../../api/productApi';
 import type { ProductResponse } from '../../../../types/product';
-import UserItem from './UserItem';
-import UserItemInfo from './UserItemInfo';
-import UserItemGridLoading from './UserItemGridLoading';
+import { UserItem } from './UserItem';
+import { UserItemInfo } from './UserItemInfo';
+import { CreateAuctionSection } from './CreateAuctionSection';
 
-export const UserItemGrid: React.FC = () => {
-    const [items, setItems] = useState<ProductResponse[]>([]);
-    const [selectedItem, setSelectedItem] = useState<ProductResponse | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+interface UserItemGridProps {
+    refreshKey?: number;
+}
+
+export const UserItemGrid: React.FC<UserItemGridProps> = ({ refreshKey }) => {
+    const [products, setProducts] = useState<ProductResponse[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedProduct, setSelectedProduct] = useState<ProductResponse | null>(null);
+    const [launchProduct, setLaunchProduct] = useState<ProductResponse | null>(null);
+
+    const fetchProducts = async () => {
+        setLoading(true);
+        try {
+            const res = await productApi.getStorage();
+            setProducts(res.data.content);
+        } catch (err) {
+            console.error('Failed to load storage:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        let cancelled = false;
+        fetchProducts();
+    }, [refreshKey]);
 
-        const fetchStorage = async () => {
-            setIsLoading(true);
-            try {
-                const res = await productApi.getStorage(0, 20);
-                if (cancelled) return;
+    if (loading) {
+        return (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
+                {Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', height: '260px', background: '#f9fafb', animation: 'pulse 1.5s ease-in-out infinite' }} />
+                ))}
+            </div>
+        );
+    }
 
-                const data = res.data as unknown as { content?: ProductResponse[] } | ProductResponse[];
-                setItems(Array.isArray(data) ? data : (data?.content ?? []));
-            } catch (error) {
-                console.error(error);
-            } finally {
-                if (!cancelled) {
-                    setIsLoading(false);
-                }
-            }
-        };
-
-        fetchStorage();
-
-        return () => { cancelled = true; };
-    }, []);
+    if (products.length === 0) {
+        return (
+            <div style={{ textAlign: 'center', padding: '60px 0', color: '#9ca3af' }}>
+                <p style={{ fontSize: '16px', fontWeight: 500 }}>No items in storage yet.</p>
+                <p style={{ fontSize: '14px', marginTop: '4px' }}>Add your first item to get started.</p>
+            </div>
+        );
+    }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {isLoading ? (
-                <UserItemGridLoading />
-            ) : items.length === 0 ? (
-                <p style={{ color: '#6b7280', fontSize: '14px', margin: 0 }}>Your storage is currently empty.</p>
-            ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '24px' }}>
-                    {items.map((item) => (
-                        <UserItem
-                            key={item.id}
-                            product={item}
-                            onClick={() => setSelectedItem(item)}
-                        />
-                    ))}
-                </div>
-            )}
-            {selectedItem && (
+        <>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
+                {products.map(product => (
+                    <UserItem
+                        key={product.id}
+                        product={product}
+                        onClick={() => setSelectedProduct(product)}
+                        onLaunch={() => setLaunchProduct(product)}
+                    />
+                ))}
+            </div>
+
+            {selectedProduct && (
                 <UserItemInfo
-                    product={selectedItem}
-                    onClose={() => setSelectedItem(null)}
+                    product={selectedProduct}
+                    onClose={() => setSelectedProduct(null)}
+                    onUpdated={() => { setSelectedProduct(null); fetchProducts(); }}
+                    onDeleted={() => { setSelectedProduct(null); fetchProducts(); }}
                 />
             )}
-        </div>
+
+            {launchProduct && (
+                <CreateAuctionSection
+                    product={launchProduct}
+                    onClose={() => setLaunchProduct(null)}
+                    onSuccess={() => { setLaunchProduct(null); fetchProducts(); }}
+                />
+            )}
+        </>
     );
 };
 

@@ -24,6 +24,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import org.springframework.data.domain.PageRequest;
 
 @Component
 @RequiredArgsConstructor
@@ -54,7 +55,7 @@ public class BidFeedPanelController {
         // Load history from REST on a background thread
         Thread worker = new Thread(() -> {
             try {
-                List<BidResponse> history = bidService.getBidHistory(auction.getId());
+                List<BidResponse> history = bidService.getBidHistory(auction.getId(), PageRequest.of(0, 50)).getContent();
                 javafx.application.Platform.runLater(() -> {
                     if (history.isEmpty()) {
                         showEmpty(true);

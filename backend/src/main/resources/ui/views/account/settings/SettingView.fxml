@@ -1,20 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
 <ScrollPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.auction.app.controllers.account.settings.SettingViewController"
             fitToWidth="true"
-            style="-fx-background-color: transparent; -fx-background: #f5f6fa; -fx-padding: 30;">
+            style="-fx-background-color: transparent; -fx-background: #0D0D0D;"
+            hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
 
-    <VBox spacing="20" maxWidth="800" style="-fx-background-color: transparent; -fx-alignment: top-center;">
+    <HBox spacing="20"
+          style="-fx-background-color: #0D0D0D; -fx-fill-height: true;">
 
-        <fx:include fx:id="userProfileCard" source="UserProfileCard.fxml" />
+        <padding>
+            <Insets top="24" right="24" bottom="24" left="24"/>
+        </padding>
 
-        <fx:include fx:id="updateProfileBox" source="UpdateProfileBox.fxml" />
+        <!-- LEFT: floating identity card -->
+        <fx:include fx:id="userProfileCard" source="UserProfileCard.fxml"/>
 
-    </VBox>
+        <!-- RIGHT: settings forms -->
+        <VBox HBox.hgrow="ALWAYS" style="-fx-background-color: transparent;">
+            <fx:include fx:id="updateProfileBox" source="UpdateProfileBox.fxml"/>
+        </VBox>
+
+    </HBox>
 
 </ScrollPane>
