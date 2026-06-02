@@ -38,6 +38,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         return notificationRepository.findByReceiverId(receiverId, pageable)
                 .map(entity -> new NotificationResponse(
+                        entity.getId(),
                         entity.getMessage(),
                         entity.getSendAt()
                 ));
@@ -56,7 +57,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .build();
         notificationRepository.save(notification);
 
-        NotificationResponse response = new NotificationResponse(message, notification.getSendAt());
+        NotificationResponse response = new NotificationResponse(notification.getId(), message, notification.getSendAt());
 
         messagingTemplate.convertAndSendToUser(
                 receiver.getDisplayName(),
@@ -88,12 +89,11 @@ public class NotificationServiceImpl implements NotificationService {
 
         notificationRepository.saveAll(notifications);
 
-        NotificationResponse response = new NotificationResponse(message, now);
         for (User follower : followers) {
             messagingTemplate.convertAndSendToUser(
                     follower.getDisplayName(),
                     "/queue/notifications",
-                    response
+                    new NotificationResponse(null, message, now)
             );
         }
 

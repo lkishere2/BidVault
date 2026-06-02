@@ -9,10 +9,11 @@ export interface Page<T> {
 }
 
 export interface Slice<T> {
-    items: T[];
-    pageSize: number;
-    hasNext: boolean;
-    hasPrevious: boolean;
-    nextCursor?: string | null;
-    previousCursor?: string | null;
+    content: T[];
+    size: number;
+    number: number;
+    first: boolean;
+    last: boolean;
+    numberOfElements: number;
+    empty: boolean;
 }

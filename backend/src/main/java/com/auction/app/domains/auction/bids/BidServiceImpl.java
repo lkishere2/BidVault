@@ -7,6 +7,9 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
 import com.auction.app.domains.auction.auction.notification.AuctionPublisher;
 import com.auction.app.domains.auction.auction.redis.AuctionRedisService;
@@ -179,8 +182,8 @@ public class BidServiceImpl implements BidService {
     }
 
     @Override
-    public List<Long> getAuctionsBiddenByCurrentUser() {
-        return bidRepository.findDistinctAuctionIdsByBidderId(securityUtils.getCurrentUserId());
+    public Page<Long> getAuctionsBiddenByCurrentUser(Pageable pageable) {
+        return bidRepository.findDistinctAuctionIdsByBidderId(securityUtils.getCurrentUserId(), pageable);
     }
 
     private Bid buildBid(Auction auction, User bidder, BigDecimal amount) {

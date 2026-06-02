@@ -1,11 +1,23 @@
 import { useNavigate } from 'react-router-dom';
 
-export default function LoginButton() {
+interface LoginButtonProps {
+    onClick?: () => void;
+}
+
+export default function LoginButton({ onClick }: LoginButtonProps) {
     const navigate = useNavigate();
+
+    const handleClick = () => {
+        if (onClick) {
+            onClick();
+        } else {
+            navigate('/login');
+        }
+    };
 
     return (
         <button
-            onClick={() => navigate('/login')}
+            onClick={handleClick}
             style={buttonStyle}
             onMouseEnter={(e) => e.currentTarget.style.setProperty('opacity', '0.85')}
             onMouseLeave={(e) => e.currentTarget.style.setProperty('opacity', '1')}

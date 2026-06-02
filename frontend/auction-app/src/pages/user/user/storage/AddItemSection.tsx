@@ -9,7 +9,7 @@ interface AddItemSectionProps {
 
 const AVAILABLE_TAGS: Tag[] = [
     'ELECTRONICS', 'FOOD', 'COLLECTIBLES', 'FASHION', 'JEWELRY',
-    'ART', 'VEHICLES', 'SPORTS', 'GARDENING', 'GAMES', 'ONLINE_ITEM', 'OTHER'
+    'ART', 'VEHICLES', 'SPORTS', 'GARDENING', 'GAMES', 'ONLINE_ITEM', 'OTHERS'
 ];
 
 export const AddItemSection: React.FC<AddItemSectionProps> = ({ onClose, onSuccess }) => {

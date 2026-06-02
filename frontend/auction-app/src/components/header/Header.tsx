@@ -1,10 +1,14 @@
 import { useState } from 'react';
-import { Gavel, LogOut, Menu, X } from 'lucide-react';
+import { Gavel, Menu, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import NavItem from './NavItem';
 import LoginButton from './LoginButton';
 import ProfileButton from './ProfileButton';
 import AdminButton from './AdminButton';
+import LogoutButton from './LogoutButton';
+import NotificationButton from './NotificationButton';
+import NotificationDropdown from './NotificationDropdown';
+import { notificationApi } from '../../api/notificationApi';
 
 interface HeaderProps {
     user?: { username: string; initials: string; role?: string };
@@ -29,9 +33,33 @@ const NAV = [
 export default function Header({ user, isLoggedIn = !!user, isAdmin = false, onLogout, onLogin }: HeaderProps) {
     const navigate = useNavigate();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [notifOpen, setNotifOpen] = useState(false);
+    const [notifications, setNotifications] = useState<{ id: number; message: string; sendAt: string; read?: boolean }[]>([]);
+    const [notifLoading, setNotifLoading] = useState(false);
     const close = () => setMobileOpen(false);
 
     const displayAdmin = isAdmin || user?.role === 'ADMIN' || user?.role === 'admin';
+
+    const handleNotifOpen = async () => {
+        const opening = !notifOpen;
+        setNotifOpen(opening);
+        if (opening && notifications.length === 0) {
+            try {
+                setNotifLoading(true);
+                const response = await notificationApi.getMyNotificationsFeed(0, 8);
+                setNotifications(response.data.content.map((n: { id: number; message: string; sendAt: string }) => ({
+                    ...n,
+                    read: false,
+                })));
+            } catch {
+                // silently fail — dropdown shows empty state
+            } finally {
+                setNotifLoading(false);
+            }
+        }
+    };
+
+    const unreadCount = notifications.filter(n => !n.read).length;
 
     return (
         <header className="sticky top-0 z-[100] w-full bg-white border-b border-[#0D0D0D]">
@@ -61,20 +89,25 @@ export default function Header({ user, isLoggedIn = !!user, isAdmin = false, onL
                         {isLoggedIn && user ? (
                             <>
                                 {displayAdmin && <AdminButton />}
+                                <div className="relative">
+                                    <NotificationButton
+                                        unreadCount={unreadCount}
+                                        isOpen={notifOpen}
+                                        onClick={handleNotifOpen}
+                                    />
+                                    <NotificationDropdown
+                                        isOpen={notifOpen}
+                                        onClose={() => setNotifOpen(false)}
+                                        notifications={notifications}
+                                        isLoading={notifLoading}
+                                        onMarkAllRead={() => setNotifications(prev => prev.map(n => ({ ...n, read: true })))}
+                                    />
+                                </div>
                                 <ProfileButton username={user.username} initials={user.initials} />
-                                <button
-                                    type="button"
-                                    onClick={onLogout}
-                                    title="Log out"
-                                    className="w-[38px] h-[38px] sm:w-[42px] sm:h-[42px] rounded-full border border-neutral-200 flex items-center justify-center text-neutral-400 hover:border-red-400 hover:text-red-500 transition-colors bg-white cursor-pointer"
-                                >
-                                    <LogOut size={14} strokeWidth={2} />
-                                </button>
+                                <LogoutButton onClick={onLogout} variant="desktop" />
                             </>
                         ) : (
-                            <div onClick={onLogin}>
-                                <LoginButton />
-                            </div>
+                            <LoginButton onClick={onLogin} />
                         )}
                     </div>
 
@@ -133,18 +166,12 @@ export default function Header({ user, isLoggedIn = !!user, isAdmin = false, onL
                                 )}
                                 <div className="flex items-center justify-between px-3 py-2">
                                     <ProfileButton username={user.username} initials={user.initials} />
-                                    <button
-                                        type="button"
-                                        onClick={() => { onLogout?.(); close(); }}
-                                        className="flex items-center gap-1.5 text-[12px] font-semibold text-red-500 bg-transparent border-0 cursor-pointer pl-4"
-                                    >
-                                        <LogOut size={13} strokeWidth={2} /> Log out
-                                    </button>
+                                    <LogoutButton onClick={() => { onLogout?.(); close(); }} variant="mobile" />
                                 </div>
                             </div>
                         ) : (
-                            <div onClick={() => { onLogin?.(); close(); }} className="w-full flex justify-center py-2">
-                                <LoginButton />
+                            <div className="w-full flex justify-center py-2">
+                                <LoginButton onClick={() => { onLogin?.(); close(); }} />
                             </div>
                         )}
                     </div>
