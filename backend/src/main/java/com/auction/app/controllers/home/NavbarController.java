@@ -29,7 +29,7 @@ public class NavbarController {
     @FXML private NavbarItemController navExploreController;
     @FXML private NavbarItemController navMarketController;
     @FXML private NavbarItemController navAccountController;
-    @FXML private NavbarItemController navAdminController;
+    @FXML private NavbarItemController navAdminInnerController;
     @FXML private NavbarItemController navLogoutController;
 
     @Autowired
@@ -91,7 +91,7 @@ public class NavbarController {
         if (navExploreController != null) navExploreController.setItemText("Explore");
         if (navMarketController != null) navMarketController.setItemText("Market");
         if (navAccountController != null) navAccountController.setItemText("Account");
-        if (navAdminController != null) navAdminController.setItemText("Admin Control");
+        if (navAdminInnerController != null) navAdminInnerController.setItemText("Admin");
         if (navLogoutController != null) navLogoutController.setItemText("Logout");
     }
 

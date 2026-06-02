@@ -20,6 +20,7 @@ import org.springframework.security.concurrent.DelegatingSecurityContextRunnable
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -63,13 +64,16 @@ public class InventoryViewController {
 
     private void updateUI(Page<ProductResponse> page) {
         productsFlowPane.getChildren().clear();
+        List<ProductResponse> availableProducts = page.getContent().stream()
+                .filter(product -> product.getQuantity() > 0)
+                .toList();
 
-        if (page.isEmpty()) {
-            Label blankLabel = new Label("Your storage vault is empty. Click '+ Add Product' to start registry listings.");
+        if (availableProducts.isEmpty()) {
+            Label blankLabel = new Label("No stocked products available. Click '+ Add Product' to register new inventory.");
             blankLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #94A3B8; -fx-padding: 40 0 0 0;");
             productsFlowPane.getChildren().add(blankLabel);
         } else {
-            for (ProductResponse product : page.getContent()) {
+            for (ProductResponse product : availableProducts) {
                 try {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/views/account/inventory/ProductItem.fxml"));
                     loader.setControllerFactory(springContext::getBean);

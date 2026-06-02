@@ -1,7 +1,9 @@
 package com.auction.app.controllers.account.balance;
 
+import com.auction.app.controllers.UserSession;
 import com.auction.app.domains.transaction.model.TransactionType;
 import com.auction.app.domains.users.users.UserController;
+import com.auction.app.domains.users.users.UserRepository;
 import com.auction.app.domains.users.users.dtos.UserResponse;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -17,6 +19,7 @@ import org.springframework.security.concurrent.DelegatingSecurityContextRunnable
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 
 @Component
 public class UserBalanceCardController {
@@ -25,6 +28,8 @@ public class UserBalanceCardController {
     @FXML private Button requestBalanceBtn;
 
     @Autowired private UserController userController;
+    @Autowired private UserRepository userRepository;
+    @Autowired private UserSession userSession;
     @Autowired private ApplicationContext springContext;
 
     private BalanceViewController parentController;
@@ -41,19 +46,37 @@ public class UserBalanceCardController {
     public void loadActiveUserMetrics() {
         Runnable secureTask = new DelegatingSecurityContextRunnable(() -> {
             try {
-                ResponseEntity<UserResponse> response = userController.getCurrentUserInformation();
-                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                    UserResponse profile = response.getBody();
-                    Platform.runLater(() -> balanceAmountLabel.setText(
-                            String.format("$%,.2f", profile.getBalance())
-                    ));
-                }
+                BigDecimal balance = loadBalanceSnapshot();
+                Platform.runLater(() -> balanceAmountLabel.setText(formatBalance(balance)));
             } catch (Exception e) {
+                e.printStackTrace();
                 Platform.runLater(() -> balanceAmountLabel.setText("Connection Error"));
             }
         });
 
         new Thread(secureTask).start();
+    }
+
+    private BigDecimal loadBalanceSnapshot() {
+        if (userSession != null && userSession.getUserDetails() != null && userSession.getUserDetails().getId() != null) {
+            BigDecimal balance = userRepository.findById(userSession.getUserDetails().getId())
+                    .map(user -> user.getBalance() != null ? user.getBalance() : BigDecimal.ZERO)
+                    .orElse(BigDecimal.ZERO);
+            userSession.getUserDetails().setBalance(balance);
+            return balance;
+        }
+
+        ResponseEntity<UserResponse> response = userController.getCurrentUserInformation();
+        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+            UserResponse profile = response.getBody();
+            return profile.getBalance() != null ? profile.getBalance() : BigDecimal.ZERO;
+        }
+
+        return BigDecimal.ZERO;
+    }
+
+    private String formatBalance(BigDecimal balance) {
+        return String.format("$%,.2f", balance != null ? balance : BigDecimal.ZERO);
     }
 
     @FXML

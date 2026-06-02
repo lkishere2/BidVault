@@ -19,6 +19,7 @@
                 </font>
             </Label>
             <Label fx:id="typeBadgeLabel" text="TYPE" />
+            <Label fx:id="statusBadgeLabel" text="PENDING" />
         </HBox>
         <Label fx:id="emailLabel" text="user@email.com" textFill="#94A3B8" />
         <Label fx:id="dateLabel" text="2026-05-31 19:07:00" textFill="#64748B" style="-fx-font-size: 11px;" />
