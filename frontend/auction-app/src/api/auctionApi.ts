@@ -22,5 +22,6 @@ export const auctionApi = {
             }
         }),
     getMyAuctions: (pageNo: number = 0, size: number = 10) => api.get<Page<AuctionResponse>>(`/auctions/me?pageNo=${pageNo}&size=${size}`),
+    getTopAuctions: () => api.get<AuctionResponse[]>('/auctions/top'),
 };
 export default auctionApi;

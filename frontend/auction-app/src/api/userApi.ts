@@ -10,5 +10,6 @@ export const userApi = {
     updatePassword: (data: PasswordRequest) => api.patch<void>('/users/update-password', data),
     updateProfileImage: (data: ProfileImageRequest) => api.patch<void>('/users/update-profile-image', data),
     getAllUsers: (page = 0, size = 20) => api.get<Page<UserResponse>>(`/users/all?page=${page}&size=${size}`),
+    getTopUsers: () => api.get<UserResponse[]>('/users/top'),
 };
 export default userApi;

@@ -2,12 +2,11 @@ import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Bell, CheckCheck } from 'lucide-react';
 import NotificationItem from '../../pages/user/user/notification/NotificationItem';
-import { theme } from '../../constants/theme';
 
 export interface NotificationPreview {
     id: number;
     message: string;
-    sendAt: string; // ISO string
+    sendAt: string;
     read?: boolean;
 }
 
@@ -31,19 +30,15 @@ export default function NotificationDropdown({
     const navigate = useNavigate();
     const ref = useRef<HTMLDivElement>(null);
 
-    // Close on outside click
     useEffect(() => {
         if (!isOpen) return;
         const handler = (e: MouseEvent) => {
-            if (ref.current && !ref.current.contains(e.target as Node)) {
-                onClose();
-            }
+            if (ref.current && !ref.current.contains(e.target as Node)) onClose();
         };
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
     }, [isOpen, onClose]);
 
-    // Close on Escape
     useEffect(() => {
         if (!isOpen) return;
         const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -62,21 +57,17 @@ export default function NotificationDropdown({
             role="dialog"
             aria-label="Notifications"
             className={`
-                absolute top-[calc(100%+8px)] right-0 w-[360px] border rounded-xl 
-                overflow-hidden z-[200] transition-all duration-200 origin-top-right
+                absolute top-[calc(100%+8px)] right-0 w-[360px] bg-white border border-neutral-200 rounded-xl
+                shadow-[0_8px_32px_rgba(0,0,0,0.08)] overflow-hidden z-[200]
+                transition-all duration-200 origin-top-right
                 ${isOpen ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'}
             `}
-            style={{ 
-                backgroundColor: theme.colors.surface, 
-                borderColor: theme.colors.primary, 
-                boxShadow: theme.shadows.dropdown 
-            }}
         >
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: theme.colors.border }}>
+            <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-100">
                 <div className="flex items-center gap-2">
-                    <Bell size={14} strokeWidth={2.5} style={{ color: theme.colors.primary }} />
-                    <span className="text-[13px] tracking-tight uppercase" style={{ color: theme.colors.primary, fontWeight: theme.typography.fontWeight.black }}>
+                    <Bell size={14} strokeWidth={2.5} className="text-[#0D0D0D]" />
+                    <span className="text-[13px] font-black tracking-tight text-[#0D0D0D] uppercase">
                         Notifications
                     </span>
                 </div>
@@ -84,8 +75,7 @@ export default function NotificationDropdown({
                     <button
                         type="button"
                         onClick={onMarkAllRead}
-                        className="flex items-center gap-1 text-[11px] font-semibold transition-colors cursor-pointer bg-transparent border-0 p-0 hover:opacity-75"
-                        style={{ color: theme.colors.text.muted }}
+                        className="flex items-center gap-1 text-[11px] font-semibold text-neutral-400 hover:text-[#0D0D0D] transition-colors cursor-pointer bg-transparent border-0 p-0"
                     >
                         <CheckCheck size={12} />
                         Mark all read
@@ -102,16 +92,16 @@ export default function NotificationDropdown({
                         ))}
                     </div>
                 ) : notifications.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-10 gap-2" style={{ color: theme.colors.text.muted }}>
+                    <div className="flex flex-col items-center justify-center py-10 gap-2 text-neutral-300">
                         <Bell size={28} strokeWidth={1.5} />
-                        <p className="text-[12px]" style={{ fontWeight: theme.typography.fontWeight.semibold }}>You're all caught up</p>
+                        <p className="text-[12px] font-semibold">You're all caught up</p>
                     </div>
                 ) : (
                     <div className="flex flex-col divide-y divide-neutral-50">
                         {notifications.slice(0, 8).map(n => (
                             <NotificationItem
                                 key={n.id}
-                                id={n.id}
+                                notificationId={n.id}
                                 message={n.message}
                                 sendAt={n.sendAt}
                                 read={n.read}
@@ -125,16 +115,11 @@ export default function NotificationDropdown({
 
             {/* Footer */}
             {!isLoading && notifications.length > 0 && (
-                <div className="border-t px-4 py-2.5" style={{ borderColor: theme.colors.border }}>
+                <div className="border-t border-neutral-100 px-4 py-2.5">
                     <button
                         type="button"
                         onClick={handleViewAll}
-                        className="
-                            w-full flex items-center justify-center gap-1.5
-                            text-[12px] transition-colors cursor-pointer bg-transparent border-0 p-0
-                            hover:opacity-75
-                        "
-                        style={{ color: theme.colors.primary, fontWeight: theme.typography.fontWeight.bold }}
+                        className="w-full flex items-center justify-center gap-1.5 text-[12px] font-bold text-[#0D0D0D] hover:text-[#F5C518] transition-colors cursor-pointer bg-transparent border-0 p-0"
                     >
                         View all notifications
                         <ArrowRight size={12} strokeWidth={2.5} />

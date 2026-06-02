@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("api/v1/users")
@@ -58,5 +59,10 @@ public class UserController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ResponseEntity.ok(userService.getAllUsers(page, size));
+    }
+
+    @GetMapping("/top")
+    public ResponseEntity<List<UserResponse>> getTopUsers() {
+        return ResponseEntity.ok(userService.getTop8Users());
     }
 }

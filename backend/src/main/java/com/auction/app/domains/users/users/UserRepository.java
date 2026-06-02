@@ -38,4 +38,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("UPDATE User u SET u.profileImageUrl = :profileImageUrl WHERE u.id = :id")
     void updateProfileImageUrl(@Param("id") Long id, @Param("profileImageUrl") String profileImageUrl);
 
+    @Query("SELECT u FROM User u ORDER BY size(u.followers) DESC")
+    List<User> findTopUsersByFollowers(Pageable pageable);
+
 }

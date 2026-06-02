@@ -215,6 +215,13 @@ public class AuctionServiceImpl implements AuctionService {
         return new PageImpl<>(responses, pageable, idPage.getTotalElements());
     }
 
+    public List<AuctionResponse> getTop10ActiveAuctions() {
+        return auctionRepository.findTopAuctionsByBidCount(AuctionStatus.ACTIVE, PageRequest.of(0, 10))
+                .stream()
+                .map(AuctionResponse::from)
+                .toList();
+    }
+
     private Auction findByIdWithDetails(Long auctionId) {
         return auctionRepository.findByIdWithDetails(auctionId)
                 .orElseThrow(() -> new AuctionNotFoundException("Auction not found"));
