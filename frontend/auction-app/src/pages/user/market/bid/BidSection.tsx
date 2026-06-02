@@ -43,11 +43,14 @@ export default function BidSection({ auction, onClose }: BidSectionProps) {
     useEffect(() => {
         const wsUrl = (import.meta.env.VITE_WS_URL as string) || 'ws://localhost:8000/ws';
 
+        const token = localStorage.getItem('accessToken');
+
         const client = new Client({
             brokerURL: wsUrl,
             reconnectDelay: 5000,
             heartbeatIncoming: 4000,
             heartbeatOutgoing: 4000,
+            connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
             onConnect: () => {
                 setIsConnected(true);
 
