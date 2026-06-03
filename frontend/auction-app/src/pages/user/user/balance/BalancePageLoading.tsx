@@ -2,7 +2,7 @@ export default function BalancePageLoading() {
     const skeletonCards = [1, 2, 3];
 
     return (
-        <div className="flex flex-col gap-8 w-full animate-fade-in">
+        <div className="flex flex-col gap-8 w-full bg-white border border-neutral-200 rounded-2xl p-6 sm:p-8 shadow-sm animate-fade-in">
             <div>
                 <div className="h-6 w-44 bg-neutral-200 rounded-lg animate-pulse" />
                 <div className="h-3.5 w-72 bg-neutral-100 rounded-md animate-pulse mt-2" />

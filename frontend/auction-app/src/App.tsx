@@ -23,6 +23,7 @@ import HubPage from './pages/user/market/hub/HubPage';
 import CommunityPage from './pages/user/community/CommunityPage';
 import ProfilePage from './pages/user/community/ProfilePage';
 import JoinedAuctionsPage from './pages/user/market/joins/JoinedAuctionsPage';
+import BidPage from './pages/user/market/bid/BidPage';
 import { userApi } from './api/userApi';
 import { authApi } from './api/authApi';
 import './App.css';
@@ -71,7 +72,7 @@ function App() {
     const syncUser = async () => {
       const token = localStorage.getItem('accessToken');
 
-      if (token && !user?.id) {
+      if (token) {
         try {
           const response = await userApi.getInfo();
           const { id, username, role, profileImageUrl, profile_image_url } = response.data as any;
@@ -137,6 +138,7 @@ function App() {
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/profile/:user_id" element={<ProfilePage />} />
           <Route path="/auctions/hub" element={<HubPage />} />
+          <Route path="/auctions/hub/:auction_id" element={<BidPage />} />
           <Route path="/auction/joined" element={<JoinedAuctionsPage />} />
 
           <Route path="/account" element={<AccountNavbar />}>

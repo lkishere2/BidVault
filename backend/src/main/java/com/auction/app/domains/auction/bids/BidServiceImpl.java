@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,9 +25,9 @@ import com.auction.app.domains.auction.bids.validator.BidValidatorService;
 import com.auction.app.domains.auction.exceptions.*;
 import com.auction.app.domains.users.exceptions.UserNotFoundException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,9 +81,9 @@ public class BidServiceImpl implements BidService {
     public void placeBid(Long auctionId, BidRequest request, User bidder) {
 
         Auction auction = auctionRepository.findByIdForUpdate(auctionId)
-        .orElseThrow(() -> new AuctionNotFoundException("Auction not found."));
+                .orElseThrow(() -> new AuctionNotFoundException("Auction not found."));
 
-    // Now validate and save safely
+        // Now validate and save safely
         AuctionResponse response = getActiveAuctionResponse(auctionId);
         bidValidatorService.validateUser(bidder.getId(), response.getSellerId());
         bidValidatorService.validateBidAmount(request.getAmount(), response);
@@ -109,6 +110,7 @@ public class BidServiceImpl implements BidService {
 
         self.processNextBid(auctionId);
     }
+
     @Async
     @Transactional
     public void processNextBid(Long auctionId) {
@@ -266,5 +268,28 @@ public class BidServiceImpl implements BidService {
 
     private BigDecimal calculateIncrement(BigDecimal amount) {
         return amount.multiply(INCREMENT_PERCENTAGE).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    @Scheduled(fixedRate = 500)
+    public void syncAuctionsToDb() {
+
+        List<AuctionResponse> responses = cache.getAllAuctionResponses();
+
+        for (AuctionResponse response : responses) {
+            if (response.getStatus() != AuctionStatus.ACTIVE) {
+                continue;
+            }
+
+            auctionRepository.findById(response.getId()).ifPresent(
+                    auction -> {
+                        auction.setCurrentPrice(response.getCurrentPrice());
+                        auction.setBidCount(response.getBidCount());
+                        auction.setMinBidIncrement(response.getMinBidIncrement());
+                        if (response.getWinnerId() != null) {
+                            userRepository.findById(response.getWinnerId()).ifPresent(auction::setWinner);
+                        }
+                        auctionRepository.save(auction);
+                    });
+        }
     }
 }

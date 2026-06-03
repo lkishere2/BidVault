@@ -15,6 +15,20 @@ function formatPrice(val: string | number) {
     return n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
 }
 
+function BidInfoBox({ label, value, icon }: { label: string; value: React.ReactNode; icon?: React.ReactNode }) {
+    return (
+        <div className="bg-neutral-50 rounded-2xl p-3 sm:p-4 text-center flex flex-col justify-center items-center shadow-sm border border-neutral-100 overflow-hidden w-full transition-colors hover:bg-neutral-100/50">
+            <p className="text-[10px] sm:text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-1">{label}</p>
+            <div className="flex items-center justify-center gap-1.5 w-full">
+                {icon}
+                <p className="text-[16px] sm:text-[18px] md:text-[20px] font-black text-[#0D0D0D] break-words">
+                    {value}
+                </p>
+            </div>
+        </div>
+    );
+}
+
 export default function BidInfoPanel({ auction, ticker, onPlaceBid }: BidInfoPanelProps) {
     const currentPrice = ticker ? ticker.currentPrice : auction.currentPrice;
     const bidCount = ticker ? ticker.bidCount : auction.bidCount;
@@ -59,86 +73,69 @@ export default function BidInfoPanel({ auction, ticker, onPlaceBid }: BidInfoPan
     }, [endTime]);
 
     return (
-        <div className="flex flex-col h-full bg-white p-5">
-            <div className="flex gap-4 mb-5">
+        <div className="flex flex-col h-full bg-white p-6 md:p-8 flex-1">
+            <div className="flex gap-5 mb-8">
                 {auction.productImageUrl ? (
                     <img
                         src={auction.productImageUrl}
                         alt={auction.productName}
-                        className="w-20 h-20 rounded-xl object-cover flex-shrink-0 border border-neutral-100"
+                        className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl object-cover flex-shrink-0 border border-neutral-200 shadow-sm"
                     />
                 ) : (
-                    <div className="w-20 h-20 rounded-xl bg-neutral-100 flex items-center justify-center flex-shrink-0">
-                        <Gavel size={24} className="text-neutral-300" strokeWidth={1.5} />
+                    <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl bg-neutral-100 flex items-center justify-center flex-shrink-0 border border-neutral-200 shadow-sm">
+                        <Gavel size={32} className="text-neutral-400" strokeWidth={1.5} />
                     </div>
                 )}
-                <div className="min-w-0">
-                    <p className="text-[12px] text-neutral-400 font-medium truncate">{auction.sellerLabel}</p>
-                    <h3 className="text-[15px] font-bold text-[#0D0D0D] leading-snug mt-0.5 line-clamp-2">
+                <div className="min-w-0 flex flex-col justify-center">
+                    <p className="text-[12px] sm:text-[13px] md:text-[14px] text-neutral-500 font-bold uppercase tracking-wide truncate">{auction.sellerLabel}</p>
+                    <h3 className="text-[18px] sm:text-[22px] md:text-[26px] font-black text-[#0D0D0D] leading-snug mt-1 line-clamp-2">
                         {auction.productName}
                     </h3>
                     {!isEnded && (
-                        <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 text-[10px] font-bold">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 text-[10px] font-bold w-max">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                             LIVE
                         </span>
                     )}
                     {isEnded && (
-                        <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-red-50 border border-red-200 text-red-600 text-[10px] font-bold">
+                        <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-red-50 border border-red-200 text-red-600 text-[10px] font-bold w-max">
                             ENDED
                         </span>
                     )}
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 mb-5">
-                <div className="bg-neutral-50 rounded-xl p-3 text-center flex flex-col justify-center items-center">
-                    <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1">Current Bid</p>
-                    <p className="text-[15px] font-black text-[#0D0D0D]">{formatPrice(currentPrice)}</p>
-                </div>
-                <div className="bg-neutral-50 rounded-xl p-3 text-center flex flex-col justify-center items-center">
-                    <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1">Min Increment</p>
-                    <p className="text-[15px] font-black text-[#0D0D0D]">{formatPrice(minBidIncrement)}</p>
-                </div>
-                <div className="bg-neutral-50 rounded-xl p-3 text-center flex flex-col justify-center items-center">
-                    <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1">Bids</p>
-                    <div className="flex items-center justify-center gap-1">
-                        <Users size={11} className="text-neutral-400" />
-                        <p className="text-[15px] font-black text-[#0D0D0D]">{bidCount}</p>
-                    </div>
-                </div>
-                <div className="bg-neutral-50 rounded-xl p-3 text-center flex flex-col justify-center items-center overflow-hidden">
-                    <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1">Top Bidder</p>
-                    <p className="text-[15px] font-black text-[#0D0D0D] truncate w-full px-1">
-                        {topBidder || 'None'}
-                    </p>
-                </div>
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8">
+                <BidInfoBox label="Current Bid" value={formatPrice(currentPrice)} />
+                <BidInfoBox label="Min Increment" value={formatPrice(minBidIncrement)} />
+                <BidInfoBox label="Bids" value={bidCount} icon={<Users size={14} className="text-neutral-400 hidden sm:block" />} />
+                <BidInfoBox label="Top Bidder" value={topBidder || 'None'} />
             </div>
 
             <div className="flex-1" />
 
-            <div className="flex items-center gap-2 text-neutral-400 mb-5">
-                <Clock size={11} />
-                <p className="text-[12px] font-medium text-neutral-600">
+            <div className="flex items-center gap-2 text-neutral-500 mb-6 bg-neutral-50 p-3 rounded-xl border border-neutral-200">
+                <Clock size={16} className="text-neutral-400" />
+                <p className="text-[14px] font-bold text-neutral-600">
                     {isEnded ? 'Auction ended' : `Ends in ${timeLeft}`}
                 </p>
                 {isExtended && (
-                    <span className="ml-auto text-[10px] font-bold text-violet-500 bg-violet-50 px-2 py-0.5 rounded-full border border-violet-200">
+                    <span className="ml-auto text-[10px] font-bold text-[#F5C518] bg-[#F5C518]/10 px-2 py-0.5 rounded-full border border-[#F5C518]/30">
                         EXTENDED
                     </span>
                 )}
             </div>
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-3 sm:gap-4 mt-auto">
                 <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 font-bold">$</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 font-bold text-[16px] sm:text-[18px]">$</span>
                     <input
                         type="number"
                         value={bidAmount}
                         onChange={(e) => setBidAmount(e.target.value)}
                         disabled={isEnded}
                         placeholder="Enter amount"
-                        className="w-full h-[48px] rounded-xl border border-neutral-200 pl-8 pr-4 text-[15px] font-bold text-[#0D0D0D] outline-none focus:border-[#F5C518] focus:ring-2 focus:ring-[#F5C518]/20 transition-all disabled:bg-neutral-50 disabled:text-neutral-400"
+                        className="w-full h-[50px] sm:h-[56px] rounded-2xl border border-neutral-200 bg-white pl-9 pr-4 text-[16px] sm:text-[18px] font-bold text-[#0D0D0D] outline-none focus:border-[#F5C518] focus:ring-4 focus:ring-[#F5C518]/10 transition-all disabled:bg-neutral-50 disabled:text-neutral-400 shadow-sm"
                     />
                 </div>
                 <button
@@ -149,9 +146,9 @@ export default function BidInfoPanel({ auction, ticker, onPlaceBid }: BidInfoPan
                         }
                     }}
                     disabled={isEnded || !bidAmount}
-                    className={`w-full h-[48px] rounded-xl text-[14px] font-bold flex items-center justify-center gap-2 transition-all ${isEnded || !bidAmount
-                        ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
-                        : 'bg-[#0D0D0D] text-white hover:bg-[#1A1A1A] cursor-pointer'
+                    className={`w-full h-[50px] sm:h-[56px] rounded-2xl text-[15px] sm:text-[16px] font-black flex items-center justify-center gap-2 transition-all shadow-md ${isEnded || !bidAmount
+                        ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed shadow-none'
+                        : 'bg-[#F5C518] text-[#0D0D0D] hover:bg-[#e0b416] hover:shadow-lg hover:shadow-[#F5C518]/20 cursor-pointer transform hover:-translate-y-0.5'
                         }`}
                 >
                     <Gavel size={16} strokeWidth={2} />

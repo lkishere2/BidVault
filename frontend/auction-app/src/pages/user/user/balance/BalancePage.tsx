@@ -53,7 +53,7 @@ export default function BalancePage() {
     }
 
     return (
-        <div className="flex flex-col gap-8 w-full">
+        <div className="flex flex-col gap-8 w-full bg-white border border-neutral-200 rounded-2xl p-6 sm:p-8 shadow-sm">
             <div>
                 <h1 className="text-xl font-bold text-neutral-900 tracking-tight">Payments & Wallet</h1>
                 <p className="text-neutral-400 text-xs mt-0.5">

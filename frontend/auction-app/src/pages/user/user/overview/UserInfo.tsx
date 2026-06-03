@@ -124,20 +124,20 @@ export const UserInfo: React.FC<UserInfoProps> = ({ userId, currentUserId }) => 
     if (isLoading) return <UserInfoLoading />;
 
     return (
-        <div style={{ display: 'flex', gap: '24px', alignItems: 'center', justifyContent: 'space-between', width: '100%', background: '#ffffff', padding: '24px', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
-            <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-                <img src={avatarUrl} alt={user?.username || 'User Avatar'} style={{ width: '96px', height: '96px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #e5e7eb' }} />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <h2 style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#1f2937' }}>
+        <div className="w-full bg-white p-6 sm:p-8 rounded-2xl border border-neutral-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex flex-col sm:flex-row items-center gap-5 md:gap-6 text-center sm:text-left">
+                <img src={avatarUrl} alt={user?.username || 'User Avatar'} className="w-24 h-24 rounded-full object-cover border-4 border-neutral-50 shadow-sm" />
+                <div className="flex flex-col gap-1.5">
+                    <h2 className="text-[22px] md:text-[26px] font-black text-[#0D0D0D] tracking-tight">
                         {user ? user.username : `User #${userId}`}
                     </h2>
-                    {isMe && user?.email && <p style={{ margin: 0, color: '#4b5563', fontSize: '14px' }}>{user.email}</p>}
-                    {isMe && user?.balance && <p style={{ margin: 0, color: '#16a34a', fontSize: '14px', fontWeight: '600' }}>Balance: ${user.balance}</p>}
+                    {isMe && user?.email && <p className="text-[14px] font-medium text-neutral-500">{user.email}</p>}
+                    {isMe && user?.balance && <p className="text-[14px] font-bold text-[#F5C518]">Balance: ${user.balance}</p>}
 
                     {stats && (
-                        <div style={{ display: 'flex', gap: '20px', margin: '4px 0' }}>
-                            <span style={{ fontSize: '14px', color: '#4b5563' }}><strong style={{ color: '#1f2937' }}>{stats.followersCount ?? 0}</strong> Followers</span>
-                            <span style={{ fontSize: '14px', color: '#4b5563' }}><strong style={{ color: '#1f2937' }}>{stats.followingCount ?? 0}</strong> Following</span>
+                        <div className="flex items-center justify-center sm:justify-start gap-4 mt-2">
+                            <span className="text-[13px] font-medium text-neutral-500"><strong className="text-[#0D0D0D] font-black">{stats.followersCount ?? 0}</strong> Followers</span>
+                            <span className="text-[13px] font-medium text-neutral-500"><strong className="text-[#0D0D0D] font-black">{stats.followingCount ?? 0}</strong> Following</span>
                         </div>
                     )}
                 </div>
@@ -146,16 +146,11 @@ export const UserInfo: React.FC<UserInfoProps> = ({ userId, currentUserId }) => 
             {!isMe && currentUserId !== undefined && (
                 <button
                     onClick={handleFollowToggle}
-                    style={{
-                        padding: '10px 24px',
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        cursor: 'pointer',
-                        border: isFollowing ? '1px solid #d1d5db' : 'none',
-                        background: isFollowing ? '#ffffff' : '#1f2937',
-                        color: isFollowing ? '#374151' : '#ffffff'
-                    }}
+                    className={`px-8 py-3 rounded-xl text-[14px] font-bold transition-all duration-200 ${
+                        isFollowing 
+                        ? 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 border border-neutral-200' 
+                        : 'bg-[#0D0D0D] text-white hover:bg-[#F5C518] hover:text-[#0D0D0D]'
+                    }`}
                 >
                     {isFollowing ? 'Unfollow' : 'Follow'}
                 </button>
