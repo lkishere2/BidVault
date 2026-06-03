@@ -1,13 +1,17 @@
 import type { TopUser } from './UserSection';
+import { useNavigate } from 'react-router-dom';
 
 interface UserItemProps {
     user: TopUser;
     rank: number;
+    onClick?: () => void;
 }
 
-export default function UserItem({ user, rank }: UserItemProps) {
+export default function UserItem({ user, rank, onClick }: UserItemProps) {
+    const navigate = useNavigate();
+
     return (
-        <div className="group flex flex-col items-center text-center cursor-pointer">
+        <div onClick={() => onClick ? onClick() : navigate(`/profile/${user.id}`)} className="group flex flex-col items-center text-center cursor-pointer transition-all duration-500 ease-out group-hover/grid:opacity-40 group-hover/grid:scale-90 hover:!opacity-100 hover:!scale-110 hover:-translate-y-3">
             {/* Avatar */}
             <div className="relative mb-3 sm:mb-4">
                 {/* Ring is done via outline so no invalid CSS prop is needed */}

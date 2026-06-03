@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router-dom';
-import { LayoutDashboard, Users, CreditCard } from 'lucide-react';
+import { LayoutDashboard, Users, CreditCard, MessageSquare } from 'lucide-react';
 import AdminNavItem from './AdminNavItem';
 
 export default function AdminNavbar() {
@@ -15,6 +15,7 @@ export default function AdminNavbar() {
                         <AdminNavItem to="/admin" icon={<LayoutDashboard size={17} strokeWidth={2} />} label="Dashboard" />
                         <AdminNavItem to="/admin/user-control" icon={<Users size={17} strokeWidth={2} />} label="User Control" />
                         <AdminNavItem to="/admin/transaction-request" icon={<CreditCard size={17} strokeWidth={2} />} label="Transactions" />
+                        <AdminNavItem to="/admin/feedback" icon={<MessageSquare size={17} strokeWidth={2} />} label="Feedback" />
                     </div>
                 </aside>
 

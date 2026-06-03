@@ -33,27 +33,29 @@ export const UserItemGrid: React.FC<UserItemGridProps> = ({ refreshKey }) => {
 
     if (loading) {
         return (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
-                {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', height: '260px', background: '#f9fafb', animation: 'pulse 1.5s ease-in-out infinite' }} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mt-6">
+                {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="h-[280px] bg-neutral-100 border border-neutral-200 rounded-2xl animate-pulse" />
                 ))}
             </div>
         );
     }
 
-    if (products.length === 0) {
+    const availableProducts = products.filter(p => p.quantity > 0);
+
+    if (availableProducts.length === 0) {
         return (
-            <div style={{ textAlign: 'center', padding: '60px 0', color: '#9ca3af' }}>
-                <p style={{ fontSize: '16px', fontWeight: 500 }}>No items in storage yet.</p>
-                <p style={{ fontSize: '14px', marginTop: '4px' }}>Add your first item to get started.</p>
+            <div className="flex flex-col items-center justify-center p-12 bg-neutral-50 rounded-2xl border border-neutral-100 mt-6 text-center">
+                <p className="text-[16px] font-bold text-[#0D0D0D]">No items in storage yet.</p>
+                <p className="text-[14px] text-neutral-500 mt-1">Add your first item to get started.</p>
             </div>
         );
     }
 
     return (
-        <>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
-                {products.map(product => (
+        <div className="mt-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                {availableProducts.map(product => (
                     <UserItem
                         key={product.id}
                         product={product}
@@ -79,7 +81,7 @@ export const UserItemGrid: React.FC<UserItemGridProps> = ({ refreshKey }) => {
                     onSuccess={() => { setLaunchProduct(null); fetchProducts(); }}
                 />
             )}
-        </>
+        </div>
     );
 };
 

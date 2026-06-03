@@ -7,5 +7,10 @@ export interface FeedbackResponse {
     username: string;
     email: string;
     content: string;
+    adminResponse?: string;
     createdAt: string; // Khớp với LocalDateTime từ Backend
+}
+
+export interface FeedbackAdminResponseRequest {
+    responseContent: string;
 }

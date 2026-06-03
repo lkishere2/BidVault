@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import PreviewItem from './PreviewItem';
 import { auctionApi } from '../../../api/auctionApi';
+import LoginNotification from './LoginNotification';
+import { useNavigate } from 'react-router-dom';
 
 export interface AuctionLot {
     id: string;
@@ -21,6 +23,17 @@ function formatTimeLeft(endTimeStr: string) {
 
 export default function PreviewSection() {
     const [auctions, setAuctions] = useState<AuctionLot[]>([]);
+    const [showLoginNotif, setShowLoginNotif] = useState(false);
+    const navigate = useNavigate();
+
+    const handleIntercept = (path: string) => {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            setShowLoginNotif(true);
+        } else {
+            navigate(path);
+        }
+    };
 
     useEffect(() => {
         auctionApi.getTopAuctions().then(res => {
@@ -60,7 +73,11 @@ export default function PreviewSection() {
                     </h2>
                 </div>
                 <a
-                    href="/auctions/hub"
+                    href="#"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        handleIntercept('/auctions/hub');
+                    }}
                     className="text-[12px] font-bold tracking-[.08em] uppercase text-[#F5C518] border-b border-[#F5C518]/40 pb-1 no-underline transition hover:opacity-70"
                 >
                     View all →
@@ -77,9 +94,11 @@ export default function PreviewSection() {
             */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
                 {auctions.map(item => (
-                    <PreviewItem key={item.id} item={item} />
+                    <PreviewItem key={item.id} item={item} onClick={() => handleIntercept(`/auctions/hub/${item.id}`)} />
                 ))}
             </div>
+
+            <LoginNotification isOpen={showLoginNotif} onClose={() => setShowLoginNotif(false)} />
         </section>
     );
 }

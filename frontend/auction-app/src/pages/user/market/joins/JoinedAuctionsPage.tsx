@@ -3,9 +3,9 @@ import { Gavel, ChevronLeft, ChevronRight, Activity } from 'lucide-react';
 import type { AuctionResponse } from '../../../../types/auction';
 import type { Page } from '../../../../types/pagination';
 import bidApi from '../../../../api/bidApi';
+import { useNavigate } from 'react-router-dom';
 import AuctionItem from '../hub/AuctionItem';
 import AuctionItemSkeleton from '../hub/AuctionItemSkeleton';
-import BidSection from '../bid/BidSection';
 
 const PAGE_SIZE = 12;
 
@@ -14,7 +14,7 @@ export default function JoinedAuctionsPage() {
     const [pageNo, setPageNo] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [selected, setSelected] = useState<AuctionResponse | null>(null);
+    const navigate = useNavigate();
 
     const fetchAuctions = useCallback(async (targetPageNo: number) => {
         setLoading(true);
@@ -101,7 +101,7 @@ export default function JoinedAuctionsPage() {
                             {loading
                                 ? Array.from({ length: PAGE_SIZE }).map((_, i) => <AuctionItemSkeleton key={i} />)
                                 : page?.items.map(auction => (
-                                    <AuctionItem key={auction.id} auction={auction} onClick={setSelected} />
+                                    <AuctionItem key={auction.id} auction={auction} onClick={(auction) => navigate(`/auctions/hub/${auction.id}`)} />
                                 ))
                             }
                         </div>
@@ -146,8 +146,6 @@ export default function JoinedAuctionsPage() {
                         )}
                     </>
                 )}
-
-                {selected && <BidSection auction={selected} onClose={() => setSelected(null)} />}
             </div>
         </div>
     );

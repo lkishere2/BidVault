@@ -25,15 +25,18 @@ export const PasswordChangingBox = () => {
 
     return (
         <>
-            <form onSubmit={handleSubmit} className="p-4 border border-[#E8E8E8] rounded-lg bg-white">
-                <h3 className="font-semibold mb-2 text-[#0D0D0D]">Change Password</h3>
-                <div className="flex flex-col gap-3">
+            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row justify-between p-5 border border-neutral-200 rounded-xl bg-neutral-50 gap-4 transition-colors hover:bg-neutral-100/50">
+                <div className="flex flex-col">
+                    <h3 className="text-[15px] font-bold text-[#0D0D0D]">Password</h3>
+                    <p className="text-[13px] font-medium text-neutral-500 max-w-[280px]">Ensure your account is using a long, random password to stay secure.</p>
+                </div>
+                <div className="flex flex-col gap-3 w-full sm:w-auto">
                     <input
                         type="password"
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
                         placeholder="Current Password"
-                        className="w-full border border-neutral-200 rounded px-3 py-2 outline-none focus:border-[#F5C518] text-[#0D0D0D]"
+                        className="w-full sm:w-72 border border-neutral-300 rounded-lg px-4 py-2 text-[14px] font-semibold text-[#0D0D0D] outline-none focus:border-[#0D0D0D] focus:ring-1 focus:ring-[#0D0D0D] transition-all bg-white shadow-sm"
                         required
                     />
                     <input
@@ -41,13 +44,13 @@ export const PasswordChangingBox = () => {
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         placeholder="New Password"
-                        className="w-full border border-neutral-200 rounded px-3 py-2 outline-none focus:border-[#F5C518] text-[#0D0D0D]"
+                        className="w-full sm:w-72 border border-neutral-300 rounded-lg px-4 py-2 text-[14px] font-semibold text-[#0D0D0D] outline-none focus:border-[#0D0D0D] focus:ring-1 focus:ring-[#0D0D0D] transition-all bg-white shadow-sm"
                         required
                     />
                     <button
                         type="submit"
                         disabled={loading}
-                        className="px-4 py-2 rounded self-start text-white disabled:opacity-50 bg-[#0D0D0D] hover:opacity-85 transition-opacity"
+                        className="px-6 py-2.5 rounded-lg text-[13px] font-black text-[#0D0D0D] disabled:opacity-50 bg-[#F5C518] hover:bg-[#e0b416] transition-colors shadow-md self-end"
                     >
                         {loading ? 'Saving...' : 'Update Password'}
                     </button>

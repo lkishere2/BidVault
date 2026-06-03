@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
 import com.auction.app.domains.auction.auction.model.AuctionStatus;
@@ -28,8 +29,7 @@ public class AuctionRedisServiceImpl implements AuctionRedisService {
 
     public AuctionRedisServiceImpl(
             @Qualifier("auctionResponseRedisTemplate") RedisTemplate<String, AuctionResponse> auctionResponseRedisTemplate,
-            @Qualifier("pendingBidRedisTemplate") RedisTemplate<String, PendingBid> pendingBidRedisTemplate
-    ) {
+            @Qualifier("pendingBidRedisTemplate") RedisTemplate<String, PendingBid> pendingBidRedisTemplate) {
         this.auctionResponseRedisTemplate = auctionResponseRedisTemplate;
         this.pendingBidRedisTemplate = pendingBidRedisTemplate;
     }
@@ -63,9 +63,23 @@ public class AuctionRedisServiceImpl implements AuctionRedisService {
                 .toList();
 
         List<AuctionResponse> results = auctionResponseRedisTemplate.opsForValue().multiGet(keys);
-        if (results == null) return new ArrayList<>(Collections.nCopies(ids.size(), null));
+        if (results == null)
+            return new ArrayList<>(Collections.nCopies(ids.size(), null));
 
         return new ArrayList<>(results);
+    }
+
+    @Override
+    public List<AuctionResponse> getAllAuctionResponses() {
+        Set<String> keys = auctionResponseRedisTemplate.keys(RESPONSE_PREFIX + "*");
+        if (keys == null || keys.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<AuctionResponse> results = auctionResponseRedisTemplate.opsForValue().multiGet(keys);
+        if (results == null)
+            return Collections.emptyList();
+
+        return results.stream().filter(java.util.Objects::nonNull).toList();
     }
 
     @Override

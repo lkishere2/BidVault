@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,10 +25,12 @@ import com.auction.app.domains.auction.bids.validator.BidValidatorService;
 import com.auction.app.domains.auction.exceptions.*;
 import com.auction.app.domains.users.exceptions.UserNotFoundException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.auction.app.domains.auction.auction.model.Auction;
@@ -80,9 +83,9 @@ public class BidServiceImpl implements BidService {
     public void placeBid(Long auctionId, BidRequest request, User bidder) {
 
         Auction auction = auctionRepository.findByIdForUpdate(auctionId)
-        .orElseThrow(() -> new AuctionNotFoundException("Auction not found."));
+                .orElseThrow(() -> new AuctionNotFoundException("Auction not found."));
 
-    // Now validate and save safely
+        // Now validate and save safely
         AuctionResponse response = getActiveAuctionResponse(auctionId);
         bidValidatorService.validateUser(bidder.getId(), response.getSellerId());
         bidValidatorService.validateBidAmount(request.getAmount(), response);
@@ -109,77 +112,98 @@ public class BidServiceImpl implements BidService {
 
         self.processNextBid(auctionId);
     }
+
     @Async
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void processNextBid(Long auctionId) {
+        // PESSIMISTIC LOCK: Thread will wait here until any previous 
+        // processNextBid for this auction is fully complete.
+        Auction auction = auctionRepository.findByIdForUpdate(auctionId)
+                .orElseThrow(() -> new AuctionNotFoundException("Auction not found."));
+
         while (true) {
-            log.info("[Bid Service - Process Bid] De-queuing next bid for auction #{}", auctionId);
             PendingBid pendingBid = cache.dequeueBid(auctionId);
-            if (pendingBid == null)
-                break;
+            if (pendingBid == null) break;
 
             Bid bid = findBidById(pendingBid.getBidId());
-
             AuctionResponse response = getActiveAuctionResponse(auctionId);
 
-            log.info("[Bid Service - Process Bid] Validate info for bid #{}", pendingBid.getBidId());
             if (!bidValidatorService.isBidEligible(response, pendingBid.getAmount())) {
                 bid.setStatus(BidStatus.REFUNDED);
                 bidRepository.save(bid);
-                log.info("[Bid Service - Process Bid] Bid #{} rejected — marked REFUNDED. auction #{}", bid.getId(),
-                        auctionId);
                 continue;
             }
 
-            User bidder = findBidderById(pendingBid.getBidderId());
-            if (!bidValidatorService.hasSufficientBalance(bidder, pendingBid.getAmount())) {
-                bid.setStatus(BidStatus.REFUNDED);
-                bidRepository.save(bid);
-                log.info("[Bid Service - Process Bid] Bid #{} rejected — insufficient balance. bidder #{}", bid.getId(),
-                        pendingBid.getBidderId());
-                continue;
-            }
-
-            refundPreviousHighestBidder(auctionId);
-
+            // ATOMIC STEP:
+            // 1. Clear previous HELD status (The repo method is atomic)
+            bidRepository.refundPreviousHighest(auctionId);
+            
+            // 2. Set current bid to HELD
             bid.setStatus(BidStatus.HELD);
             bidRepository.save(bid);
 
-            BidFeedEvent feedEvent = BidFeedEvent.builder()
-                    .bidderLabel(pendingBid.getBidderLabel())
-                    .amount(pendingBid.getAmount())
-                    .placedAt(pendingBid.getPlacedAt())
-                    .build();
-            publisher.publishBidFeedEvent(auctionId, feedEvent);
-
-            boolean isExtended = applySniperProtection(auctionId, response);
-
-            BigDecimal newIncrement = calculateIncrement(pendingBid.getAmount());
-            response.setCurrentPrice(pendingBid.getAmount());
-            response.setMinBidIncrement(newIncrement);
-            response.setBidCount(response.getBidCount() + 1);
-            response.setWinnerId(pendingBid.getBidderId());
-            response.setWinnerLabel(pendingBid.getBidderLabel());
-            cache.cacheAuctionResponse(auctionId, response);
-            log.info("[Bid Service - Process Bid] Bid #{} promoted to HELD — auction #{}, price ${}, bidder #{}",
-                    bid.getId(), auctionId, pendingBid.getAmount(), pendingBid.getBidderId());
-
-            publisher.publish(BidNotificationPayload.builder()
-                    .auctionId(auctionId)
-                    .currentPrice(pendingBid.getAmount())
-                    .minNextBid(pendingBid.getAmount().add(newIncrement))
-                    .bidderLabel(pendingBid.getBidderLabel())
-                    .endTime(response.getEndTime())
-                    .extended(isExtended)
-                    .bidCount(response.getBidCount())
-                    .build());
+            // 3. Update Cache & Notify
+            updateAuctionAndNotify(auctionId, response, pendingBid);
+            log.info("[Bid Service] Bid #{} promoted to HELD", bid.getId());
         }
     }
 
+    private void updateAuctionAndNotify(Long auctionId, AuctionResponse response, PendingBid pendingBid) {
+        BigDecimal newIncrement = calculateIncrement(pendingBid.getAmount());
+        response.setCurrentPrice(pendingBid.getAmount());
+        response.setMinBidIncrement(newIncrement);
+        response.setBidCount(response.getBidCount() + 1);
+        response.setWinnerId(pendingBid.getBidderId());
+        response.setWinnerLabel(pendingBid.getBidderLabel());
+        
+        // Check if sniper protection applies
+        boolean isExtended = applySniperProtection(auctionId, response);
+        response.setExtended(isExtended);
+        
+        // Immediately persist auction to DB
+        Auction auction = findAuctionById(auctionId);
+        auction.setCurrentPrice(response.getCurrentPrice());
+        auction.setBidCount(response.getBidCount());
+        auction.setMinBidIncrement(response.getMinBidIncrement());
+        auction.setWinner(userRepository.findById(response.getWinnerId()).orElse(null));
+        if (isExtended) {
+            auction.setEndTime(response.getEndTime());
+            auction.setExtended(true);
+        }
+        auctionRepository.save(auction);
+
+        cache.cacheAuctionResponse(auctionId, response);
+
+        publisher.publishBidFeedEvent(auctionId, BidFeedEvent.builder()
+                .bidId(pendingBid.getBidId())
+                .auctionId(auctionId)
+                .bidderId(pendingBid.getBidderId())
+                .bidderLabel(pendingBid.getBidderLabel())
+                .amount(pendingBid.getAmount())
+                .placedAt(pendingBid.getPlacedAt())
+                .build());
+
+        BidNotificationPayload ticker = BidNotificationPayload.builder()
+                .auctionId(auctionId)
+                .currentPrice(response.getCurrentPrice())
+                .minNextBid(response.getCurrentPrice().add(response.getMinBidIncrement()))
+                .bidderLabel(response.getWinnerLabel())
+                .bidCount(response.getBidCount())
+                .endTime(response.getEndTime())
+                .extended(response.isExtended())
+                .ended(false)
+                .build();
+        publisher.publish(ticker);
+        
+        log.info("[Bid Service] Auction #{} updated: price ${}, bids {}, minIncrement ${}", 
+                auctionId, response.getCurrentPrice(), response.getBidCount(), response.getMinBidIncrement());
+    }
+
+
     @Override
     public Slice<BidResponse> getBidHistory(Long auctionId, Pageable pageable) {
-        return bidRepository.findByAuctionIdOrderByPlacedAtDesc(auctionId, pageable)
-                .map(BidResponse::from);
+    return bidRepository.findByAuctionIdOrderByPlacedAtDesc(auctionId, pageable)
+            .map(BidResponse::from);
     }
 
     @Override
@@ -266,5 +290,48 @@ public class BidServiceImpl implements BidService {
 
     private BigDecimal calculateIncrement(BigDecimal amount) {
         return amount.multiply(INCREMENT_PERCENTAGE).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    @Scheduled(fixedRate = 500)
+    public void syncAuctionsToDb() {
+
+        List<AuctionResponse> responses = cache.getAllAuctionResponses();
+
+        for (AuctionResponse response : responses) {
+            if (response.getStatus() != AuctionStatus.ACTIVE) {
+                continue;
+            }
+
+            auctionRepository.findById(response.getId()).ifPresent(
+                    auction -> {
+                        auction.setCurrentPrice(response.getCurrentPrice());
+                        auction.setBidCount(response.getBidCount());
+                        auction.setMinBidIncrement(response.getMinBidIncrement());
+                        if (response.getWinnerId() != null) {
+                            userRepository.findById(response.getWinnerId()).ifPresent(auction::setWinner);
+                        }
+                        auctionRepository.save(auction);
+                    });
+        }
+    }
+
+    @Scheduled(fixedRate = 2000)
+    @Transactional
+    public void drainDeadBids() {
+        try {
+            List<Auction> activeAuctions = auctionRepository.findAll().stream()
+                    .filter(a -> a.getStatus() == AuctionStatus.ACTIVE)
+                    .toList();
+
+            for (Auction auction : activeAuctions) {
+                int deletedCount = bidRepository.deleteDeadBids(auction.getId(), auction.getCurrentPrice());
+                if (deletedCount > 0) {
+                    log.info("[Dead Bid Drainer] Auction #{} — deleted {} dead bids at price ${}", 
+                            auction.getId(), deletedCount, auction.getCurrentPrice());
+                }
+            }
+        } catch (Exception e) {
+            log.error("[Dead Bid Drainer] Error draining dead bids", e);
+        }
     }
 }

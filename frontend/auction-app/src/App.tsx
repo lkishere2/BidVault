@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Outlet, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Header from './components/header/Header';
 import Footer from './components/footer/Footer';
 import HomePage from './pages/user/home/HomePage';
@@ -7,6 +7,7 @@ import AdminPage from './pages/admin/home/AdminPage';
 import AdminNavbar from './pages/admin/AdminNavbar';
 import TransactionPage from './pages/admin/transaction/TransactionPage';
 import { UserControlPage } from './pages/admin/user/UserControlPage';
+import FeedbackPage from './pages/admin/feedback/FeedbackPage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import VerifyPage from './pages/auth/VerifyPage';
@@ -23,14 +24,13 @@ import HubPage from './pages/user/market/hub/HubPage';
 import CommunityPage from './pages/user/community/CommunityPage';
 import ProfilePage from './pages/user/community/ProfilePage';
 import JoinedAuctionsPage from './pages/user/market/joins/JoinedAuctionsPage';
+import BidPage from './pages/user/market/bid/BidPage';
 import { userApi } from './api/userApi';
 import { authApi } from './api/authApi';
+import { refreshAccessToken, TOKEN_REFRESH_INTERVAL_MS } from './api/axios';
 import './App.css';
 import NotFoundPage from './pages/NotFoundPage';
 import AuthCallbackPage from './pages/auth/AuthCallbackPage';
-
-const MyBidsPage = () => <div className="p-4"><h1 className="text-xl font-bold">My Bids</h1></div>;
-const AdminUserControlPage = () => <div className="p-4"><h1 className="text-xl font-bold">User Control Panel</h1></div>;
 
 type UserData = { id?: string | number; username: string; initials: string; role?: string; profileImageUrl?: string };
 
@@ -42,7 +42,22 @@ function RootLayout({
   onLogout: () => void;
 }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const isAuthPage = ['/login', '/register', '/forget-password', '/verify'].some(path => location.pathname.startsWith(path));
+
+  useEffect(() => {
+    // If logged out and not on home or auth page, redirect to home
+    if (!isLoggedIn) {
+      if (!isAuthPage && location.pathname !== '/' && location.pathname !== '/oauth2/callback') {
+        navigate('/', { replace: true });
+      }
+    } else {
+      // If logged in and trying to access an auth page, redirect back or to home
+      if (isAuthPage) {
+        navigate('/', { replace: true });
+      }
+    }
+  }, [isLoggedIn, isAuthPage, location.pathname, navigate]);
 
   return (
     <div className="flex flex-col min-h-screen bg-neutral-50/50">
@@ -71,7 +86,7 @@ function App() {
     const syncUser = async () => {
       const token = localStorage.getItem('accessToken');
 
-      if (token && !user?.id) {
+      if (token) {
         try {
           const response = await userApi.getInfo();
           const { id, username, role, profileImageUrl, profile_image_url } = response.data as any;
@@ -92,6 +107,25 @@ function App() {
       }
     };
     syncUser();
+  }, []);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(async () => {
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (!refreshToken) return;
+
+      try {
+        await refreshAccessToken();
+      } catch (error) {
+        console.error('Token refresh failed:', error);
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        setUser(null);
+        window.location.href = '/login';
+      }
+    }, TOKEN_REFRESH_INTERVAL_MS);
+
+    return () => window.clearInterval(intervalId);
   }, []);
 
   useEffect(() => {
@@ -137,6 +171,7 @@ function App() {
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/profile/:user_id" element={<ProfilePage />} />
           <Route path="/auctions/hub" element={<HubPage />} />
+          <Route path="/auctions/hub/:auction_id" element={<BidPage />} />
           <Route path="/auction/joined" element={<JoinedAuctionsPage />} />
 
           <Route path="/account" element={<AccountNavbar />}>
@@ -160,6 +195,7 @@ function App() {
             <Route index element={<AdminPage />} />
             <Route path="user-control" element={<UserControlPage />} />
             <Route path="transaction-request" element={<TransactionPage />} />
+            <Route path="feedback" element={<FeedbackPage />} />
           </Route>
 
         </Route>

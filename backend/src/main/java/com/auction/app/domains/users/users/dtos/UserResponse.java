@@ -17,4 +17,5 @@ public class UserResponse {
     private String profileImageUrl;
     private String role;
     private Integer followersCount;
+    private Integer followingCount;
 }

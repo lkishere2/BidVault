@@ -1,7 +1,6 @@
 package com.auction.app.controllers.explore;
 
 import com.auction.app.domains.users.connection.ConnectionController;
-import com.auction.app.domains.users.connection.dtos.UserStats;
 import com.auction.app.domains.users.users.dtos.UserResponse;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -48,9 +47,11 @@ public class UserProfileController {
             setDefaultAvatar();
         }
 
+        followersCountLabel.setText(String.valueOf(user.getFollowersCount() != null ? user.getFollowersCount() : 0));
+        followingCountLabel.setText(String.valueOf(user.getFollowingCount() != null ? user.getFollowingCount() : 0));
+
         // Check DB state on load so button correctly shows Follow or Unfollow
         checkFollowRelationshipState();
-        fetchUserStats();
     }
 
     private void checkFollowRelationshipState() {
@@ -72,27 +73,6 @@ public class UserProfileController {
         new Thread(secureTask).start();
     }
 
-    private void fetchUserStats() {
-        long targetUserId = currentTargetUser.getId();
-
-        Runnable fetchTask = () -> {
-            try {
-                ResponseEntity<UserStats> response = connectionController.getStats(targetUserId);
-                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                    UserStats stats = response.getBody();
-                    Platform.runLater(() -> {
-                        followersCountLabel.setText(String.valueOf(stats.getFollowersCount()));
-                        followingCountLabel.setText(String.valueOf(stats.getFollowingCount()));
-                    });
-                }
-            } catch (Exception e) {
-                System.err.println("Failed to fetch connection stats: " + e.getMessage());
-            }
-        };
-
-        DelegatingSecurityContextRunnable secureTask = new DelegatingSecurityContextRunnable(fetchTask, SecurityContextHolder.getContext());
-        new Thread(secureTask).start();
-    }
 
     @FXML
     private void handleToggleFollow() {
@@ -105,7 +85,11 @@ public class UserProfileController {
                     isFollowing = !isFollowing;
                     Platform.runLater(() -> {
                         updateButtonUI();
-                        fetchUserStats();
+                        // Update local count
+                        int currentCount = currentTargetUser.getFollowersCount() != null ? currentTargetUser.getFollowersCount() : 0;
+                        int newCount = isFollowing ? currentCount + 1 : currentCount - 1;
+                        currentTargetUser.setFollowersCount(newCount);
+                        followersCountLabel.setText(String.valueOf(newCount));
                     });
                 }
             } catch (Exception e) {

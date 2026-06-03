@@ -136,8 +136,7 @@ export default function NotificationPage() {
     };
 
     return (
-        <div className="min-h-screen bg-neutral-50">
-            <div className="max-w-[900px] mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <div className="w-full bg-white border border-neutral-200 rounded-2xl p-6 sm:p-8 shadow-sm">
 
                 <div className="flex items-start justify-between mb-6 gap-3 flex-wrap">
                     <div>
@@ -291,7 +290,6 @@ export default function NotificationPage() {
                         )}
                     </div>
                 )}
-            </div>
         </div>
     );
 }

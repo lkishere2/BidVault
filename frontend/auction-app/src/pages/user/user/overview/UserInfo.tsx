@@ -12,7 +12,6 @@ interface UserInfoProps {
 
 export const UserInfo: React.FC<UserInfoProps> = ({ userId, currentUserId }) => {
     const [user, setUser] = useState<UserResponse | null>(null);
-    const [stats, setStats] = useState<UserStats | null>(null);
     const [isFollowing, setIsFollowing] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -38,12 +37,10 @@ export const UserInfo: React.FC<UserInfoProps> = ({ userId, currentUserId }) => 
                     }
                 } else {
                     try {
-                        const searchRes = await userApi.searchUsers('', 0, 100);
-                        // Defensively check both .items and .content arrays from the response
-                        const items = searchRes?.data?.items || searchRes?.data?.content || [];
-                        userDetail = items.find((u: UserResponse) => u.id === userId) || null;
+                        const res = await userApi.getUserById(userId);
+                        userDetail = res.data;
                     } catch (err) {
-                        console.error("Error searching user list:", err);
+                        console.error("Error fetching user info by ID:", err);
                     }
                 }
 
@@ -61,28 +58,20 @@ export const UserInfo: React.FC<UserInfoProps> = ({ userId, currentUserId }) => 
                 if (!isMounted) return;
                 setUser(userDetail);
 
-                // 2. Fetch stats and follow relationship in parallel
-                // Wrapped individually so that if one fails, it doesn't break the whole component
+                // 2. Fetch follow relationship
                 try {
-                    const [statsRes, followRes] = await Promise.all([
-                        connectionApi.getStats(userId).catch(err => {
-                            console.error("Error fetching stats:", err);
-                            return { data: null };
-                        }),
-                        isMe
-                            ? Promise.resolve({ data: false })
-                            : connectionApi.checkFollowStatus(userId).catch(err => {
-                                console.error("Error checking follow status:", err);
-                                return { data: false };
-                            })
-                    ]);
+                    const followRes = await (isMe
+                        ? Promise.resolve({ data: false })
+                        : connectionApi.checkFollowStatus(userId).catch(err => {
+                            console.error("Error checking follow status:", err);
+                            return { data: false };
+                        }));
 
-                    if (isMounted) {
-                        if (statsRes?.data) setStats(statsRes.data);
-                        if (followRes?.data !== undefined) setIsFollowing(followRes.data);
+                    if (isMounted && followRes?.data !== undefined) {
+                        setIsFollowing(followRes.data);
                     }
-                } catch (parallelErr) {
-                    console.error("Error in parallel stats/follow fetch:", parallelErr);
+                } catch (err) {
+                    console.error("Error fetching follow status:", err);
                 }
 
             } catch (error) {
@@ -105,9 +94,13 @@ export const UserInfo: React.FC<UserInfoProps> = ({ userId, currentUserId }) => 
         try {
             await connectionApi.follow(userId);
             setIsFollowing(!isFollowing);
-            const statsRes = await connectionApi.getStats(userId);
-            if (statsRes?.data) {
-                setStats(statsRes.data);
+            // We assume backend updates followers count immediately;
+            // for immediate UI response we can just update the local user object.
+            if (user) {
+                setUser({
+                    ...user,
+                    followersCount: (user.followersCount || 0) + (isFollowing ? -1 : 1)
+                });
             }
         } catch (error) {
             console.error(error);
@@ -124,38 +117,31 @@ export const UserInfo: React.FC<UserInfoProps> = ({ userId, currentUserId }) => 
     if (isLoading) return <UserInfoLoading />;
 
     return (
-        <div style={{ display: 'flex', gap: '24px', alignItems: 'center', justifyContent: 'space-between', width: '100%', background: '#ffffff', padding: '24px', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
-            <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-                <img src={avatarUrl} alt={user?.username || 'User Avatar'} style={{ width: '96px', height: '96px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #e5e7eb' }} />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <h2 style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#1f2937' }}>
+        <div className="w-full bg-white p-6 sm:p-8 rounded-2xl border border-neutral-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex flex-col sm:flex-row items-center gap-5 md:gap-6 text-center sm:text-left">
+                <img src={avatarUrl} alt={user?.username || 'User Avatar'} className="w-24 h-24 rounded-full object-cover border-4 border-neutral-50 shadow-sm" />
+                <div className="flex flex-col gap-1.5">
+                    <h2 className="text-[22px] md:text-[26px] font-black text-[#0D0D0D] tracking-tight">
                         {user ? user.username : `User #${userId}`}
                     </h2>
-                    {isMe && user?.email && <p style={{ margin: 0, color: '#4b5563', fontSize: '14px' }}>{user.email}</p>}
-                    {isMe && user?.balance && <p style={{ margin: 0, color: '#16a34a', fontSize: '14px', fontWeight: '600' }}>Balance: ${user.balance}</p>}
+                    {isMe && user?.email && <p className="text-[14px] font-medium text-neutral-500">{user.email}</p>}
+                    {isMe && user?.balance && <p className="text-[14px] font-bold text-[#F5C518]">Balance: ${user.balance}</p>}
 
-                    {stats && (
-                        <div style={{ display: 'flex', gap: '20px', margin: '4px 0' }}>
-                            <span style={{ fontSize: '14px', color: '#4b5563' }}><strong style={{ color: '#1f2937' }}>{stats.followersCount ?? 0}</strong> Followers</span>
-                            <span style={{ fontSize: '14px', color: '#4b5563' }}><strong style={{ color: '#1f2937' }}>{stats.followingCount ?? 0}</strong> Following</span>
-                        </div>
-                    )}
+                    <div className="flex items-center justify-center sm:justify-start gap-4 mt-2">
+                        <span className="text-[13px] font-medium text-neutral-500"><strong className="text-[#0D0D0D] font-black">{user?.followersCount ?? 0}</strong> Followers</span>
+                        <span className="text-[13px] font-medium text-neutral-500"><strong className="text-[#0D0D0D] font-black">{user?.followingCount ?? 0}</strong> Following</span>
+                    </div>
                 </div>
             </div>
 
             {!isMe && currentUserId !== undefined && (
                 <button
                     onClick={handleFollowToggle}
-                    style={{
-                        padding: '10px 24px',
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        cursor: 'pointer',
-                        border: isFollowing ? '1px solid #d1d5db' : 'none',
-                        background: isFollowing ? '#ffffff' : '#1f2937',
-                        color: isFollowing ? '#374151' : '#ffffff'
-                    }}
+                    className={`px-8 py-3 rounded-xl text-[14px] font-bold transition-all duration-200 ${
+                        isFollowing 
+                        ? 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 border border-neutral-200' 
+                        : 'bg-[#0D0D0D] text-white hover:bg-[#F5C518] hover:text-[#0D0D0D]'
+                    }`}
                 >
                     {isFollowing ? 'Unfollow' : 'Follow'}
                 </button>

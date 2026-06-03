@@ -8,9 +8,8 @@ interface OverviewPageProps {
 
 export const OverviewPage: React.FC<OverviewPageProps> = ({ userId }) => {
     return (
-        <div style={{ padding: '24px', flex: 1, display: 'flex', flexDirection: 'column', gap: '32px' }}>
+        <div className="flex flex-col w-full gap-8">
             <UserInfo key={`info-${userId}`} userId={userId} />
-            <div style={{ height: '1px', background: '#e5e7eb', width: '100%' }} />
             <UserAuctionGrid key={`grid-${userId}`} userId={userId} />
         </div>
     );

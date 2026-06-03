@@ -45,7 +45,10 @@ public class SecurityConfig {
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/verify",
                                 "/api/v1/auth/verify/resend",
-                                "/api/v1/auth/password-reset/**"
+                                "/api/v1/auth/password-reset/**",
+                                "/api/v1/auctions/top",
+                                "api/v1/users/top",
+                                "/api/v1/users/top"
                         ).permitAll()
                         .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
@@ -65,7 +68,8 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:5173",
                 "http://localhost:8000",
-                "http://127.0.0.1:8000"
+                "http://127.0.0.1:8000",
+                "https://bid-vault-seven.vercel.app"
         ));
         configuration.setAllowCredentials(true);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));

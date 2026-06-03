@@ -20,14 +20,14 @@ export default function BidFeedPanel({ bids, isConnected }: BidFeedPanelProps) {
     }, [bids]);
 
     return (
-        <div className="flex flex-col h-full bg-neutral-50/50 border-l border-neutral-100">
-            <div className="px-5 py-4 flex items-center justify-between border-b border-neutral-100 bg-white">
+        <div className="flex flex-col h-full bg-neutral-50/50 border-l border-neutral-200">
+            <div className="px-5 py-4 flex items-center justify-between border-b border-neutral-200 bg-white">
                 <div className="flex items-center gap-2">
                     <Activity size={16} className={isConnected ? "text-emerald-500" : "text-neutral-400"} />
                     <h3 className="text-[14px] font-bold text-[#0D0D0D]">Live Feed</h3>
                 </div>
                 {isConnected ? (
-                    <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full border border-emerald-100">
+                    <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full border border-emerald-200">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                         CONNECTED
                     </span>
@@ -51,7 +51,11 @@ export default function BidFeedPanel({ bids, isConnected }: BidFeedPanelProps) {
                 ) : (
                     <div className="flex flex-col gap-2">
                         {bids.map((bid, index) => (
-                            <FeedItem key={bid.bidId} event={bid} isNew={index === 0} />
+                            <FeedItem
+                                key={`${bid.bidId ?? index}-${bid.placedAt}-${bid.amount}-${bid.bidderLabel}`}
+                                event={bid}
+                                isNew={index === 0}
+                            />
                         ))}
                     </div>
                 )}

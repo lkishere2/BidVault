@@ -69,6 +69,15 @@ public class AuctionController {
         return ResponseEntity.ok(auctionService.getDiscoverableAuctions(request, pageable));
     }
 
+    @GetMapping("/seller/{sellerId}")
+    public ResponseEntity<Page<AuctionResponse>> getAuctionsBySellerId(
+            @PathVariable Long sellerId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startTime"));
+        return ResponseEntity.ok(auctionService.getAuctionsBySellerId(sellerId, pageable));
+    }
+
     @GetMapping("/top")
     public ResponseEntity<List<AuctionResponse>> getTopAuctions() {
         return ResponseEntity.ok(auctionService.getTop10ActiveAuctions());

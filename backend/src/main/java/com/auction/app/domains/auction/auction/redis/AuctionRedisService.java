@@ -16,9 +16,12 @@ public interface AuctionRedisService {
 
     List<AuctionResponse> getAuctionResponses(List<Long> ids);
 
+    List<AuctionResponse> getAllAuctionResponses();
+
     void enqueueBid(Long auctionId, PendingBid bid);
 
     PendingBid dequeueBid(Long auctionId);
 
     void clearAuctionCache(Long auctionId);
+
 }

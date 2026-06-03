@@ -12,6 +12,7 @@ import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
+import com.auction.app.domains.auction.auction.redis.AuctionRedisService;
 
 import com.auction.app.domains.auction.bids.dtos.BidFeedEvent;
 import com.auction.app.domains.auction.bids.dtos.BidNotificationPayload;
@@ -27,6 +28,10 @@ import java.io.IOException;
 public class AuctionSubscriber implements MessageListener {
 
     private final SimpMessagingTemplate messagingTemplate;
+    private final AuctionRedisService auctionRedisService;
+    private final com.auction.app.domains.auction.auction.AuctionRepository auctionRepository;
+    private final com.auction.app.domains.auction.bids.BidRepository bidRepository;
+    private final com.auction.app.domains.users.users.UserRepository userRepository;
 
     private final ObjectMapper objectMapper = buildRedisObjectMapper();
 
@@ -64,9 +69,56 @@ public class AuctionSubscriber implements MessageListener {
 
     private void subscribeToAuctionChannel(Message message, String channel) throws IOException {
         BidNotificationPayload payload = objectMapper.readValue(message.getBody(), BidNotificationPayload.class);
-        String destination = "/topic/auction/" + payload.getAuctionId();
+        Long auctionId = payload.getAuctionId();
+
+        // Check cached auction in Redis and persist DB changes if a new bid/version was observed
+        try {
+            com.auction.app.domains.auction.auction.dtos.AuctionResponse cached = auctionRedisService.getAuctionResponse(auctionId);
+            if (cached != null) {
+                auctionRepository.findById(auctionId).ifPresent(dbAuction -> {
+                    Integer cachedCount = cached.getBidCount() == null ? 0 : cached.getBidCount();
+                    Integer dbCount = dbAuction.getBidCount() == null ? 0 : dbAuction.getBidCount();
+                    if (cachedCount > dbCount) {
+                        // Persist a representative bid if none exists as HELD in DB
+                        try {
+                            java.util.List<com.auction.app.domains.auction.bids.model.Bid> held = bidRepository.findByAuctionIdAndStatus(auctionId, com.auction.app.domains.auction.bids.model.BidStatus.HELD);
+                            if (held == null || held.isEmpty()) {
+                                Long winnerId = cached.getWinnerId();
+                                if (winnerId != null) {
+                                    userRepository.findById(winnerId).ifPresent(winner -> {
+                                        com.auction.app.domains.auction.bids.model.Bid newBid = com.auction.app.domains.auction.bids.model.Bid.builder()
+                                                .auction(dbAuction)
+                                                .bidder(winner)
+                                                .amount(cached.getCurrentPrice())
+                                                .status(com.auction.app.domains.auction.bids.model.BidStatus.HELD)
+                                                .build();
+                                        bidRepository.save(newBid);
+                                        log.info("Persisted bid from Redis cache for auction #{} (bidCount {})", auctionId, cachedCount);
+                                    });
+                                }
+                            }
+
+                            // Persist auction-level fields
+                            dbAuction.setCurrentPrice(cached.getCurrentPrice());
+                            dbAuction.setMinBidIncrement(cached.getMinBidIncrement());
+                            dbAuction.setBidCount(cachedCount);
+                            if (cached.getWinnerId() != null) {
+                                userRepository.findById(cached.getWinnerId()).ifPresent(dbAuction::setWinner);
+                            }
+                            auctionRepository.save(dbAuction);
+                        } catch (Exception ex) {
+                            log.error("Failed to persist bid/auction from cached update for auction #{}: {}", auctionId, ex.getMessage());
+                        }
+                    }
+                });
+            }
+        } catch (Exception e) {
+            log.error("Error while reconciling cached auction for auction #{}: {}", payload.getAuctionId(), e.getMessage());
+        }
+
+        String destination = "/topic/auction/" + auctionId;
         messagingTemplate.convertAndSend(destination, payload);
-        log.info("WebSocket push → {} — price ${}", destination, payload.getCurrentPrice());
+        log.info("WebSocket push → {} — price {}", destination, payload.getCurrentPrice());
     }
 
     private void subscribeToBidFeedChannel(Message message, String channel) throws IOException {

@@ -63,15 +63,18 @@ export const ProfileImageChangingBox = ({ currentImage }: { currentImage?: strin
 
     return (
         <>
-            <form onSubmit={handleSubmit} className="p-4 border border-[#E8E8E8] rounded-lg mb-4 bg-white">
-                <h3 className="font-semibold mb-4 text-[#0D0D0D]">Change Profile Image</h3>
-                <div className="flex gap-4 items-center">
+            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row sm:items-center justify-between p-5 border border-neutral-200 rounded-xl bg-neutral-50 gap-4 transition-colors hover:bg-neutral-100/50">
+                <div className="flex flex-col">
+                    <h3 className="text-[15px] font-bold text-[#0D0D0D]">Profile Image</h3>
+                    <p className="text-[13px] font-medium text-neutral-500">PNG, JPG or WEBP under 5MB.</p>
+                </div>
+                <div className="flex flex-wrap sm:flex-nowrap gap-4 items-center w-full sm:w-auto">
                     {preview ? (
-                        <img src={preview} alt="Profile preview" className="w-16 h-16 rounded-full object-cover border border-[#E8E8E8]" />
+                        <img src={preview} alt="Profile preview" className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm" />
                     ) : (
-                        <div className="w-16 h-16 rounded-full bg-neutral-100 border border-[#E8E8E8]" />
+                        <div className="w-14 h-14 rounded-full bg-neutral-200 border-2 border-white shadow-sm" />
                     )}
-                    <div className="flex flex-1 gap-2 items-center">
+                    <div className="flex gap-2 items-center flex-1 sm:flex-initial">
                         <input
                             type="file"
                             accept="image/*"
@@ -82,19 +85,19 @@ export const ProfileImageChangingBox = ({ currentImage }: { currentImage?: strin
                         <button
                             type="button"
                             onClick={() => fileInputRef.current?.click()}
-                            className="border border-[#E8E8E8] rounded px-4 py-2 hover:bg-neutral-50 text-sm font-medium text-[#0D0D0D] transition-colors"
+                            className="border border-neutral-300 rounded-lg px-4 py-2 hover:bg-neutral-100 text-[13px] font-bold text-[#0D0D0D] transition-colors bg-white shadow-sm whitespace-nowrap"
                         >
-                            Browse File
+                            Browse
                         </button>
                         {selectedFile && (
-                            <span className="text-xs text-neutral-400 truncate max-w-[120px]">{selectedFile.name}</span>
+                            <span className="text-[12px] font-bold text-neutral-400 truncate max-w-[100px]">{selectedFile.name}</span>
                         )}
                         <button
                             type="submit"
                             disabled={loading || !selectedFile}
-                            className="px-4 py-2 rounded text-sm font-medium text-white disabled:opacity-50 bg-[#0D0D0D] hover:opacity-85 transition-opacity ml-auto"
+                            className="px-6 py-2 rounded-lg text-[13px] font-bold text-white disabled:opacity-50 bg-[#0D0D0D] hover:bg-neutral-800 transition-colors shadow-md whitespace-nowrap"
                         >
-                            {loading ? 'Uploading...' : 'Upload Image'}
+                            {loading ? 'Saving...' : 'Save'}
                         </button>
                     </div>
                 </div>

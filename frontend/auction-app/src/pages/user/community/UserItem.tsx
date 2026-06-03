@@ -18,27 +18,18 @@ export const UserItem: React.FC<UserItemProps> = ({ user, onClick }) => {
     return (
         <div
             onClick={onClick}
-            style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '16px',
-                padding: '16px',
-                borderRadius: '12px',
-                border: '1px solid #e5e7eb',
-                background: '#ffffff',
-                cursor: 'pointer'
-            }}
+            className="flex items-center gap-4 p-4 rounded-xl border border-neutral-200 bg-white cursor-pointer transition-all duration-200 hover:border-neutral-300 hover:shadow-sm group"
         >
             <img
                 src={avatarUrl}
                 alt={user.username}
-                style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover' }}
+                className="w-14 h-14 rounded-full object-cover"
             />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <h4 style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: '#1f2937' }}>
+            <div className="flex flex-col gap-1">
+                <h4 className="m-0 text-[16px] font-bold text-[#0D0D0D] group-hover:text-[#F5C518] transition-colors">
                     {user.username}
                 </h4>
-                <span style={{ fontSize: '13px', color: '#6b7280' }}>
+                <span className="text-[13px] font-medium text-neutral-500">
                     View Profile →
                 </span>
             </div>
