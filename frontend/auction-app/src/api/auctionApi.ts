@@ -3,11 +3,11 @@ import type { AuctionRequest, AuctionResponse, AuctionFindingRequest } from '../
 import type { Page } from '../types/pagination';
 
 export const auctionApi = {
-    createAuction: (data: AuctionRequest) => api.post<AuctionResponse>('/auctions/create', data),
-    cancelAuction: (auctionId: number) => api.delete<AuctionResponse>(`/auctions/cancel/${auctionId}`),
-    getAuction: (auctionId: number) => api.get<AuctionResponse>(`/auctions/get/${auctionId}`),
+    createAuction: (data: AuctionRequest) => api.post<AuctionResponse>('/api/v1/auctions/create', data),
+    cancelAuction: (auctionId: number) => api.delete<AuctionResponse>(`/api/v1/auctions/cancel/${auctionId}`),
+    getAuction: (auctionId: number) => api.get<AuctionResponse>(`/api/v1/auctions/get/${auctionId}`),
     getDiscoverableAuctions: (data: AuctionFindingRequest, page: number, size: number) =>
-        api.get<Page<AuctionResponse>>('/auctions/discover', {
+        api.get<Page<AuctionResponse>>('/api/v1/auctions/discover', {
             params: { ...data, page, size },
             paramsSerializer: (params) => {
                 const searchParams = new URLSearchParams();

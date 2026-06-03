@@ -68,7 +68,8 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:5173",
                 "http://localhost:8000",
-                "http://127.0.0.1:8000"
+                "http://127.0.0.1:8000",
+                "https://bid-vault-seven.vercel.app"
         ));
         configuration.setAllowCredentials(true);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));

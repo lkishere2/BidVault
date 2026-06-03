@@ -26,7 +26,7 @@ const TAG_OPTIONS: { value: Tag; label: string }[] = [
     { value: 'GARDENING', label: 'Gardening' },
     { value: 'GAMES', label: 'Games' },
     { value: 'ONLINE_ITEM', label: 'Online Item' },
-    { value: 'OTHER', label: 'Other' }
+    { value: 'OTHERS', label: 'Others' }
 ];
 
 export default function SearchBar({ onSearch }: SearchBarProps) {

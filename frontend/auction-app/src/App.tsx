@@ -27,12 +27,10 @@ import JoinedAuctionsPage from './pages/user/market/joins/JoinedAuctionsPage';
 import BidPage from './pages/user/market/bid/BidPage';
 import { userApi } from './api/userApi';
 import { authApi } from './api/authApi';
+import { refreshAccessToken, TOKEN_REFRESH_INTERVAL_MS } from './api/axios';
 import './App.css';
 import NotFoundPage from './pages/NotFoundPage';
 import AuthCallbackPage from './pages/auth/AuthCallbackPage';
-
-const MyBidsPage = () => <div className="p-4"><h1 className="text-xl font-bold">My Bids</h1></div>;
-const AdminUserControlPage = () => <div className="p-4"><h1 className="text-xl font-bold">User Control Panel</h1></div>;
 
 type UserData = { id?: string | number; username: string; initials: string; role?: string; profileImageUrl?: string };
 
@@ -112,6 +110,25 @@ function App() {
   }, []);
 
   useEffect(() => {
+    const intervalId = window.setInterval(async () => {
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (!refreshToken) return;
+
+      try {
+        await refreshAccessToken();
+      } catch (error) {
+        console.error('Token refresh failed:', error);
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        setUser(null);
+        window.location.href = '/login';
+      }
+    }, TOKEN_REFRESH_INTERVAL_MS);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
     if (user) {
       localStorage.setItem('bidvault_user', JSON.stringify(user));
     } else {
@@ -174,7 +191,7 @@ function App() {
             <Route path="settings" element={<SettingPage />} />
           </Route>
 
-            <Route path="/admin" element={<AdminNavbar />}>
+          <Route path="/admin" element={<AdminNavbar />}>
             <Route index element={<AdminPage />} />
             <Route path="user-control" element={<UserControlPage />} />
             <Route path="transaction-request" element={<TransactionPage />} />

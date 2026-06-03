@@ -22,6 +22,22 @@ export default function BidPage() {
     const [bids, setBids] = useState<BidFeedEvent[]>([]);
     const stompClientRef = useRef<Client | null>(null);
 
+    const normalizeBidFeedEvent = (data: Partial<BidFeedEvent>): BidFeedEvent => {
+        const placedAt = data.placedAt ? String(data.placedAt) : new Date().toISOString();
+        const amount = data.amount !== undefined ? String(data.amount) : '0';
+        const bidderLabel = data.bidderLabel ?? 'Unknown bidder';
+        const bidId = data.bidId ?? (Number(new Date(placedAt).getTime()) || Date.now());
+
+        return {
+            bidId,
+            auctionId: data.auctionId ?? Number(auction_id ?? '0'),
+            bidderId: data.bidderId ?? 0,
+            bidderLabel,
+            amount,
+            placedAt,
+        };
+    };
+
     // Fetch Auction Data
     useEffect(() => {
         if (!auction_id) return;
@@ -79,8 +95,14 @@ export default function BidPage() {
                 client.subscribe(`/topic/auction/${auction.id}/bids`, (message) => {
                     if (message.body) {
                         try {
-                            const data = JSON.parse(message.body) as BidFeedEvent;
-                            setBids(prev => [data, ...prev]);
+                            const data = JSON.parse(message.body) as Partial<BidFeedEvent>;
+                            const event = normalizeBidFeedEvent(data);
+                            setBids(prev => {
+                                const existingKey = event.bidId;
+                                const hasExisting = prev.some(b => b.bidId === existingKey || (`${b.bidderLabel}-${b.amount}-${b.placedAt}`) === `${event.bidderLabel}-${event.amount}-${event.placedAt}`);
+                                if (hasExisting) return prev;
+                                return [event, ...prev];
+                            });
                         } catch (e) {
                             console.error('Error parsing bid event', e);
                         }
