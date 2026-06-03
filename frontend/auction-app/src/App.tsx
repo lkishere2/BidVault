@@ -25,6 +25,7 @@ import ProfilePage from './pages/user/community/ProfilePage';
 import JoinedAuctionsPage from './pages/user/market/joins/JoinedAuctionsPage';
 import { userApi } from './api/userApi';
 import { authApi } from './api/authApi';
+import { refreshAccessToken, TOKEN_REFRESH_INTERVAL_MS } from './api/axios';
 import './App.css';
 import NotFoundPage from './pages/NotFoundPage';
 import AuthCallbackPage from './pages/auth/AuthCallbackPage';
@@ -92,6 +93,25 @@ function App() {
       }
     };
     syncUser();
+  }, []);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(async () => {
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (!refreshToken) return;
+
+      try {
+        await refreshAccessToken();
+      } catch (error) {
+        console.error('Token refresh failed:', error);
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        setUser(null);
+        window.location.href = '/login';
+      }
+    }, TOKEN_REFRESH_INTERVAL_MS);
+
+    return () => window.clearInterval(intervalId);
   }, []);
 
   useEffect(() => {

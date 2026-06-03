@@ -1,13 +1,13 @@
 import axios from 'axios';
 import type { AxiosRequestConfig } from 'axios';
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 const SKIP_REFRESH_PATHS = [
-    '/auth/login',
-    '/auth/register',
-    '/auth/refresh',
-    '/auth/logout',
+    '/api/v1/auth/login',
+    '/api/v1/auth/register',
+    '/api/v1/auth/refresh',
+    '/api/v1/auth/logout',
 ];
 
 const api = axios.create({
@@ -46,11 +46,13 @@ function shouldSkipRefresh(url: string | undefined): boolean {
     return SKIP_REFRESH_PATHS.some((path) => url?.includes(path));
 }
 
-async function refreshAccessToken(): Promise<void> {
+export const TOKEN_REFRESH_INTERVAL_MS = 15 * 60_000;
+
+export async function refreshAccessToken(): Promise<void> {
     const refreshToken = localStorage.getItem('refreshToken');
     if (!refreshToken) throw new Error('No refresh token available');
 
-    const response = await axios.post(`${BASE_URL}/auth/refresh`, { refreshToken });
+    const response = await axios.post(`${BASE_URL}/api/v1/auth/refresh`, { refreshToken });
 
     localStorage.setItem('accessToken', response.data.accessToken);
     if (response.data.refreshToken) {
@@ -93,13 +95,13 @@ export async function logout(): Promise<void> {
 
         // Send the refresh token to the backend in the header so it can be blacklisted/invalidated
         if (refreshToken) {
-            await api.post('/auth/logout', undefined, {
+            await api.post('/api/v1/auth/logout', undefined, {
                 headers: {
                     'X-Refresh-Token': refreshToken,
                 },
             });
         } else {
-            await api.post('/auth/logout');
+            await api.post('/api/v1/auth/logout');
         }
     } catch {
         // Intentionally swallowed - we want to force the frontend logout regardless of backend errors

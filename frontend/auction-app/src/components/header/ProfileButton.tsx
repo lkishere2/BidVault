@@ -9,7 +9,6 @@ interface ProfileButtonProps {
 
 export default function ProfileButton({ username, initials, profileImageUrl }: ProfileButtonProps) {
     const navigate = useNavigate();
-    // Accept snake_case as well if provided in props
     const rawProfile = (profileImageUrl as any) ?? (profileImageUrl as any) ?? undefined;
     const resolvedProfile = rawProfile;
     const avatarUrl = resolvedProfile
