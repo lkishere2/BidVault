@@ -4,43 +4,129 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
-<VBox prefHeight="650.0" prefWidth="850.0" spacing="20.0" style="-fx-background-color: #0F172A;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.app.controllers.admin.transaction.TransactionViewController">
+<VBox prefHeight="650.0" prefWidth="850.0" spacing="18"
+      style="-fx-background-color: #0D0D0D;"
+      xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.auction.app.controllers.admin.transaction.TransactionViewController">
+
     <padding>
-        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+        <Insets top="26" right="26" bottom="26" left="26"/>
     </padding>
-    <children>
-        <VBox spacing="5.0">
-            <children>
-                <Label text="User Transaction Requests" textFill="#F8FAFC">
-                    <font>
-                        <Font name="System Bold" size="22.0" />
-                    </font>
-                </Label>
-                <Label text="Review incoming balance deposit additions or wallet withdrawals requiring platform administrative validation." textFill="#94A3B8" />
-            </children>
-        </VBox>
 
-        <VBox VBox.vgrow="ALWAYS">
-            <fx:include fx:id="clientRequestGrid" source="ClientRequestGrid.fxml" />
+    <!-- Header card — floating -->
+    <HBox alignment="CENTER_LEFT"
+          style="-fx-background-color: #111111;
+                 -fx-background-radius: 12;
+                 -fx-border-color: rgba(255,77,77,0.20);
+                 -fx-border-radius: 12; -fx-border-width: 1;
+                 -fx-padding: 18 22 18 22;">
+        <VBox spacing="5" HBox.hgrow="ALWAYS">
+            <!-- Title — floats highest -->
+            <Label text="Transaction Requests"
+                   style="-fx-text-fill: #FFFFFF;
+                          -fx-font-size: 20px; -fx-font-weight: bold;
+                          -fx-effect: dropshadow(gaussian, rgba(255,255,255,0.18), 8, 0, 0, 2);"/>
+            <!-- Subtitle — recessed -->
+            <Label text="Review incoming deposit and withdrawal requests requiring admin validation."
+                   style="-fx-text-fill: rgba(255,255,255,0.28);
+                          -fx-font-size: 11px;"/>
         </VBox>
+        <!-- Live indicator -->
+        <Label text="● LIVE FEED"
+               style="-fx-text-fill: #FF4D4D;
+                      -fx-font-size: 10px; -fx-font-weight: bold;
+                      -fx-background-color: rgba(255,77,77,0.10);
+                      -fx-background-radius: 20; -fx-padding: 5 12;
+                      -fx-border-color: rgba(255,77,77,0.25);
+                      -fx-border-radius: 20; -fx-border-width: 0.5;"/>
+    </HBox>
 
-        <HBox alignment="CENTER" spacing="15.0">
-            <children>
-                <Button fx:id="prevButton" onAction="#handlePrevPage" text="← Previous" style="-fx-background-color: #1E293B; -fx-text-fill: #F8FAFC; -fx-font-weight: bold; -fx-background-radius: 6px; -fx-cursor: hand;">
-                    <padding>
-                        <Insets bottom="8.0" left="16.0" right="16.0" top="8.0" />
-                    </padding>
-                </Button>
-                <Label fx:id="pageTrackerLabel" text="Page 1 of 1" textFill="#94A3B8" />
-                <Button fx:id="nextButton" onAction="#handleNextPage" text="Next →" style="-fx-background-color: #1E293B; -fx-text-fill: #F8FAFC; -fx-font-weight: bold; -fx-background-radius: 6px; -fx-cursor: hand;">
-                    <padding>
-                        <Insets bottom="8.0" left="16.0" right="16.0" top="8.0" />
-                    </padding>
-                </Button>
-            </children>
-        </HBox>
-    </children>
+    <!-- Stat chips row -->
+    <HBox spacing="14">
+        <!-- Pending -->
+        <VBox spacing="4" alignment="CENTER" HBox.hgrow="ALWAYS"
+              style="-fx-background-color: #111111;
+                     -fx-background-radius: 10;
+                     -fx-border-color: rgba(245,197,24,0.20);
+                     -fx-border-radius: 10; -fx-border-width: 0.5;
+                     -fx-padding: 14 0;">
+            <Label text="PENDING"
+                   style="-fx-text-fill: rgba(255,255,255,0.28);
+                          -fx-font-size: 9px; -fx-font-weight: bold;"/>
+            <Label fx:id="pendingCountLabel" text="—"
+                   style="-fx-text-fill: #F5C518;
+                          -fx-font-size: 22px; -fx-font-weight: bold;
+                          -fx-effect: dropshadow(gaussian, rgba(245,197,24,0.40), 10, 0, 0, 0);"/>
+            <Label text="Awaiting Review"
+                   style="-fx-text-fill: rgba(255,255,255,0.20); -fx-font-size: 10px;"/>
+        </VBox>
+        <!-- Approved -->
+        <VBox spacing="4" alignment="CENTER" HBox.hgrow="ALWAYS"
+              style="-fx-background-color: #111111;
+                     -fx-background-radius: 10;
+                     -fx-border-color: rgba(0,214,143,0.18);
+                     -fx-border-radius: 10; -fx-border-width: 0.5;
+                     -fx-padding: 14 0;">
+            <Label text="APPROVED TODAY"
+                   style="-fx-text-fill: rgba(255,255,255,0.28);
+                          -fx-font-size: 9px; -fx-font-weight: bold;"/>
+            <Label fx:id="approvedCountLabel" text="—"
+                   style="-fx-text-fill: #00D68F;
+                          -fx-font-size: 22px; -fx-font-weight: bold;
+                          -fx-effect: dropshadow(gaussian, rgba(0,214,143,0.40), 10, 0, 0, 0);"/>
+            <Label text="Processed"
+                   style="-fx-text-fill: rgba(255,255,255,0.20); -fx-font-size: 10px;"/>
+        </VBox>
+        <!-- Rejected -->
+        <VBox spacing="4" alignment="CENTER" HBox.hgrow="ALWAYS"
+              style="-fx-background-color: #111111;
+                     -fx-background-radius: 10;
+                     -fx-border-color: rgba(255,77,77,0.18);
+                     -fx-border-radius: 10; -fx-border-width: 0.5;
+                     -fx-padding: 14 0;">
+            <Label text="REJECTED TODAY"
+                   style="-fx-text-fill: rgba(255,255,255,0.28);
+                          -fx-font-size: 9px; -fx-font-weight: bold;"/>
+            <Label fx:id="rejectedCountLabel" text="—"
+                   style="-fx-text-fill: #FF4D4D;
+                          -fx-font-size: 22px; -fx-font-weight: bold;
+                          -fx-effect: dropshadow(gaussian, rgba(255,77,77,0.40), 10, 0, 0, 0);"/>
+            <Label text="Declined"
+                   style="-fx-text-fill: rgba(255,255,255,0.20); -fx-font-size: 10px;"/>
+        </VBox>
+    </HBox>
+
+    <!-- Request feed -->
+    <VBox VBox.vgrow="ALWAYS">
+        <fx:include fx:id="clientRequestGrid" source="ClientRequestGrid.fxml"/>
+    </VBox>
+
+    <!-- Pagination -->
+    <HBox alignment="CENTER" spacing="12">
+        <Button fx:id="prevButton" text="← Previous" onAction="#handlePrevPage"
+                style="-fx-background-color: #1A1A1A;
+                       -fx-text-fill: rgba(255,255,255,0.55);
+                       -fx-font-size: 12px; -fx-font-weight: bold;
+                       -fx-background-radius: 7;
+                       -fx-border-color: rgba(255,255,255,0.10);
+                       -fx-border-radius: 7; -fx-border-width: 0.5;
+                       -fx-cursor: hand; -fx-padding: 8 18;"/>
+        <Label fx:id="pageTrackerLabel" text="Page 1 of 1"
+               style="-fx-text-fill: rgba(255,255,255,0.28);
+                      -fx-font-size: 12px; -fx-font-weight: bold;
+                      -fx-padding: 0 10;"/>
+        <Button fx:id="nextButton" text="Next →" onAction="#handleNextPage"
+                style="-fx-background-color: #1A1A1A;
+                       -fx-text-fill: rgba(255,255,255,0.55);
+                       -fx-font-size: 12px; -fx-font-weight: bold;
+                       -fx-background-radius: 7;
+                       -fx-border-color: rgba(255,255,255,0.10);
+                       -fx-border-radius: 7; -fx-border-width: 0.5;
+                       -fx-cursor: hand; -fx-padding: 8 18;"/>
+    </HBox>
+
 </VBox>
