@@ -23,4 +23,5 @@ public interface AuctionRedisService {
     PendingBid dequeueBid(Long auctionId);
 
     void clearAuctionCache(Long auctionId);
+
 }

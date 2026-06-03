@@ -51,7 +51,11 @@ export default function BidFeedPanel({ bids, isConnected }: BidFeedPanelProps) {
                 ) : (
                     <div className="flex flex-col gap-2">
                         {bids.map((bid, index) => (
-                            <FeedItem key={bid.bidId} event={bid} isNew={index === 0} />
+                            <FeedItem
+                                key={`${bid.bidId ?? index}-${bid.placedAt}-${bid.amount}-${bid.bidderLabel}`}
+                                event={bid}
+                                isNew={index === 0}
+                            />
                         ))}
                     </div>
                 )}

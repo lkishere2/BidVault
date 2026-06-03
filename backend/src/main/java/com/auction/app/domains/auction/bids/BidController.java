@@ -44,7 +44,7 @@ public class BidController {
         bidService.placeBid(auctionId, request, bidder);
     }
 
-    @GetMapping("/bids/{auctionId}")
+    @GetMapping("/{auctionId}/bids")
     public ResponseEntity<Slice<BidResponse>> getBidHistory(
             @PathVariable Long auctionId,
             @RequestParam(defaultValue = "0") int page,
