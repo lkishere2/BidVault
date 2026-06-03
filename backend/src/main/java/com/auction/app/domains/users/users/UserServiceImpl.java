@@ -27,6 +27,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserResponse getUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return mapToResponse(user);
+    }
+
+    @Override
     public Page<UserResponse> searchUsersByUsername(String username, int page, int size) {
         return userRepository.searchByUsername(username, PageRequest.of(page, size))
                 .map(this::mapToResponse);
@@ -102,6 +109,7 @@ public class UserServiceImpl implements UserService {
                 .profileImageUrl(user.getProfileImageUrl())
                 .role(user.getRole() != null ? user.getRole().name() : "USER")
                 .followersCount(user.getFollowers() != null ? user.getFollowers().size() : 0)
+                .followingCount(user.getFollowing() != null ? user.getFollowing().size() : 0)
                 .build();
     }
 }

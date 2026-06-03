@@ -13,6 +13,7 @@ public interface AuctionService {
     AuctionResponse getAuction(Long auctionId);
     Page<AuctionResponse> getAuctionsBidOnByCurrentUser(Page<Long> auctionIdPage, Pageable pageable);
     Page<AuctionResponse> getDiscoverableAuctions(AuctionFindingRequest request, Pageable pageable);
+    Page<AuctionResponse> getAuctionsBySellerId(Long sellerId, Pageable pageable);
     Page<AuctionResponse> getMyAuctions(Pageable pageable);
     List<AuctionResponse> getTop10ActiveAuctions();
 }

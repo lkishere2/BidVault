@@ -12,9 +12,10 @@ export interface NavItemProps {
     path?: string;
     sub?: SubItem[];
     onNavigate?: () => void;
+    onIntercept?: () => boolean;
 }
 
-export default function NavItem({ label, path, sub, onNavigate }: NavItemProps) {
+export default function NavItem({ label, path, sub, onNavigate, onIntercept }: NavItemProps) {
     const location = useLocation();
     const navigate = useNavigate();
     const [open, setOpen] = useState(false);
@@ -44,7 +45,10 @@ export default function NavItem({ label, path, sub, onNavigate }: NavItemProps) 
             <div ref={ref} className="relative">
                 <button
                     type="button"
-                    onClick={() => setOpen(v => !v)}
+                    onClick={() => {
+                        if (onIntercept && onIntercept()) return;
+                        setOpen(v => !v);
+                    }}
                     className={`${baseBtn} ${colorCls} flex items-center gap-1`}
                 >
                     {label}
@@ -62,7 +66,12 @@ export default function NavItem({ label, path, sub, onNavigate }: NavItemProps) 
                             <button
                                 key={s.path}
                                 type="button"
-                                onClick={() => { navigate(s.path); setOpen(false); onNavigate?.(); }}
+                                onClick={() => {
+                                    if (onIntercept && onIntercept()) return;
+                                    navigate(s.path);
+                                    setOpen(false);
+                                    onNavigate?.();
+                                }}
                                 className={`w-full text-left px-4 py-2.5 text-[12px] font-semibold transition-colors cursor-pointer border-0
                                     ${location.pathname === s.path
                                         ? 'bg-[#0D0D0D] text-white'
@@ -80,7 +89,11 @@ export default function NavItem({ label, path, sub, onNavigate }: NavItemProps) 
     return (
         <button
             type="button"
-            onClick={() => { navigate(path ?? '/'); onNavigate?.(); }}
+            onClick={() => {
+                if (onIntercept && onIntercept()) return;
+                navigate(path ?? '/');
+                onNavigate?.();
+            }}
             className={`${baseBtn} ${colorCls}`}
         >
             {label}

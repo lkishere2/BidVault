@@ -4,6 +4,7 @@ import type { UserResponse, UsernameRequest, EmailRequest, PasswordRequest, Prof
 
 export const userApi = {
     getInfo: () => api.get<UserResponse>('/users/info'),
+    getUserById: (id: number) => api.get<UserResponse>(`/users/${id}`),
     searchUsers: (username: string, page = 0, size = 20) => api.get<Page<UserResponse>>(`/users/search?username=${encodeURIComponent(username)}&page=${page}&size=${size}`),
     updateUsername: (data: UsernameRequest) => api.patch<void>('/users/update-username', data),
     updateEmail: (data: EmailRequest) => api.patch<void>('/users/update-email', data),

@@ -9,6 +9,7 @@ import LogoutButton from './LogoutButton';
 import NotificationButton from './NotificationButton';
 import NotificationDropdown from './NotificationDropdown';
 import { notificationApi } from '../../api/notificationApi';
+import LoginNotification from '../../pages/user/home/LoginNotification';
 
 interface HeaderProps {
     user?: { username: string; initials: string; role?: string; profileImageUrl?: string };
@@ -36,7 +37,16 @@ export default function Header({ user, isLoggedIn = !!user, isAdmin = false, onL
     const [notifOpen, setNotifOpen] = useState(false);
     const [notifications, setNotifications] = useState<{ id: number; message: string; sendAt: string; read?: boolean }[]>([]);
     const [notifLoading, setNotifLoading] = useState(false);
+    const [showLoginNotif, setShowLoginNotif] = useState(false);
     const close = () => setMobileOpen(false);
+
+    const handleIntercept = (path?: string) => {
+        if (!isLoggedIn && path !== '/') {
+            setShowLoginNotif(true);
+            return true; // Intercept
+        }
+        return false;
+    };
 
     const displayAdmin = isAdmin || user?.role === 'ADMIN' || user?.role === 'admin';
 
@@ -103,7 +113,7 @@ export default function Header({ user, isLoggedIn = !!user, isAdmin = false, onL
 
                 <nav className="hidden md:flex items-center gap-0 flex-1 justify-center">
                     {NAV.map(item => (
-                        <NavItem key={item.label} {...item} />
+                        <NavItem key={item.label} {...item} onIntercept={() => handleIntercept(item.path)} />
                     ))}
                 </nav>
 
@@ -168,7 +178,14 @@ export default function Header({ user, isLoggedIn = !!user, isAdmin = false, onL
                                     <button
                                         key={s.path}
                                         type="button"
-                                        onClick={() => { navigate(s.path); close(); }}
+                                        onClick={() => {
+                                            if (handleIntercept(s.path)) {
+                                                close();
+                                                return;
+                                            }
+                                            navigate(s.path);
+                                            close();
+                                        }}
                                         className="w-full text-left px-3 py-2.5 text-[13px] font-semibold text-[#0D0D0D] hover:text-[#F5C518] rounded-lg hover:bg-neutral-50 transition-colors bg-transparent border-0 cursor-pointer"
                                     >
                                         {s.label}
@@ -179,7 +196,14 @@ export default function Header({ user, isLoggedIn = !!user, isAdmin = false, onL
                             <button
                                 key={item.label}
                                 type="button"
-                                onClick={() => { navigate(item.path!); close(); }}
+                                onClick={() => {
+                                    if (handleIntercept(item.path)) {
+                                        close();
+                                        return;
+                                    }
+                                    navigate(item.path!);
+                                    close();
+                                }}
                                 className="w-full text-left px-3 py-2.5 text-[13px] font-semibold text-[#0D0D0D] hover:text-[#F5C518] rounded-lg hover:bg-neutral-50 transition-colors bg-transparent border-0 cursor-pointer"
                             >
                                 {item.label}
@@ -214,6 +238,8 @@ export default function Header({ user, isLoggedIn = !!user, isAdmin = false, onL
                     </div>
                 </nav>
             </div>
+            
+            <LoginNotification isOpen={showLoginNotif} onClose={() => setShowLoginNotif(false)} />
         </header>
     );
 }

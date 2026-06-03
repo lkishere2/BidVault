@@ -6,6 +6,7 @@ export interface UserResponse {
     profileImageUrl?: string;
     role: 'ADMIN' | 'USER';
     followersCount?: number;
+    followingCount?: number;
 }
 
 export interface UsernameRequest {

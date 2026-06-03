@@ -215,6 +215,21 @@ public class AuctionServiceImpl implements AuctionService {
         return new PageImpl<>(responses, pageable, idPage.getTotalElements());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<AuctionResponse> getAuctionsBySellerId(Long sellerId, Pageable pageable) {
+        Page<Long> idPage = auctionRepository.findIdsBySellerIdOrderByStartTime(sellerId, pageable);
+        List<Long> ids = idPage.getContent();
+        if (ids.isEmpty()) return Page.empty(pageable);
+        
+        List<AuctionResponse> responses = auctionRepository.findByIdsWithDetails(ids)
+                .stream()
+                .map(AuctionResponse::from)
+                .toList();
+
+        return new PageImpl<>(responses, pageable, idPage.getTotalElements());
+    }
+
     public List<AuctionResponse> getTop10ActiveAuctions() {
         return auctionRepository.findTopAuctionsByBidCount(AuctionStatus.ACTIVE, PageRequest.of(0, 10))
                 .stream()

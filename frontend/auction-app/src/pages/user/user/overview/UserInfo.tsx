@@ -12,7 +12,6 @@ interface UserInfoProps {
 
 export const UserInfo: React.FC<UserInfoProps> = ({ userId, currentUserId }) => {
     const [user, setUser] = useState<UserResponse | null>(null);
-    const [stats, setStats] = useState<UserStats | null>(null);
     const [isFollowing, setIsFollowing] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -38,12 +37,10 @@ export const UserInfo: React.FC<UserInfoProps> = ({ userId, currentUserId }) => 
                     }
                 } else {
                     try {
-                        const searchRes = await userApi.searchUsers('', 0, 100);
-                        // Defensively check both .items and .content arrays from the response
-                        const items = searchRes?.data?.items || searchRes?.data?.content || [];
-                        userDetail = items.find((u: UserResponse) => u.id === userId) || null;
+                        const res = await userApi.getUserById(userId);
+                        userDetail = res.data;
                     } catch (err) {
-                        console.error("Error searching user list:", err);
+                        console.error("Error fetching user info by ID:", err);
                     }
                 }
 
@@ -61,28 +58,20 @@ export const UserInfo: React.FC<UserInfoProps> = ({ userId, currentUserId }) => 
                 if (!isMounted) return;
                 setUser(userDetail);
 
-                // 2. Fetch stats and follow relationship in parallel
-                // Wrapped individually so that if one fails, it doesn't break the whole component
+                // 2. Fetch follow relationship
                 try {
-                    const [statsRes, followRes] = await Promise.all([
-                        connectionApi.getStats(userId).catch(err => {
-                            console.error("Error fetching stats:", err);
-                            return { data: null };
-                        }),
-                        isMe
-                            ? Promise.resolve({ data: false })
-                            : connectionApi.checkFollowStatus(userId).catch(err => {
-                                console.error("Error checking follow status:", err);
-                                return { data: false };
-                            })
-                    ]);
+                    const followRes = await (isMe
+                        ? Promise.resolve({ data: false })
+                        : connectionApi.checkFollowStatus(userId).catch(err => {
+                            console.error("Error checking follow status:", err);
+                            return { data: false };
+                        }));
 
-                    if (isMounted) {
-                        if (statsRes?.data) setStats(statsRes.data);
-                        if (followRes?.data !== undefined) setIsFollowing(followRes.data);
+                    if (isMounted && followRes?.data !== undefined) {
+                        setIsFollowing(followRes.data);
                     }
-                } catch (parallelErr) {
-                    console.error("Error in parallel stats/follow fetch:", parallelErr);
+                } catch (err) {
+                    console.error("Error fetching follow status:", err);
                 }
 
             } catch (error) {
@@ -105,9 +94,13 @@ export const UserInfo: React.FC<UserInfoProps> = ({ userId, currentUserId }) => 
         try {
             await connectionApi.follow(userId);
             setIsFollowing(!isFollowing);
-            const statsRes = await connectionApi.getStats(userId);
-            if (statsRes?.data) {
-                setStats(statsRes.data);
+            // We assume backend updates followers count immediately;
+            // for immediate UI response we can just update the local user object.
+            if (user) {
+                setUser({
+                    ...user,
+                    followersCount: (user.followersCount || 0) + (isFollowing ? -1 : 1)
+                });
             }
         } catch (error) {
             console.error(error);
@@ -134,12 +127,10 @@ export const UserInfo: React.FC<UserInfoProps> = ({ userId, currentUserId }) => 
                     {isMe && user?.email && <p className="text-[14px] font-medium text-neutral-500">{user.email}</p>}
                     {isMe && user?.balance && <p className="text-[14px] font-bold text-[#F5C518]">Balance: ${user.balance}</p>}
 
-                    {stats && (
-                        <div className="flex items-center justify-center sm:justify-start gap-4 mt-2">
-                            <span className="text-[13px] font-medium text-neutral-500"><strong className="text-[#0D0D0D] font-black">{stats.followersCount ?? 0}</strong> Followers</span>
-                            <span className="text-[13px] font-medium text-neutral-500"><strong className="text-[#0D0D0D] font-black">{stats.followingCount ?? 0}</strong> Following</span>
-                        </div>
-                    )}
+                    <div className="flex items-center justify-center sm:justify-start gap-4 mt-2">
+                        <span className="text-[13px] font-medium text-neutral-500"><strong className="text-[#0D0D0D] font-black">{user?.followersCount ?? 0}</strong> Followers</span>
+                        <span className="text-[13px] font-medium text-neutral-500"><strong className="text-[#0D0D0D] font-black">{user?.followingCount ?? 0}</strong> Following</span>
+                    </div>
                 </div>
             </div>
 

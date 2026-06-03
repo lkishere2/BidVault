@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import UserItem from './UserItem';
 import { userApi } from '../../../api/userApi';
+import LoginNotification from './LoginNotification';
+import { useNavigate } from 'react-router-dom';
 
 export interface TopUser {
     id: string;
@@ -11,6 +13,17 @@ export interface TopUser {
 
 export default function UserSection() {
     const [users, setUsers] = useState<TopUser[]>([]);
+    const [showLoginNotif, setShowLoginNotif] = useState(false);
+    const navigate = useNavigate();
+
+    const handleIntercept = (path: string) => {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            setShowLoginNotif(true);
+        } else {
+            navigate(path);
+        }
+    };
 
     useEffect(() => {
         userApi.getTopUsers().then(res => {
@@ -30,11 +43,11 @@ export default function UserSection() {
     return (
         <section
             id="sec-users"
-            className="px-[7vw] py-24"
+            className="px-[7vw] py-16"
             style={{ background: '#F7F6F3' }}
         >
             {/* Header */}
-            <div className="flex items-end justify-between mb-14 flex-wrap gap-4">
+            <div className="flex items-end justify-between mb-8 flex-wrap gap-4">
                 <div>
                     <p className="text-[11px] font-bold tracking-[.16em] uppercase text-[#F5C518] mb-2.5">
                         Community
@@ -47,7 +60,11 @@ export default function UserSection() {
                     </h2>
                 </div>
                 <a
-                    href="/community"
+                    href="#"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        handleIntercept('/community');
+                    }}
                     className="text-[12px] font-bold tracking-[.08em] uppercase text-[#F5C518] border-b border-[#F5C518]/40 pb-1 no-underline transition hover:opacity-70"
                 >
                     View all →
@@ -61,23 +78,13 @@ export default function UserSection() {
                   sm   → 4 cols  (2 rows of 4)
                   xs   → 2 cols  (4 rows of 2)
             */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-8 gap-x-6 gap-y-10">
+            <div className="group/grid grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-8 gap-x-2 gap-y-6">
                 {users.map((user, i) => (
-                    <UserItem key={user.id} user={user} rank={i + 1} />
+                    <UserItem key={user.id} user={user} rank={i + 1} onClick={() => handleIntercept(`/profile/${user.id}`)} />
                 ))}
             </div>
 
-            {/* Divider accent */}
-            <div className="mt-16 flex items-center gap-4">
-                <div className="flex-1 h-px" style={{ background: 'rgba(0,0,0,0.07)' }} />
-                <span
-                    className="text-[10px] font-bold tracking-[.16em] uppercase"
-                    style={{ color: '#c9a20f' }}
-                >
-                    Ranked by followers
-                </span>
-                <div className="flex-1 h-px" style={{ background: 'rgba(0,0,0,0.07)' }} />
-            </div>
+            <LoginNotification isOpen={showLoginNotif} onClose={() => setShowLoginNotif(false)} />
         </section>
     );
 }

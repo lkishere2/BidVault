@@ -45,7 +45,10 @@ public class SecurityConfig {
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/verify",
                                 "/api/v1/auth/verify/resend",
-                                "/api/v1/auth/password-reset/**"
+                                "/api/v1/auth/password-reset/**",
+                                "/api/v1/auctions/top",
+                                "api/v1/users/top",
+                                "/api/v1/users/top"
                         ).permitAll()
                         .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()

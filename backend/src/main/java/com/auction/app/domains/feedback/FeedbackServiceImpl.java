@@ -1,7 +1,6 @@
 package com.auction.app.domains.feedback;
 
-import com.auction.app.domains.feedback.dtos.FeedbackRequest;
-import com.auction.app.domains.feedback.dtos.FeedbackResponse;
+import com.auction.app.domains.feedback.dtos.*;
 import com.auction.app.domains.feedback.exceptions.FeedBackNotFoundException;
 import com.auction.app.domains.feedback.model.Feedback;
 import com.auction.app.domains.users.users.model.User;
@@ -57,6 +56,15 @@ public class FeedbackServiceImpl implements FeedbackService {
         return feedbackRepository.findAll(pageable).map(this::mapToResponse);
     }
 
+    @Override
+    @Transactional
+    public FeedbackResponse respondToFeedback(Long id, FeedbackAdminResponseRequest request) {
+        Feedback feedback = feedbackRepository.findById(id)
+                .orElseThrow(() -> new FeedBackNotFoundException("Feedback not found"));
+        feedback.setAdminResponse(request.getResponseContent());
+        return mapToResponse(feedbackRepository.save(feedback));
+    }
+
     // Helpers
     private User currentUser() {
         try {
@@ -95,6 +103,7 @@ public class FeedbackServiceImpl implements FeedbackService {
                 .username(client.getDisplayName())
                 .email(client.getEmail())
                 .content(feedback.getContent())
+                .adminResponse(feedback.getAdminResponse())
                 .createdAt(feedback.getCreatedAt())
                 .build();
     }
