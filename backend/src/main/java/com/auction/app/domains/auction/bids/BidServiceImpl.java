@@ -77,14 +77,13 @@ public class BidServiceImpl implements BidService {
 
     @Override
     @Transactional
-    public void placeBid(Long auctionId, BidRequest request) {
+    public void placeBid(Long auctionId, BidRequest request, User bidder) {
 
-        log.info("[Bid Service - Place Bid] Get the current user and auction info");
-        User bidder = securityUtils.getCurrentUser();
+        Auction auction = auctionRepository.findByIdForUpdate(auctionId)
+        .orElseThrow(() -> new AuctionNotFoundException("Auction not found."));
+
+    // Now validate and save safely
         AuctionResponse response = getActiveAuctionResponse(auctionId);
-        Auction auction = findAuctionById(auctionId);
-
-        log.info("[Bid Service - Place Bid] Validate info before continue");
         bidValidatorService.validateUser(bidder.getId(), response.getSellerId());
         bidValidatorService.validateBidAmount(request.getAmount(), response);
         bidValidatorService.validateSpendableBalance(bidder, request.getAmount());
@@ -110,7 +109,6 @@ public class BidServiceImpl implements BidService {
 
         self.processNextBid(auctionId);
     }
-
     @Async
     @Transactional
     public void processNextBid(Long auctionId) {

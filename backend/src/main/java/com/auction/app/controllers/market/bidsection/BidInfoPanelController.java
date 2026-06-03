@@ -5,6 +5,7 @@ import com.auction.app.domains.auction.auction.model.AuctionStatus;
 import com.auction.app.domains.auction.bids.dtos.BidNotificationPayload;
 import com.auction.app.domains.auction.bids.BidService;
 import com.auction.app.domains.auction.bids.dtos.BidRequest;
+import com.auction.app.infrastructure.security.SecurityUtils;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
@@ -20,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.security.concurrent.DelegatingSecurityContextRunnable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -52,6 +54,7 @@ public class BidInfoPanelController {
     @FXML private Label     bidErrorLabel;
 
     private final BidService bidService;
+    private final SecurityUtils securityUtils;
 
     private AuctionResponse auction;
     private AuctionStatus   mode;
@@ -130,7 +133,7 @@ public class BidInfoPanelController {
 
         Runnable secureTask = new DelegatingSecurityContextRunnable(() -> {
             try {
-                bidService.placeBid(auction.getId(), new BidRequest(amount));
+                bidService.placeBid(auction.getId(), new BidRequest(amount), securityUtils.getCurrentUser());
                 javafx.application.Platform.runLater(() -> {
                     bidAmountField.clear();
                     placeBidButton.setDisable(false);
@@ -143,7 +146,7 @@ public class BidInfoPanelController {
                     placeBidButton.setText("BID");
                 });
             }
-        });
+        }, SecurityContextHolder.getContext());
 
         Thread worker = new Thread(secureTask);
         worker.setDaemon(true);
