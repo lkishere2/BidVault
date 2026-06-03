@@ -6,9 +6,9 @@ import { PasswordChangingBox } from './PasswordChangingBox';
 
 export const SettingBox = ({ user }: { user: UserResponse }) => {
     return (
-        <div className="mt-8">
-            <h2 className="text-xl font-bold mb-4">Security & Credentials</h2>
-            <div className="flex flex-col">
+        <div className="mt-10">
+            <h2 className="text-[20px] font-black tracking-tight mb-6 text-[#0D0D0D]">Security & Credentials</h2>
+            <div className="flex flex-col gap-5">
                 <ProfileImageChangingBox currentImage={user.profileImageUrl} />
                 <UsernameChangingBox currentUsername={user.username} />
                 <EmailChangingBox currentEmail={user.email} />

@@ -66,7 +66,7 @@ export default function HistoryItem({ item }: HistoryItemProps) {
 
             <div className="flex items-center gap-4 flex-shrink-0">
                 <div className="text-right">
-                    <p className={`text-[15px] font-bold ${isDeposit ? 'text-blue-600' : 'text-neutral-800'}`}>
+                    <p className={`text-[15px] font-black tracking-tight ${isDeposit ? 'text-[#0D0D0D]' : 'text-neutral-500'}`}>
                         {isDeposit ? '+' : '-'}{formattedAmount}
                     </p>
                 </div>

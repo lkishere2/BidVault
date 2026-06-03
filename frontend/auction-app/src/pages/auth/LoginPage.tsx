@@ -38,8 +38,20 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
     return (
         <main className="w-screen h-screen min-h-screen flex items-center justify-center bg-gray-50 overflow-hidden select-none relative">
-            {/* Đảm bảo component LoginBox của bạn nhận prop onSuccess để truyền lại thông tin user khi login đúng */}
-            <LoginBox onError={handleLoginError} onSuccess={handleLoginSuccessInternal} />
+            {/* Watermark Background */}
+            <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden z-0">
+                <div 
+                    className="text-[25vw] font-black opacity-10 select-none -rotate-6 whitespace-nowrap tracking-tighter"
+                    style={{ WebkitTextStroke: '6px #F5C518', color: 'transparent' }}
+                >
+                    BIDVAULT
+                </div>
+            </div>
+
+            {/* Content */}
+            <div className="z-10 w-full flex items-center justify-center">
+                <LoginBox onError={handleLoginError} onSuccess={handleLoginSuccessInternal} />
+            </div>
 
             {alert && (
                 <ErrorBox

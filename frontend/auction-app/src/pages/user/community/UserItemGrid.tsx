@@ -5,15 +5,16 @@ import UserItem from './UserItem';
 interface UserItemGridProps {
     users: UserResponse[];
     onUserClick: (userId: number) => void;
+    isGridView?: boolean;
 }
 
-export const UserItemGrid: React.FC<UserItemGridProps> = ({ users, onUserClick }) => {
+export const UserItemGrid: React.FC<UserItemGridProps> = ({ users, onUserClick, isGridView = false }) => {
     if (users.length === 0) {
-        return <p style={{ color: '#6b7280', fontSize: '14px' }}>No users found.</p>;
+        return <p className="text-neutral-500 text-[14px]">No users found.</p>;
     }
 
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px', width: '100%' }}>
+        <div className={`grid gap-4 w-full ${isGridView ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
             {users.map((user) => (
                 <UserItem
                     key={user.id}

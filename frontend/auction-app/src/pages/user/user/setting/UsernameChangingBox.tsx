@@ -22,20 +22,23 @@ export const UsernameChangingBox = ({ currentUsername }: { currentUsername: stri
 
     return (
         <>
-            <form onSubmit={handleSubmit} className="p-4 border border-[#E8E8E8] rounded-lg mb-4 bg-white">
-                <h3 className="font-semibold mb-2 text-[#0D0D0D]">Change Username</h3>
-                <div className="flex gap-2">
+            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row sm:items-center justify-between p-5 border border-neutral-200 rounded-xl bg-neutral-50 gap-4 transition-colors hover:bg-neutral-100/50">
+                <div className="flex flex-col">
+                    <h3 className="text-[15px] font-bold text-[#0D0D0D]">Username</h3>
+                    <p className="text-[13px] font-medium text-neutral-500">How you appear to other users.</p>
+                </div>
+                <div className="flex gap-3 w-full sm:w-auto">
                     <input
                         type="text"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        className="flex-1 border border-neutral-200 rounded px-3 py-2 outline-none focus:border-[#F5C518] text-[#0D0D0D]"
+                        className="flex-1 sm:w-64 border border-neutral-300 rounded-lg px-4 py-2 text-[14px] font-semibold text-[#0D0D0D] outline-none focus:border-[#0D0D0D] focus:ring-1 focus:ring-[#0D0D0D] transition-all bg-white shadow-sm"
                         required
                     />
                     <button
                         type="submit"
                         disabled={loading}
-                        className="px-4 py-2 rounded text-white disabled:opacity-50 bg-[#0D0D0D] hover:opacity-85 transition-opacity"
+                        className="px-6 py-2 rounded-lg text-[13px] font-bold text-white disabled:opacity-50 bg-[#0D0D0D] hover:bg-neutral-800 transition-colors shadow-md whitespace-nowrap"
                     >
                         {loading ? 'Saving...' : 'Update'}
                     </button>

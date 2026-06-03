@@ -1,47 +1,22 @@
 import React from 'react';
 
 export const UserAuctionGridLoading: React.FC = () => {
-    const skeletonStyle: React.CSSProperties = {
-        background: '#e5e7eb',
-        borderRadius: '4px',
-        animation: 'pulse 1.5s infinite ease-in-out'
-    };
-
     return (
-        <>
-            <style>{`
-                @keyframes pulse {
-                    0%, 100% { opacity: 1; }
-                    50% { opacity: 0.4; }
-                }
-            `}</style>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '24px' }}>
-                {Array.from({ length: 4 }).map((_, index) => (
-                    <div
-                        key={index}
-                        style={{
-                            border: '1px solid #e5e7eb',
-                            borderRadius: '8px',
-                            padding: '16px',
-                            background: '#ffffff',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '12px'
-                        }}
-                    >
-                        <div style={{ ...skeletonStyle, width: '100%', height: '160px', borderRadius: '6px' }} />
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <div style={{ ...skeletonStyle, width: '75%', height: '18px' }} />
-                            <div style={{ ...skeletonStyle, width: '55%', height: '16px' }} />
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: '4px' }}>
-                            <div style={{ ...skeletonStyle, width: '68px', height: '22px', borderRadius: '4px' }} />
-                            <div style={{ ...skeletonStyle, width: '48px', height: '14px' }} />
-                        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            {Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="bg-white border border-neutral-200 rounded-xl p-4 flex flex-col gap-3 animate-pulse">
+                    <div className="w-full h-40 bg-neutral-200 rounded-lg" />
+                    <div className="flex flex-col gap-2">
+                        <div className="h-5 bg-neutral-200 rounded w-3/4" />
+                        <div className="h-4 bg-neutral-100 rounded w-1/2" />
                     </div>
-                ))}
-            </div>
-        </>
+                    <div className="flex justify-between items-center mt-2">
+                        <div className="h-6 bg-neutral-200 rounded w-16" />
+                        <div className="h-4 bg-neutral-100 rounded w-12" />
+                    </div>
+                </div>
+            ))}
+        </div>
     );
 };
 

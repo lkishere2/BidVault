@@ -1,7 +1,6 @@
 package com.auction.app.domains.auction.bids;
 
 import java.security.Principal;
-import java.util.List;
 
 import com.auction.app.domains.auction.auction.AuctionService;
 import com.auction.app.domains.auction.bids.dtos.BidRequest;
@@ -37,11 +36,11 @@ public class BidController {
 
     @MessageMapping("/auction/{auctionId}/bid")
     public void placeBid(
-        @DestinationVariable Long auctionId, 
-        @Valid @Payload BidRequest request,
-        Principal principal) {
+            @DestinationVariable Long auctionId,
+            @Valid @Payload BidRequest request,
+            Principal principal) {
         User bidder = userRepository.findByEmail(principal.getName())
-                        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         bidService.placeBid(auctionId, request, bidder);
     }
 

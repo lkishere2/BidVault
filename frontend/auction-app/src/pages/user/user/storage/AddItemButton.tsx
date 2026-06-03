@@ -8,25 +8,9 @@ export const AddItemButton: React.FC<AddItemButtonProps> = ({ onClick }) => {
     return (
         <button
             onClick={onClick}
-            style={{
-                background: '#F5C518',
-                color: '#0D0D0D',
-                border: 'none',
-                borderRadius: '8px',
-                padding: '10px 20px',
-                fontSize: '14px',
-                fontWeight: '700',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                transition: 'background-color 0.2s',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.background = '#D4A900'}
-            onMouseLeave={(e) => e.currentTarget.style.background = '#F5C518'}
+            className="flex items-center gap-2 bg-[#F5C518] text-[#0D0D0D] border-0 rounded-xl px-5 py-2.5 text-[14px] font-bold cursor-pointer transition-all duration-200 hover:bg-[#e0b416] hover:-translate-y-0.5 shadow-md hover:shadow-lg"
         >
-            <span style={{ fontSize: '18px', lineHeight: '1' }}>+</span>
+            <span className="text-[18px] leading-none font-black">+</span>
             Add Item
         </button>
     );

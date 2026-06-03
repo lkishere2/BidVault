@@ -7,7 +7,9 @@ interface AuctionItemProps {
 
 export default function AuctionItem({ auction, onClick }: AuctionItemProps) {
     const { productName, productImageUrl, currentPrice, startingPrice, productTags, status } = auction;
-    const priceDisplay = currentPrice && parseFloat(currentPrice) > 0 ? currentPrice : startingPrice;
+    const parsedCurrent = parseFloat(currentPrice?.toString() || '0');
+    const parsedStart = parseFloat(startingPrice?.toString() || '0');
+    const finalPrice = parsedCurrent > 0 && !isNaN(parsedCurrent) ? parsedCurrent : (!isNaN(parsedStart) ? parsedStart : 0);
 
     return (
         <div
@@ -51,18 +53,18 @@ export default function AuctionItem({ auction, onClick }: AuctionItemProps) {
             </div>
 
             <div className="p-4 pt-2">
-                <div className="border-t border-neutral-100 pt-3 flex items-end justify-between">
+                <div className="border-t border-neutral-100 pt-3 flex flex-col gap-3">
                     <div>
                         <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-0.5">
-                            {currentPrice && parseFloat(currentPrice) > 0 ? 'Current Bid' : 'Starting Price'}
+                            {parsedCurrent > 0 ? 'Current Bid' : 'Starting Price'}
                         </p>
                         <p className="text-[18px] font-black text-[#0D0D0D]">
-                            ${parseFloat(priceDisplay || '0').toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            ${finalPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                     </div>
 
-                    <div className="text-right">
-                        <span className="inline-block px-3 py-1.5 bg-[#0D0D0D] text-white text-[12px] font-bold rounded-lg group-hover:bg-[#F5C518] group-hover:text-[#0D0D0D] transition-colors">
+                    <div className="w-full">
+                        <span className="block text-center w-full py-2 bg-[#0D0D0D] text-white text-[13px] font-bold rounded-xl group-hover:bg-[#F5C518] group-hover:text-[#0D0D0D] transition-colors">
                             Bid Now
                         </span>
                     </div>

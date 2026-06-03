@@ -35,7 +35,7 @@ export default function FeedItem({ event, isNew }: FeedItemProps) {
                     <span className="text-[10px]">{formatTime(event.placedAt)}</span>
                 </div>
             </div>
-            <div className="text-[14px] font-black text-[#0D0D0D]">
+            <div className={`text-[14px] font-black ${isNew ? 'text-[#F5C518]' : 'text-[#0D0D0D]'}`}>
                 {formatPrice(event.amount)}
             </div>
         </div>

@@ -50,14 +50,16 @@ export const UserAuctionGrid: React.FC<UserAuctionGridProps> = ({ userId, isMe =
     }, [userId, isMe]);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '32px' }}>
-            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '600', color: '#1f2937' }}>Auctions</h3>
+        <div className="flex flex-col gap-6 mt-10">
+            <h3 className="text-[20px] font-black text-[#0D0D0D] tracking-tight">Auctions</h3>
             {isLoading ? (
                 <UserAuctionGridLoading />
             ) : auctions.length === 0 ? (
-                <p style={{ color: '#6b7280', fontSize: '14px', margin: 0 }}>No auctions posted yet.</p>
+                <div className="bg-neutral-50 rounded-2xl p-10 text-center border border-neutral-100">
+                    <p className="text-neutral-500 text-[14px] font-bold">No auctions posted yet.</p>
+                </div>
             ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '24px' }}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                     {auctions.map((auction) => (
                         <UserAuctionItem
                             key={auction.id}

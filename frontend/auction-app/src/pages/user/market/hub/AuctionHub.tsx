@@ -3,9 +3,9 @@ import { Gavel, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { AuctionResponse, AuctionFindingRequest } from '../../../../types/auction';
 import type { Page } from '../../../../types/pagination';
 import auctionApi from '../../../../api/auctionApi';
+import { useNavigate } from 'react-router-dom';
 import AuctionItem from './AuctionItem';
 import AuctionItemSkeleton from './AuctionItemSkeleton';
-import BidSection from '../bid/BidSection';
 
 const PAGE_SIZE = 12;
 
@@ -18,7 +18,7 @@ export default function AuctionHub({ filters }: AuctionHubProps) {
     const [pageNo, setPageNo] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [selected, setSelected] = useState<AuctionResponse | null>(null);
+    const navigate = useNavigate();
 
     const fetchAuctions = useCallback(async (targetPageNo: number) => {
         setLoading(true);
@@ -97,7 +97,7 @@ export default function AuctionHub({ filters }: AuctionHubProps) {
                 {loading
                     ? Array.from({ length: PAGE_SIZE }).map((_, i) => <AuctionItemSkeleton key={i} />)
                     : page?.items.map(auction => (
-                        <AuctionItem key={auction.id} auction={auction} onClick={setSelected} />
+                        <AuctionItem key={auction.id} auction={auction} onClick={(auction) => navigate(`/auctions/hub/${auction.id}`)} />
                     ))
                 }
             </div>
@@ -140,8 +140,6 @@ export default function AuctionHub({ filters }: AuctionHubProps) {
                     </button>
                 </div>
             )}
-
-            {selected && <BidSection auction={selected} onClose={() => setSelected(null)} />}
         </>
     );
 }
