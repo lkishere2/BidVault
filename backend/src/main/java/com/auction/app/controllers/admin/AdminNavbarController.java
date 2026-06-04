@@ -24,23 +24,27 @@ public class AdminNavbarController {
     @FXML private Parent navTransactions;
     @FXML private Parent navAuctions;
     @FXML private Parent navUsers;
+    @FXML private Parent navFeedback;
     @FXML private Parent navBack;
 
     @FXML private NavbarItemController navTransactionsController;
     @FXML private NavbarItemController navAuctionsController;
     @FXML private NavbarItemController navUsersController;
+    @FXML private NavbarItemController navFeedbackController;
     @FXML private NavbarItemController navBackController;
 
     @FXML
     public void initialize() {
         if (navTransactionsController != null) navTransactionsController.setItemText("Transactions");
-        if (navAuctionsController != null) navAuctionsController.setItemText("Auctions");
-        if (navUsersController != null) navUsersController.setItemText("Users");
+        if (navAuctionsController != null) navAuctionsController.setItemText("Auction View");
+        if (navUsersController != null) navUsersController.setItemText("User Control");
+        if (navFeedbackController != null) navFeedbackController.setItemText("Feedback");
         if (navBackController != null) navBackController.setItemText("Back to Dashboard");
 
         if (navTransactions != null) navTransactions.setOnMouseClicked(e -> handlePanelSwap("Transactions"));
         if (navAuctions != null) navAuctions.setOnMouseClicked(e -> handlePanelSwap("Auctions"));
         if (navUsers != null) navUsers.setOnMouseClicked(e -> handlePanelSwap("Users"));
+        if (navFeedback != null) navFeedback.setOnMouseClicked(e -> handlePanelSwap("Feedback"));
 
         if (navBack != null) {
             navBack.setOnMouseClicked(e -> mainController.navigateTo("/ui/views/home/HomeView.fxml"));
@@ -53,9 +57,11 @@ public class AdminNavbarController {
         if ("Transactions".equals(panelName)) {
             fxmlPath = "/ui/views/admin/transaction/TransactionView.fxml";
         } else if ("Auctions".equals(panelName)) {
-            fxmlPath = "/ui/views/admin/AdminAuctionView.fxml";
+            fxmlPath = "/ui/views/admin/auction/AuctionView.fxml";
         } else if ("Users".equals(panelName)) {
-            fxmlPath = "/ui/views/admin/AdminUserView.fxml";
+            fxmlPath = "/ui/views/admin/user/UserControlView.fxml";
+        } else if ("Feedback".equals(panelName)) {
+            fxmlPath = "/ui/views/admin/feedback/FeedbackView.fxml";
         }
 
         if (fxmlPath != null) {

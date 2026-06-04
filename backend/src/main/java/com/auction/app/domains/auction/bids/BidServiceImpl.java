@@ -300,20 +300,9 @@ public class BidServiceImpl implements BidService {
     @Scheduled(fixedRate = 2000)
     @Transactional
     public void drainDeadBids() {
-        try {
-            List<Auction> activeAuctions = auctionRepository.findAll().stream()
-                    .filter(a -> a.getStatus() == AuctionStatus.ACTIVE)
-                    .toList();
-
-            for (Auction auction : activeAuctions) {
-                int deletedCount = bidRepository.deleteDeadBids(auction.getId(), auction.getCurrentPrice());
-                if (deletedCount > 0) {
-                    log.info("[Dead Bid Drainer] Auction #{} — deleted {} dead bids at price ${}",
-                            auction.getId(), deletedCount, auction.getCurrentPrice());
-                }
-            }
-        } catch (Exception e) {
-            log.error("[Dead Bid Drainer] Error draining dead bids", e);
-        }
+        // Bid rows are the audit/history source for the live feed and price curve.
+        // Invalid or outbid records are marked REFUNDED during processing, but they
+        // must stay in the database while the auction exists so the UI can rebuild
+        // the complete bid history after reopening the market popup.
     }
 }

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.auction.app.controllers.admin.feedback.FeedbackViewController"
+      spacing="18" style="-fx-background-color: #0D0D0D;">
+    <padding><Insets top="26" right="26" bottom="26" left="26"/></padding>
+    <HBox alignment="CENTER_LEFT" spacing="14">
+        <VBox spacing="5" HBox.hgrow="ALWAYS">
+            <Label text="Feedback" style="-fx-text-fill: #FFFFFF; -fx-font-size: 22px; -fx-font-weight: bold;"/>
+            <Label text="Read user messages and send admin responses." style="-fx-text-fill: #94A3B8; -fx-font-size: 12px;"/>
+        </VBox>
+        <Label fx:id="totalLabel" text="0 feedback" style="-fx-text-fill: #F5C518; -fx-font-weight: bold;"/>
+        <Button text="Refresh" onAction="#handleRefresh"/>
+    </HBox>
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
+        <VBox fx:id="feedbackList" spacing="12" style="-fx-padding: 0 16 16 0;"/>
+    </ScrollPane>
+    <HBox alignment="CENTER" spacing="12">
+        <Button fx:id="prevButton" text="Previous" onAction="#handlePrevPage"/>
+        <Label fx:id="pageLabel" text="Page 1 of 1" style="-fx-text-fill: #E2E8F0;"/>
+        <Button fx:id="nextButton" text="Next" onAction="#handleNextPage"/>
+    </HBox>
+</VBox>

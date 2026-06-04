@@ -70,6 +70,7 @@ public class BidInfoPanelController {
     private Instant         endTime;
     private Timeline        countdownTimeline;
     private BigDecimal      minNextBid;
+    private Runnable        afterBidPlaced;
 
     public void initialize(AuctionResponse auction, AuctionStatus mode) {
         this.auction = auction;
@@ -88,9 +89,12 @@ public class BidInfoPanelController {
     }
 
     public void updateFromTicker(BidNotificationPayload ticker) {
+        if (ticker == null) return;
+        if (ticker.getCurrentPrice() == null || ticker.getMinNextBid() == null) return;
         currentPriceLabel.setText("$" + String.format("%.2f", ticker.getCurrentPrice()));
         minNextBid = ticker.getMinNextBid();
-        minNextBidLabel.setText("Min next bid: $" + String.format("%.2f", ticker.getMinNextBid()));
+        BigDecimal minIncrement = ticker.getMinNextBid().subtract(ticker.getCurrentPrice());
+        minNextBidLabel.setText("Min increment: $" + String.format("%.2f", minIncrement));
         bidCountLabel.setText(ticker.getBidCount() + " bids");
         endTime = ticker.getEndTime();
         topBidderNameLabel.setText(ticker.getBidderLabel() != null && !ticker.getBidderLabel().isBlank()
@@ -102,6 +106,31 @@ public class BidInfoPanelController {
                     "-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #FBBF24;"
             );
         }
+    }
+
+    public void updateFromSnapshot(AuctionResponse latestAuction) {
+        if (latestAuction == null) return;
+        this.auction = latestAuction;
+        this.endTime = latestAuction.getEndTime();
+
+        BigDecimal price = latestAuction.getCurrentPrice() != null
+                ? latestAuction.getCurrentPrice()
+                : latestAuction.getStartingPrice();
+        currentPriceLabel.setText("$" + String.format("%.2f", price != null ? price : BigDecimal.ZERO));
+
+        if (latestAuction.getCurrentPrice() != null && latestAuction.getMinBidIncrement() != null) {
+            minNextBid = latestAuction.getCurrentPrice().add(latestAuction.getMinBidIncrement());
+            minNextBidLabel.setText("Min increment: $" + String.format("%.2f", latestAuction.getMinBidIncrement()));
+        }
+        bidCountLabel.setText((latestAuction.getBidCount() != null ? latestAuction.getBidCount() : 0) + " bids");
+        topBidderNameLabel.setText(latestAuction.getWinnerLabel() != null && !latestAuction.getWinnerLabel().isBlank()
+                ? latestAuction.getWinnerLabel()
+                : "Waiting for first bid");
+        loadTopBidderAvatar(latestAuction.getWinnerId(), latestAuction.getWinnerLabel());
+    }
+
+    public void setAfterBidPlaced(Runnable afterBidPlaced) {
+        this.afterBidPlaced = afterBidPlaced;
     }
 
     public void updateFromBidEvent(BidFeedEvent event) {
@@ -161,6 +190,9 @@ public class BidInfoPanelController {
                     bidAmountField.clear();
                     placeBidButton.setDisable(false);
                     placeBidButton.setText("BID");
+                    if (afterBidPlaced != null) {
+                        afterBidPlaced.run();
+                    }
                 });
             } catch (Exception e) {
                 javafx.application.Platform.runLater(() -> {
@@ -185,7 +217,8 @@ public class BidInfoPanelController {
         currentPriceLabel.setText("$" + String.format("%.2f", price != null ? price : BigDecimal.ZERO));
 
         if (minNextBid.compareTo(BigDecimal.ZERO) > 0) {
-            minNextBidLabel.setText("Min next bid: $" + String.format("%.2f", minNextBid));
+            minNextBidLabel.setText("Min increment: $" + String.format("%.2f",
+                    auction.getMinBidIncrement() != null ? auction.getMinBidIncrement() : BigDecimal.ZERO));
         }
         bidCountLabel.setText((auction.getBidCount() != null ? auction.getBidCount() : 0) + " bids");
         topBidderNameLabel.setText(auction.getWinnerLabel() != null && !auction.getWinnerLabel().isBlank()
@@ -247,7 +280,7 @@ public class BidInfoPanelController {
                 statusBadge.setText("LIVE");
                 statusBadge.setStyle("-fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 4 10 4 10; " +
                         "-fx-background-radius: 20px; -fx-background-color: #1A3A2A; -fx-text-fill: #4ADE80;");
-                priceCaptionLabel.setText("CURRENT PRICE");
+                priceCaptionLabel.setText("CURRENT BID");
                 bidFormBox.setVisible(true);
                 bidFormBox.setManaged(true);
             }
