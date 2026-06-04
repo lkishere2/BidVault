@@ -47,7 +47,9 @@ export default function BidPage() {
                 setAuction(res.data);
                 // Also fetch initial bids
                 bidApi.getBidHistory(Number(auction_id), 0, 50).then(bRes => {
-                    const history = bRes.data.content.map((b: BidResponse) => ({
+                    const data = bRes.data as any;
+                    const content = Array.isArray(data) ? data : (data?.content || []);
+                    const history = content.map((b: BidResponse) => ({
                         bidId: b.bidId,
                         auctionId: b.auctionId,
                         bidderId: (b as any).bidderId ?? 0,
@@ -55,7 +57,15 @@ export default function BidPage() {
                         amount: b.amount,
                         placedAt: b.placedAt
                     }));
-                    setBids(history);
+                    setBids(prev => {
+                        const newBids = [...prev];
+                        history.forEach(hBid => {
+                            if (!newBids.some(b => b.bidId === hBid.bidId || (`${b.bidderLabel}-${b.amount}-${b.placedAt}`) === `${hBid.bidderLabel}-${hBid.amount}-${hBid.placedAt}`)) {
+                                newBids.push(hBid);
+                            }
+                        });
+                        return newBids.sort((a, b) => new Date(b.placedAt).getTime() - new Date(a.placedAt).getTime());
+                    });
                 }).catch(err => console.error('Failed to fetch initial bid history:', err));
             })
             .catch(err => {
