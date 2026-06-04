@@ -4,44 +4,94 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
-<HBox alignment="CENTER_LEFT" spacing="15.0" style="-fx-background-color: #1E293B; -fx-background-radius: 8px; -fx-border-color: #334155; -fx-border-width: 1px; -fx-border-radius: 8px;" prefWidth="750.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.app.controllers.admin.transaction.ClientRequestItemController">
-    <padding>
-        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
-    </padding>
-    <VBox spacing="4.0" HBox.hgrow="ALWAYS">
-        <HBox spacing="10.0" alignment="CENTER_LEFT">
-            <Label fx:id="usernameLabel" text="Username" textFill="#F8FAFC">
-                <font>
-                    <Font name="System Bold" size="14.0" />
-                </font>
-            </Label>
-            <Label fx:id="typeBadgeLabel" text="TYPE" />
-            <Label fx:id="statusBadgeLabel" text="PENDING" />
+<HBox alignment="CENTER_LEFT" spacing="0" prefWidth="780.0"
+      style="-fx-background-color: #111111;
+             -fx-background-radius: 12;
+             -fx-border-color: rgba(255,255,255,0.07);
+             -fx-border-radius: 12; -fx-border-width: 0.5;
+             -fx-cursor: hand;"
+      xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.auction.app.controllers.admin.transaction.ClientRequestItemController">
+
+    <!-- Left type bar — gold for DEPOSIT, red for WITHDRAW -->
+    <VBox fx:id="typeBarIndicator" prefWidth="4" prefHeight="80"
+          style="-fx-background-color: #F5C518;
+                 -fx-background-radius: 12 0 0 12;"/>
+
+    <HBox alignment="CENTER_LEFT" spacing="14" HBox.hgrow="ALWAYS">
+        <padding>
+            <Insets top="16" right="18" bottom="16" left="16"/>
+        </padding>
+
+        <!-- Info block -->
+        <VBox spacing="5" HBox.hgrow="ALWAYS">
+
+            <!-- Top row: username + type badge + status badge -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+
+                <!-- Username — floats highest, strongest glow -->
+                <Label fx:id="usernameLabel" text="Username"
+                       style="-fx-text-fill: #FFFFFF;
+                              -fx-font-size: 14px; -fx-font-weight: bold;"/>
+
+                <!-- Type badge — mid float -->
+                <Label fx:id="typeBadgeLabel" text="TYPE"
+                       style="-fx-font-size: 10px; -fx-font-weight: bold;
+                              -fx-background-color: rgba(245,197,24,0.12);
+                              -fx-text-fill: #F5C518;
+                              -fx-padding: 3 9; -fx-background-radius: 20;
+                              -fx-border-color: rgba(245,197,24,0.28);
+                              -fx-border-radius: 20; -fx-border-width: 0.5;"/>
+
+                <!-- Status badge — mid float, color set by controller -->
+                <Label fx:id="statusBadgeLabel" text="PENDING"
+                       style="-fx-font-size: 10px; -fx-font-weight: bold;
+                              -fx-background-color: rgba(245,197,24,0.10);
+                              -fx-text-fill: #F5C518;
+                              -fx-padding: 3 9; -fx-background-radius: 20;
+                              -fx-border-color: rgba(245,197,24,0.25);
+                              -fx-border-radius: 20; -fx-border-width: 0.5;"/>
+            </HBox>
+
+            <!-- Email — mid depth -->
+            <Label fx:id="emailLabel" text="user@email.com"
+                   style="-fx-text-fill: rgba(255,255,255,0.38);
+                          -fx-font-size: 12px;"/>
+
+            <!-- Date — recessed deepest, carved into surface -->
+            <Label fx:id="dateLabel" text="2026-05-31 19:07:00"
+                   style="-fx-text-fill: rgba(255,255,255,0.18);
+                          -fx-font-size: 10px;"/>
+        </VBox>
+
+        <!-- Amount — floats highest, gold glow -->
+        <Label fx:id="amountLabel" text="0.00"
+               style="-fx-text-fill: #F5C518;
+                      -fx-font-size: 22px; -fx-font-weight: bold;
+                      -fx-padding: 0 20 0 0;"/>
+
+        <!-- Action buttons -->
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <Button fx:id="acceptButton" text="Accept" onAction="#handleAccept"
+                    style="-fx-background-color: #00D68F;
+                           -fx-text-fill: #0D0D0D;
+                           -fx-font-size: 12px; -fx-font-weight: bold;
+                           -fx-background-radius: 7; -fx-cursor: hand;
+                           -fx-padding: 9 18;"/>
+            <Button fx:id="denyButton" text="Deny" onAction="#handleDeny"
+                    style="-fx-background-color: transparent;
+                           -fx-text-fill: #FF4D4D;
+                           -fx-font-size: 12px; -fx-font-weight: bold;
+                           -fx-background-radius: 7; -fx-cursor: hand;
+                           -fx-border-color: rgba(255,77,77,0.35);
+                           -fx-border-radius: 7; -fx-border-width: 1;
+                           -fx-padding: 9 18;"/>
         </HBox>
-        <Label fx:id="emailLabel" text="user@email.com" textFill="#94A3B8" />
-        <Label fx:id="dateLabel" text="2026-05-31 19:07:00" textFill="#64748B" style="-fx-font-size: 11px;" />
-    </VBox>
-    <Label fx:id="amountLabel" text="\$0.00" textFill="#38BDF8">
-        <font>
-            <Font name="System Bold" size="18.0" />
-        </font>
-        <HBox.margin>
-            <Insets right="20.0" />
-        </HBox.margin>
-    </Label>
-    <HBox spacing="10.0" alignment="CENTER_RIGHT">
-        <Button fx:id="acceptButton" text="Accept" onAction="#handleAccept" style="-fx-background-color: #10B981; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6px; -fx-cursor: hand;">
-            <padding>
-                <Insets bottom="8.0" left="16.0" right="16.0" top="8.0" />
-            </padding>
-        </Button>
-        <Button fx:id="denyButton" text="Deny" onAction="#handleDeny" style="-fx-background-color: #F43F5E; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6px; -fx-cursor: hand;">
-            <padding>
-                <Insets bottom="8.0" left="16.0" right="16.0" top="8.0" />
-            </padding>
-        </Button>
+
     </HBox>
 </HBox>
