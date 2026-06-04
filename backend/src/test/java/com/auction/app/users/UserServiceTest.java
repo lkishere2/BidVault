@@ -148,7 +148,7 @@ class UserServiceTest {
         when(passwordEncoder.encode("newPassword")).thenReturn("encodedNewPassword");
 
         userService.updatePassword(request);
-        averify(userRepository).updatePassword(1L, "encodedNewPassword");
+        verify(userRepository).updatePassword(1L, "encodedNewPassword");
     }
 
     @Test
