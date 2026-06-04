@@ -50,10 +50,6 @@ public class SecurityConfig {
                                 "api/v1/users/top",
                                 "/api/v1/users/top"
                         ).permitAll()
-                        .requestMatchers(
-                                "/api/v1/auctions/top"
-                                ,"/api/v1/users/top"
-                        ).permitAll()
                         .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()

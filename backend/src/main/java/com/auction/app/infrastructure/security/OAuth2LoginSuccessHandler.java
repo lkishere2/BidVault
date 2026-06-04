@@ -30,10 +30,9 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
     @Override
     public void onAuthenticationSuccess(
-        @NonNull HttpServletRequest request,
-        @NonNull HttpServletResponse response,
-        Authentication authentication
-    ) throws IOException {
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            Authentication authentication) throws IOException {
         OAuth2User googleUser = (OAuth2User) authentication.getPrincipal();
         String email = googleUser.getAttribute("email");
         String name = googleUser.getAttribute("name");
@@ -55,8 +54,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         String targetUrl = String.format(
                 callbackUrl,
                 accessToken,
-                refreshToken
-        );
+                refreshToken);
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 }
