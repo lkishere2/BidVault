@@ -19,6 +19,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -28,6 +29,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @DataJpaTest
+@ContextConfiguration(classes = com.auction.app.TestApplication.class)
 @AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
 public class AuctionRepositoryTest {
 
@@ -228,12 +230,12 @@ public class AuctionRepositoryTest {
 
         // 2. Test filtering by Tags matching requirements
         Page<Long> resultsWithMatchingTag = auctionRepository.findAuctionIds(
-                null, new String[]{"ELECTRONICS"}, true, null, null, null, null, pageable
+                null, List.of("ELECTRONICS"), true, null, null, null, null, pageable
         );
         assertThat(resultsWithMatchingTag.getContent()).hasSize(1);
 
         Page<Long> resultsWithUnmatchedTag = auctionRepository.findAuctionIds(
-                null, new String[]{"BOOKS"}, true, null, null, null, null, pageable
+                null, List.of("ART"), true, null, null, null, null, pageable
         );
         assertThat(resultsWithUnmatchedTag.getContent()).isEmpty();
 

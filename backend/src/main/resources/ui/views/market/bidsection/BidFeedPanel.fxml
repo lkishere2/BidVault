@@ -2,6 +2,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
 
 <!-- fx:controller omitted deliberately.
      Controller is supplied via FXMLLoader.setController(applicationContext.getBean(...))
@@ -34,5 +36,28 @@
            alignment="CENTER" maxWidth="Infinity"
            managed="false" visible="false"
            style="-fx-text-fill: #4B5563; -fx-font-size: 14px; -fx-padding: 40 0 0 0;"/>
+
+    <VBox spacing="8"
+          style="-fx-padding: 12 24 20 24;
+                 -fx-border-color: #1E2433;
+                 -fx-border-width: 1 0 0 0;">
+        <Label text="PRICE CURVE"
+               style="-fx-font-size: 11px; -fx-font-weight: bold;
+                      -fx-text-fill: #9CA3AF; -fx-letter-spacing: 2px;"/>
+        <LineChart fx:id="bidPriceChart"
+                   prefHeight="170"
+                   animated="false"
+                   createSymbols="false"
+                   verticalGridLinesVisible="false"
+                   horizontalGridLinesVisible="true"
+                   style="-fx-background-color: transparent;">
+            <xAxis>
+                <NumberAxis fx:id="chartXAxis" tickLabelFill="#6B7280"/>
+            </xAxis>
+            <yAxis>
+                <NumberAxis fx:id="chartYAxis" tickLabelFill="#6B7280"/>
+            </yAxis>
+        </LineChart>
+    </VBox>
 
 </VBox>

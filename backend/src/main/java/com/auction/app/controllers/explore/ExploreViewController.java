@@ -31,6 +31,7 @@ public class ExploreViewController {
 
             UserSearchBarController controller = loader.getController();
             controller.setExploreController(this);
+            controller.loadInitialUsers();
 
             exploreContentArea.getChildren().setAll(searchPane);
         } catch (IOException e) {

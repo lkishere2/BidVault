@@ -1,7 +1,8 @@
 package com.auction.app.controllers.explore;
 
-import com.auction.app.domains.users.users.UserController;
+import com.auction.app.domains.users.users.UserRepository;
 import com.auction.app.domains.users.users.dtos.UserResponse;
+import com.auction.app.domains.users.users.model.User;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -13,7 +14,7 @@ import javafx.scene.layout.VBox;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -22,7 +23,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class UserSearchBarController {
 
-    private final UserController userController;
+    private final UserRepository userRepository;
     private final ApplicationContext springContext;
     private ExploreViewController exploreController;
 
@@ -35,8 +36,18 @@ public class UserSearchBarController {
     private int currentPage = 0;
     private final int pageSize = 10;
 
+    @FXML
+    public void initialize() {
+        searchField.setOnAction(event -> handleSearch());
+    }
+
     public void setExploreController(ExploreViewController exploreController) {
         this.exploreController = exploreController;
+    }
+
+    public void loadInitialUsers() {
+        currentPage = 0;
+        executeSearchQuery();
     }
 
     @FXML
@@ -61,23 +72,30 @@ public class UserSearchBarController {
 
     private void executeSearchQuery() {
         String query = searchField.getText().trim();
-        if (query.isEmpty()) return;
+        resultsContainer.getChildren().setAll(createStatusLabel("Loading community..."));
+        prevButton.setDisable(true);
+        nextButton.setDisable(true);
 
-        new Thread(() -> {
+        Thread searchThread = new Thread(() -> {
             try {
-                ResponseEntity<Page<UserResponse>> response = userController.searchUsersByUsername(query, currentPage, pageSize);
-                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                    Page<UserResponse> pageData = response.getBody();
-                    Platform.runLater(() -> populateResults(pageData));
-                }
+                Page<UserResponse> pageData = userRepository.searchByUsername(query, PageRequest.of(currentPage, pageSize))
+                        .map(this::toSearchResult);
+                Platform.runLater(() -> populateResults(pageData));
             } catch (Exception e) {
                 e.printStackTrace();
+                Platform.runLater(() -> resultsContainer.getChildren().setAll(createStatusLabel("Could not load users.")));
             }
-        }).start();
+        });
+        searchThread.setDaemon(true);
+        searchThread.start();
     }
 
     private void populateResults(Page<UserResponse> pageData) {
         resultsContainer.getChildren().clear();
+
+        if (pageData.getContent().isEmpty()) {
+            resultsContainer.getChildren().add(createStatusLabel("No users found."));
+        }
 
         for (UserResponse user : pageData.getContent()) {
             try {
@@ -97,5 +115,21 @@ public class UserSearchBarController {
         pageLabel.setText(String.format("Page %d of %d", currentPage + 1, Math.max(1, pageData.getTotalPages())));
         prevButton.setDisable(!pageData.hasPrevious());
         nextButton.setDisable(!pageData.hasNext());
+    }
+
+    private UserResponse toSearchResult(User user) {
+        return UserResponse.builder()
+                .id(user.getId())
+                .username(user.getDisplayName())
+                .email(user.getEmail())
+                .profileImageUrl(user.getProfileImageUrl())
+                .role(user.getRole() != null ? user.getRole().name() : "USER")
+                .build();
+    }
+
+    private Label createStatusLabel(String text) {
+        Label label = new Label(text);
+        label.setStyle("-fx-text-fill: #94A3B8; -fx-font-size: 14;");
+        return label;
     }
 }

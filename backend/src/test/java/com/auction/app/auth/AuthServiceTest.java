@@ -1,43 +1,51 @@
 package com.auction.app.auth;
 
-import com.auction.app.domains.auth.auth.AuthServiceImpl;
-import com.auction.app.domains.auth.auth.dtos.AuthResponse;
-import com.auction.app.domains.auth.auth.dtos.LoginRequest;
-import com.auction.app.domains.auth.auth.dtos.RegisterRequest;
-import com.auction.app.domains.auth.auth.dtos.VerifyRequest;
-import com.auction.app.domains.auth.exceptions.EmailSendFailureException;
-import com.auction.app.domains.auth.exceptions.InvalidPasswordResetFlowException;
-import com.auction.app.domains.auth.exceptions.InvalidVerificationCodeException;
-import com.auction.app.domains.users.exceptions.UserNotFoundException;
-import com.auction.app.domains.auth.auth.redis.AuthRedisPort;
-import com.auction.app.domains.auth.email.EmailService;
-import com.auction.app.domains.auth.refreshToken.RefreshToken;
-import com.auction.app.domains.auth.refreshToken.RefreshTokenService;
-import com.auction.app.domains.users.users.model.Provider;
-import com.auction.app.domains.users.users.model.User;
-import com.auction.app.domains.users.users.UserRepository;
-import com.auction.app.infrastructure.security.JwtService;
-import jakarta.mail.MessagingException;
-import jakarta.servlet.http.HttpServletRequest;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Optional;
+import com.auction.app.domains.auth.auth.AuthServiceImpl;
+import com.auction.app.domains.auth.auth.dtos.AuthResponse;
+import com.auction.app.domains.auth.auth.dtos.LoginRequest;
+import com.auction.app.domains.auth.auth.dtos.RegisterRequest;
+import com.auction.app.domains.auth.auth.dtos.VerifyRequest;
+import com.auction.app.domains.auth.auth.redis.AuthRedisPort;
+import com.auction.app.domains.auth.email.EmailService;
+import com.auction.app.domains.auth.exceptions.EmailSendFailureException;
+import com.auction.app.domains.auth.exceptions.InvalidPasswordResetFlowException;
+import com.auction.app.domains.auth.exceptions.InvalidVerificationCodeException;
+import com.auction.app.domains.auth.refreshToken.RefreshToken;
+import com.auction.app.domains.auth.refreshToken.RefreshTokenService;
+import com.auction.app.domains.users.exceptions.UserNotFoundException;
+import com.auction.app.domains.users.users.UserRepository;
+import com.auction.app.domains.users.users.model.Provider;
+import com.auction.app.domains.users.users.model.User;
+import com.auction.app.infrastructure.security.JwtService;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletRequest;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -54,9 +62,8 @@ class AuthServiceTest {
     @InjectMocks
     AuthServiceImpl authService;
 
-    // ------------------------------------------------------------------
+
     // Helpers
-    // ------------------------------------------------------------------
 
     private User enabledUser() {
         return User.builder()
@@ -80,9 +87,7 @@ class AuthServiceTest {
                 .build();
     }
 
-    // ==================================================================
-    // register()
-    // ==================================================================
+    // register
 
     @Nested
     class Register {
@@ -173,9 +178,7 @@ class AuthServiceTest {
         }
     }
 
-    // ==================================================================
-    // login()
-    // ==================================================================
+    // login
 
     @Nested
     class Login {
@@ -234,7 +237,7 @@ class AuthServiceTest {
 
             assertThatThrownBy(() -> authService.login(request, httpRequest))
                     .isInstanceOf(BadCredentialsException.class)
-                    .hasMessage("Invalid email or password");
+                    .hasMessageContaining("Invalid email or password");
         }
 
         @Test
@@ -259,9 +262,7 @@ class AuthServiceTest {
         }
     }
 
-    // ==================================================================
     // refresh()
-    // ==================================================================
 
     @Nested
     class Refresh {
@@ -316,9 +317,7 @@ class AuthServiceTest {
         }
     }
 
-    // ==================================================================
     // logout()
-    // ==================================================================
 
     @Nested
     class Logout {

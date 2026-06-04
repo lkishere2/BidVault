@@ -2,12 +2,16 @@ package com.auction.app.controllers.market.bidsection;
 
 import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
 import com.auction.app.domains.auction.auction.model.AuctionStatus;
+import com.auction.app.domains.auction.bids.dtos.BidFeedEvent;
 import com.auction.app.domains.auction.bids.dtos.BidNotificationPayload;
 import com.auction.app.domains.auction.bids.BidService;
 import com.auction.app.domains.auction.bids.dtos.BidRequest;
+import com.auction.app.domains.users.users.UserRepository;
+import com.auction.app.domains.users.users.model.User;
 import com.auction.app.infrastructure.security.SecurityUtils;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -25,6 +29,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
@@ -46,6 +52,8 @@ public class BidInfoPanelController {
     @FXML private Label     currentPriceLabel;
     @FXML private Label     minNextBidLabel;
     @FXML private Label     bidCountLabel;
+    @FXML private ImageView topBidderAvatar;
+    @FXML private Label     topBidderNameLabel;
     @FXML private Label     countdownLabel;
     @FXML private Label     winnerLabel;
     @FXML private VBox      bidFormBox;
@@ -55,6 +63,7 @@ public class BidInfoPanelController {
 
     private final BidService bidService;
     private final SecurityUtils securityUtils;
+    private final UserRepository userRepository;
 
     private AuctionResponse auction;
     private AuctionStatus   mode;
@@ -84,12 +93,26 @@ public class BidInfoPanelController {
         minNextBidLabel.setText("Min next bid: $" + String.format("%.2f", ticker.getMinNextBid()));
         bidCountLabel.setText(ticker.getBidCount() + " bids");
         endTime = ticker.getEndTime();
+        topBidderNameLabel.setText(ticker.getBidderLabel() != null && !ticker.getBidderLabel().isBlank()
+                ? ticker.getBidderLabel()
+                : "Waiting for first bid");
 
         if (ticker.isExtended()) {
             countdownLabel.setStyle(
                     "-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #FBBF24;"
             );
         }
+    }
+
+    public void updateFromBidEvent(BidFeedEvent event) {
+        if (event == null) return;
+        if (event.getAmount() != null) {
+            currentPriceLabel.setText("$" + String.format("%.2f", event.getAmount()));
+        }
+        if (event.getBidderLabel() != null && !event.getBidderLabel().isBlank()) {
+            topBidderNameLabel.setText(event.getBidderLabel());
+        }
+        loadTopBidderAvatar(event.getBidderId(), event.getBidderLabel());
     }
 
     public void switchToEndedMode(BidNotificationPayload ticker) {
@@ -165,6 +188,10 @@ public class BidInfoPanelController {
             minNextBidLabel.setText("Min next bid: $" + String.format("%.2f", minNextBid));
         }
         bidCountLabel.setText((auction.getBidCount() != null ? auction.getBidCount() : 0) + " bids");
+        topBidderNameLabel.setText(auction.getWinnerLabel() != null && !auction.getWinnerLabel().isBlank()
+                ? auction.getWinnerLabel()
+                : "Waiting for first bid");
+        loadTopBidderAvatar(auction.getWinnerId(), auction.getWinnerLabel());
 
         String imgUrl = auction.getProductImageUrl();
         if (imgUrl != null && !imgUrl.isBlank()) {
@@ -174,6 +201,34 @@ public class BidInfoPanelController {
                 log.warn("Could not load product image: {}", imgUrl);
             }
         }
+    }
+
+    private void loadTopBidderAvatar(Long bidderId, String bidderLabel) {
+        if (bidderId == null) {
+            setDefaultTopBidderAvatar(bidderLabel);
+            return;
+        }
+
+        Thread worker = new Thread(() -> {
+            String imageUrl = userRepository.findById(bidderId)
+                    .map(User::getProfileImageUrl)
+                    .orElse(null);
+            Platform.runLater(() -> {
+                if (imageUrl != null && !imageUrl.isBlank()) {
+                    topBidderAvatar.setImage(new Image(imageUrl, true));
+                } else {
+                    setDefaultTopBidderAvatar(bidderLabel);
+                }
+            });
+        });
+        worker.setDaemon(true);
+        worker.start();
+    }
+
+    private void setDefaultTopBidderAvatar(String seed) {
+        String safeSeed = seed != null && !seed.isBlank() ? seed : "top-bidder";
+        String encodedSeed = URLEncoder.encode(safeSeed, StandardCharsets.UTF_8);
+        topBidderAvatar.setImage(new Image("https://api.dicebear.com/7.x/initials/png?seed=" + encodedSeed, true));
     }
 
     private void applyMode(AuctionStatus status) {

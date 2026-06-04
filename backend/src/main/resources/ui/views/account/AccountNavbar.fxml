@@ -35,6 +35,7 @@
         <fx:include fx:id="navProfile"   source="../../components/NavItem.fxml"/>
         <fx:include fx:id="navBalance"   source="../../components/NavItem.fxml"/>
         <fx:include fx:id="navInventory" source="../../components/NavItem.fxml"/>
+        <fx:include fx:id="navNotifications" source="../../components/NavItem.fxml"/>
         <fx:include fx:id="navSettings"  source="../../components/NavItem.fxml"/>
     </VBox>
 

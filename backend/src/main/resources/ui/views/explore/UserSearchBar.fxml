@@ -9,7 +9,7 @@
       fx:controller="com.auction.app.controllers.explore.UserSearchBarController"
       spacing="24" alignment="TOP_CENTER" style="-fx-background-color: transparent;">
 
-    <Label text="Explore Users" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #FFFFFF;"/>
+    <Label text="Community" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #FFFFFF;"/>
 
     <HBox spacing="12" alignment="CENTER">
         <TextField fx:id="searchField" promptText="Search users by handle nickname..."

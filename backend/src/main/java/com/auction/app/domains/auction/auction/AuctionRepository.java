@@ -34,7 +34,7 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
                         +
                         "AND (:hasTags = false OR EXISTS ( " +
                         "    SELECT 1 FROM product_tags pt " +
-                        "    WHERE pt.product_id = p.id AND pt.tag_name = ANY(CAST(:tags AS text[]))" +
+                        "    WHERE pt.product_id = p.id AND pt.tag_name IN (:tags)" +
                         ")) " +
                         "AND (CAST(:minStartingPrice AS NUMERIC) IS NULL OR a.starting_price >= :minStartingPrice) " +
                         "AND (CAST(:startTime AS TIMESTAMP) IS NULL OR a.start_time >= :startTime) " +
@@ -51,7 +51,7 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
                                         +
                                         "AND (:hasTags = false OR EXISTS ( " +
                                         "    SELECT 1 FROM product_tags pt " +
-                                        "    WHERE pt.product_id = p.id AND pt.tag_name = ANY(CAST(:tags AS text[]))" +
+                                        "    WHERE pt.product_id = p.id AND pt.tag_name IN (:tags)" +
                                         ")) " +
                                         "AND (CAST(:minStartingPrice AS NUMERIC) IS NULL OR a.starting_price >= :minStartingPrice) "
                                         +
@@ -59,7 +59,7 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
                                         "AND (CAST(:endTime AS TIMESTAMP) IS NULL OR a.end_time <= :endTime)", nativeQuery = true)
         Page<Long> findAuctionIds(
                         @Param("productName") String productName,
-                        @Param("tags") String[] tags,
+                        @Param("tags") List<String> tags,
                         @Param("hasTags") boolean hasTags,
                         @Param("startTime") Instant startTime,
                         @Param("endTime") Instant endTime,

@@ -53,6 +53,17 @@
                    style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #E2E8F0;"/>
         </HBox>
 
+        <HBox spacing="10" alignment="CENTER_LEFT"
+              style="-fx-background-color: #141A27; -fx-background-radius: 10px; -fx-padding: 10 12 10 12;">
+            <ImageView fx:id="topBidderAvatar" fitWidth="34" fitHeight="34" preserveRatio="false"/>
+            <VBox spacing="2">
+                <Label text="TOP BIDDER"
+                       style="-fx-font-size: 9px; -fx-font-weight: bold; -fx-text-fill: #6B7280; -fx-letter-spacing: 1.5px;"/>
+                <Label fx:id="topBidderNameLabel" text="Waiting for first bid"
+                       style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #E2E8F0;"/>
+            </VBox>
+        </HBox>
+
         <Label fx:id="winnerLabel" text="" wrapText="true" managed="false" visible="false"
                style="-fx-font-size: 13px; -fx-text-fill: #FBBF24; -fx-font-weight: bold;
                       -fx-background-color: #1C1700; -fx-background-radius: 8px;
