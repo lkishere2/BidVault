@@ -38,6 +38,7 @@
         <fx:include fx:id="navTransactions" source="../../components/NavItem.fxml"/>
         <fx:include fx:id="navAuctions"     source="../../components/NavItem.fxml"/>
         <fx:include fx:id="navUsers"        source="../../components/NavItem.fxml"/>
+        <fx:include fx:id="navFeedback"     source="../../components/NavItem.fxml"/>
     </VBox>
 
     <Region VBox.vgrow="ALWAYS"/>

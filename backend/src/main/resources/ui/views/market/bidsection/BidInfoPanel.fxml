@@ -34,7 +34,7 @@
         <Separator style="-fx-background-color: #1E2433;"/>
 
         <VBox spacing="4">
-            <Label fx:id="priceCaptionLabel" text="CURRENT PRICE"
+            <Label fx:id="priceCaptionLabel" text="CURRENT BID"
                    style="-fx-font-size: 10px; -fx-font-weight: bold;
                           -fx-text-fill: #6B7280; -fx-letter-spacing: 1.5px;"/>
             <Label fx:id="currentPriceLabel" text=""

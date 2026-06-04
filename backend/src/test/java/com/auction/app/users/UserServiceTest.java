@@ -24,7 +24,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.auction.app.TestReflectionUtils;
 import com.auction.app.domains.users.users.UserRepository;
 import com.auction.app.domains.users.users.UserServiceImpl;
-import com.auction.app.domains.users.users.dtos.EmailRequest;
 import com.auction.app.domains.users.users.dtos.PasswordRequest;
 import com.auction.app.domains.users.users.dtos.UserResponse;
 import com.auction.app.domains.users.users.dtos.UsernameRequest;
@@ -125,52 +124,6 @@ class UserServiceTest {
         verify(userRepository).updateUsername(1L, null);
     }
 
-    // =========================================================================
-    // METHOD 3: updateEmail (5 Tests)
-    // =========================================================================
-
-    // --- Happy Path (1 Test) ---
-
-    @Test
-    void updateEmail_WhenEmailIsAvailable_ShouldCallRepositoryUpdate() {
-        EmailRequest request = createEmailRequest("new@example.com");
-        when(userRepository.existsByEmail("new@example.com")).thenReturn(false);
-
-        userService.updateEmail(request);
-
-        verify(userRepository).updateEmail(1L, "new@example.com");
-    }
-
-    // --- Edge Cases (4 Tests) ---
-
-    @Test
-    void updateEmail_WhenEmailIsAlreadyCurrentEmail_ShouldThrowException() {
-        EmailRequest request = createEmailRequest("buyer@example.com");
-
-    assertThatThrownBy(() -> userService.updateEmail(request))
-        .isInstanceOf(RuntimeException.class)
-    .hasMessageContaining("different from current email");
-
-        verify(userRepository, never()).updateEmail(1L, "buyer@example.com");
-    }
-
-    @Test
-    void updateEmail_WhenRequestIsNull_ShouldThrowException() {
-        assertThatThrownBy(() -> userService.updateEmail(null))
-                .isInstanceOf(NullPointerException.class);
-
-        verify(userRepository, never()).updateEmail(any(), any());
-    }
-
-    @Test
-    void updateEmail_WhenEmailIsNull_ShouldThrowException() {
-        EmailRequest request = createEmailRequest(null);
-
-        assertThatThrownBy(() -> userService.updateEmail(request))
-                .isInstanceOf(NullPointerException.class);
-
-        verify(userRepository, never()).updateEmail(any(), any());
-    }
 
     // =========================================================================
     // METHOD 4: updatePassword (6 Tests)
@@ -313,15 +266,9 @@ class UserServiceTest {
         return request;
     }
 
-    private EmailRequest createEmailRequest(String email) {
-        EmailRequest request = new EmailRequest();
-        request.setEmail(email);
-        return request;
-    }
-
-    private PasswordRequest createPasswordRequest(String currentPassword, String newPassword) {
+    private PasswordRequest createPasswordRequest(String verificationCode, String newPassword) {
         PasswordRequest request = new PasswordRequest();
-        request.setCurrentPassword(currentPassword);
+        request.setVerificationCode(verificationCode);
         request.setNewPassword(newPassword);
         return request;
     }

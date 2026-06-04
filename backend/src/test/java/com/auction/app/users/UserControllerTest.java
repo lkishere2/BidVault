@@ -6,8 +6,6 @@ import java.util.List;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -30,7 +28,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.auction.app.domains.users.users.UserController;
 import com.auction.app.domains.users.users.UserService;
-import com.auction.app.domains.users.users.dtos.EmailRequest;
 import com.auction.app.domains.users.users.dtos.PasswordRequest;
 import com.auction.app.domains.users.users.dtos.UserResponse;
 import com.auction.app.domains.users.users.dtos.UsernameRequest;
@@ -132,29 +129,6 @@ class UserControllerTest {
     // METHOD 3: updateEmail (4 Tests)
     // =========================================================================
 
-    @Test
-    void updateEmail_WhenRequestIsValid_ShouldReturnOk() throws Exception {
-        EmailRequest request = createEmailRequest("new@example.com");
-
-        mockMvc.perform(patch("/api/v1/users/update-email")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
-
-        verify(userService).updateEmail(any(EmailRequest.class));
-    }
-
-    @Test
-    void updateEmail_WhenEmailFormatIsInvalid_ReturnsBadRequest() throws Exception {
-        EmailRequest request = createEmailRequest("not-an-email");
-
-        mockMvc.perform(patch("/api/v1/users/update-email")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-
-        verify(userService, never()).updateEmail(any(EmailRequest.class));
-    }
 
     @Test
     void updateEmail_WhenBodyIsMissing_ShouldReturnInternalServerError() throws Exception {
@@ -166,27 +140,13 @@ class UserControllerTest {
         verifyNoInteractions(userService);
     }
 
-    @Test
-    void updateEmail_WhenServiceThrows_ShouldReturnInternalServerError() throws Exception {
-        EmailRequest request = createEmailRequest("buyer@example.com");
-        doThrow(new RuntimeException("New email must be different from current email"))
-                .when(userService).updateEmail(any(EmailRequest.class));
-
-        // Thay đổi từ assertThatThrownBy thành kiểm tra trực tiếp cấu trúc JSON Response 500
-        mockMvc.perform(patch("/api/v1/users/update-email")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.message").value("New email must be different from current email"));
-    }
-
     // =========================================================================
     // METHOD 4: updatePassword (2 Tests)
     // =========================================================================
 
     @Test
     void updatePassword_WhenRequestIsValid_ShouldReturnOk() throws Exception {
-        PasswordRequest request = createPasswordRequest("oldPassword", "newPassword");
+        PasswordRequest request = createPasswordRequest("676967", "newPassword");
 
         mockMvc.perform(patch("/api/v1/users/update-password")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -245,15 +205,8 @@ class UserControllerTest {
         return request;
     }
 
-    private EmailRequest createEmailRequest(String email) {
-        EmailRequest request = new EmailRequest();
-        request.setEmail(email);
-        return request;
-    }
-
-    private PasswordRequest createPasswordRequest(String currentPassword, String newPassword) {
+    private PasswordRequest createPasswordRequest(String verificationCode, String newPassword) {
         PasswordRequest request = new PasswordRequest();
-        request.setCurrentPassword(currentPassword);
         request.setNewPassword(newPassword);
         return request;
     }

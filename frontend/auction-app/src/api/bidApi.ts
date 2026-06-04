@@ -14,3 +14,5 @@ export const bidApi = {
     }
 };
 export default bidApi;
+
+// /api/v1/... , ws : ws:// /ws/app

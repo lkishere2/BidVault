@@ -1,5 +1,6 @@
 package com.auction.app.controllers.market.bidsection;
 
+import com.auction.app.domains.auction.auction.AuctionController;
 import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
 import com.auction.app.domains.auction.auction.model.AuctionStatus;
 import com.auction.app.domains.auction.bids.dtos.BidFeedEvent;
@@ -11,6 +12,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import jakarta.websocket.ContainerProvider;
+import jakarta.websocket.WebSocketContainer;
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -18,18 +22,21 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
-import org.springframework.messaging.simp.stomp.*;
+import org.springframework.messaging.simp.stomp.StompFrameHandler;
+import org.springframework.messaging.simp.stomp.StompHeaders;
+import org.springframework.messaging.simp.stomp.StompSession;
+import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
-import jakarta.websocket.ContainerProvider;
-import jakarta.websocket.WebSocketContainer;
 import java.lang.reflect.Type;
 
 @Component
@@ -38,80 +45,110 @@ import java.lang.reflect.Type;
 public class BidSectionController {
 
     private final ApplicationContext applicationContext;
+    private final AuctionController auctionController;
 
     public void open(AuctionResponse auction, AuctionStatus mode, Stage owner) {
         try {
-            // --- Root frame ---
+            AuctionResponse latestAuction = fetchLatestAuction(auction);
+            AuctionStatus latestMode = latestAuction.getStatus() != null ? latestAuction.getStatus() : mode;
+
             FXMLLoader mainLoader = new FXMLLoader(getClass().getResource(
                     "/ui/views/market/bidsection/BidSectionView.fxml"));
             mainLoader.setControllerFactory(applicationContext::getBean);
             HBox root = mainLoader.load();
             BidSectionViewController rootController = mainLoader.getController();
 
-            // --- BidInfoPanel ---
-            BidInfoPanelController bidInfoPanel =
-                    applicationContext.getBean(BidInfoPanelController.class);
+            BidInfoPanelController bidInfoPanel = applicationContext.getBean(BidInfoPanelController.class);
             FXMLLoader infoLoader = new FXMLLoader(getClass().getResource(
                     "/ui/views/market/bidsection/BidInfoPanel.fxml"));
             infoLoader.setController(bidInfoPanel);
             VBox infoPanelNode = infoLoader.load();
 
-            // --- BidFeedPanel ---
-            BidFeedPanelController bidFeedPanel =
-                    applicationContext.getBean(BidFeedPanelController.class);
+            BidFeedPanelController bidFeedPanel = applicationContext.getBean(BidFeedPanelController.class);
             FXMLLoader feedLoader = new FXMLLoader(getClass().getResource(
                     "/ui/views/market/bidsection/BidFeedPanel.fxml"));
             feedLoader.setController(bidFeedPanel);
             VBox feedPanelNode = feedLoader.load();
 
-            // --- Wire panels into frame ---
             rootController.getBidInfoPanelContainer().getChildren().setAll(infoPanelNode);
             rootController.getBidFeedPanelContainer().getChildren().setAll(feedPanelNode);
 
-            // --- Initialize controllers ---
-            bidInfoPanel.initialize(auction, mode);
-            bidFeedPanel.initialize(auction, mode);
+            bidInfoPanel.initialize(latestAuction, latestMode);
+            bidFeedPanel.initialize(latestAuction, latestMode);
+            bidInfoPanel.setAfterBidPlaced(() -> schedulePostBidRefresh(
+                    latestAuction.getId(),
+                    bidInfoPanel,
+                    bidFeedPanel
+            ));
 
-            // --- Build and show stage ---
             StompSessionHolder sessionHolder = new StompSessionHolder();
             Stage stage = new Stage();
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initOwner(owner);
-            stage.setTitle(auction.getProductName() + " — Auction #" + auction.getId());
+            stage.setTitle(latestAuction.getProductName() + " - Auction #" + latestAuction.getId());
             stage.setScene(new Scene(root));
-            stage.setOnHidden(e -> disconnect(sessionHolder, auction.getId()));
+            stage.setOnHidden(e -> disconnect(sessionHolder, latestAuction.getId()));
 
-            if (mode == AuctionStatus.ACTIVE) {
-                connectStomp(auction.getId(), bidInfoPanel, bidFeedPanel, sessionHolder);
+            if (latestMode == AuctionStatus.ACTIVE) {
+                connectStomp(latestAuction.getId(), bidInfoPanel, bidFeedPanel, sessionHolder);
             }
 
             stage.show();
-
         } catch (Exception e) {
             log.error("Failed to build out real-time view structure: {}", e.getMessage(), e);
         }
     }
 
-    // ------------------------------------------------------------------
-    // STOMP
-    // ------------------------------------------------------------------
+    private AuctionResponse fetchLatestAuction(AuctionResponse fallback) {
+        try {
+            ResponseEntity<AuctionResponse> response = auctionController.getAuction(fallback.getId());
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                return response.getBody();
+            }
+        } catch (Exception e) {
+            log.warn("Could not refresh auction #{} before opening bid popup: {}", fallback.getId(), e.getMessage());
+        }
+        return fallback;
+    }
 
-    /**
-     * Mirrors the ObjectMapper config from RedisConfig / AuctionSubscriber exactly.
-     *
-     * The server's Redis serializer uses activateDefaultTyping which wraps every
-     * published object with a @class property:
-     *
-     *   { "@class": "...BidNotificationPayload", "currentPrice": 1300.00, ... }
-     *
-     * The default MappingJackson2MessageConverter uses a plain ObjectMapper with no
-     * type info and no JavaTimeModule — it chokes on @class and produces an object
-     * where every field is null. updateFromTicker() then silently no-ops because
-     * String.format("%.2f", null) throws an NPE that the STOMP handler swallows.
-     *
-     * This converter reads the @class envelope, handles Instant (endTime, placedAt),
-     * and parses BigDecimal price fields without floating-point precision loss.
-     */
+    private void schedulePostBidRefresh(Long auctionId,
+                                        BidInfoPanelController bidInfoPanel,
+                                        BidFeedPanelController bidFeedPanel) {
+        refreshSnapshot(auctionId, bidInfoPanel, bidFeedPanel);
+        scheduleDelayedRefresh(auctionId, bidInfoPanel, bidFeedPanel, 250);
+        scheduleDelayedRefresh(auctionId, bidInfoPanel, bidFeedPanel, 800);
+    }
+
+    private void scheduleDelayedRefresh(Long auctionId,
+                                        BidInfoPanelController bidInfoPanel,
+                                        BidFeedPanelController bidFeedPanel,
+                                        double millis) {
+        PauseTransition delay = new PauseTransition(Duration.millis(millis));
+        delay.setOnFinished(event -> refreshSnapshot(auctionId, bidInfoPanel, bidFeedPanel));
+        delay.play();
+    }
+
+    private void refreshSnapshot(Long auctionId,
+                                 BidInfoPanelController bidInfoPanel,
+                                 BidFeedPanelController bidFeedPanel) {
+        Thread worker = new Thread(() -> {
+            try {
+                ResponseEntity<AuctionResponse> response = auctionController.getAuction(auctionId);
+                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                    AuctionResponse latest = response.getBody();
+                    Platform.runLater(() -> {
+                        bidInfoPanel.updateFromSnapshot(latest);
+                        bidFeedPanel.refreshHistory(latest);
+                    });
+                }
+            } catch (Exception e) {
+                log.warn("Could not refresh auction #{} after bid: {}", auctionId, e.getMessage());
+            }
+        });
+        worker.setDaemon(true);
+        worker.start();
+    }
+
     private static MappingJackson2MessageConverter buildStompConverter() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
@@ -124,6 +161,7 @@ public class BidSectionController {
                 ObjectMapper.DefaultTyping.NON_FINAL,
                 JsonTypeInfo.As.PROPERTY
         );
+
         MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
         converter.setObjectMapper(mapper);
         return converter;
@@ -143,14 +181,12 @@ public class BidSectionController {
         sessionHolder.stompClient = stompClient;
 
         stompClient.connectAsync("ws://localhost:8000/ws", new StompSessionHandlerAdapter() {
-
             @Override
             public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
                 sessionHolder.stompSession = session;
                 log.info("STOMP connected for auction #{}", auctionId);
                 Platform.runLater(() -> bidFeedPanel.setConnectionStatus(true));
 
-                // Ticker: price / bid-count / end-time updates
                 session.subscribe("/topic/auction/" + auctionId, new StompFrameHandler() {
                     @Override
                     public Type getPayloadType(StompHeaders headers) {
@@ -170,7 +206,6 @@ public class BidSectionController {
                     }
                 });
 
-                // Live bid feed events
                 session.subscribe("/topic/auction/" + auctionId + "/bids", new StompFrameHandler() {
                     @Override
                     public Type getPayloadType(StompHeaders headers) {
@@ -210,6 +245,6 @@ public class BidSectionController {
 
     private static class StompSessionHolder {
         WebSocketStompClient stompClient;
-        StompSession         stompSession;
+        StompSession stompSession;
     }
 }
