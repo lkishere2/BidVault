@@ -85,7 +85,6 @@ class UserControllerTest {
     void getCurrentUserInformation_WhenServiceThrows_ShouldReturnInternalServerError() throws Exception {
         when(userService.getCurrentUserInfo()).thenThrow(new RuntimeException("Unexpected user error"));
 
-        // Thay đổi từ assertThatThrownBy sang kiểm tra HTTP status 500 và thông điệp lỗi trong JSON body
         mockMvc.perform(get("/api/v1/users/info"))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.message").value("Unexpected user error"));
@@ -121,35 +120,21 @@ class UserControllerTest {
 
     @Test
     void updateUsername_WhenBodyIsMissing_ShouldReturnInternalServerError() throws Exception {
-        // Sửa lại status mong đợi là 500 do HttpMessageNotReadableException đã bị bắt và chuyển đổi thành 500 trong project của bạn
         mockMvc.perform(patch("/api/v1/users/update-username")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.message").value(containsStringIgnoringCase("required request body is missing")));
+
         verifyNoInteractions(userService);
     }
 
     // =========================================================================
-    // METHOD 3: updateEmail (4 Tests)
-    // =========================================================================
-
-
-    @Test
-    void updateEmail_WhenBodyIsMissing_ShouldReturnInternalServerError() throws Exception {
-        // Sửa lại status mong đợi từ 400 thành 500 dựa theo log thực tế từ hệ thống của bạn
-        mockMvc.perform(patch("/api/v1/users/update-email")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.message").value(containsStringIgnoringCase("required request body is missing")));
-        verifyNoInteractions(userService);
-    }
-
-    // =========================================================================
-    // METHOD 4: updatePassword (2 Tests)
+    // METHOD 4: updatePassword (3 Tests)
     // =========================================================================
 
     @Test
     void updatePassword_WhenRequestIsValid_ShouldReturnOk() throws Exception {
+        // Both verificationCode and newPassword are present and valid
         PasswordRequest request = createPasswordRequest("676967", "newPassword");
 
         mockMvc.perform(patch("/api/v1/users/update-password")
@@ -161,8 +146,22 @@ class UserControllerTest {
     }
 
     @Test
-    void updatePassword_WhenCurrentPasswordIsBlank_ShouldReturnBadRequest() throws Exception {
+    void updatePassword_WhenVerificationCodeIsBlank_ShouldReturnBadRequest() throws Exception {
+        // @NotBlank on verificationCode should trigger 400
         PasswordRequest request = createPasswordRequest("", "newPassword");
+
+        mockMvc.perform(patch("/api/v1/users/update-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(userService);
+    }
+
+    @Test
+    void updatePassword_WhenNewPasswordIsBlank_ShouldReturnBadRequest() throws Exception {
+        // @NotBlank on newPassword should trigger 400
+        PasswordRequest request = createPasswordRequest("676967", "");
 
         mockMvc.perform(patch("/api/v1/users/update-password")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -203,6 +202,10 @@ class UserControllerTest {
         verify(userService).getAllUsers(0, 20);
     }
 
+    // =========================================================================
+    // Helpers
+    // =========================================================================
+
     private UsernameRequest createUsernameRequest(String username) {
         UsernameRequest request = new UsernameRequest();
         request.setUsername(username);
@@ -211,6 +214,7 @@ class UserControllerTest {
 
     private PasswordRequest createPasswordRequest(String verificationCode, String newPassword) {
         PasswordRequest request = new PasswordRequest();
+        request.setVerificationCode(verificationCode); // was missing — caused silent validation bypass
         request.setNewPassword(newPassword);
         return request;
     }

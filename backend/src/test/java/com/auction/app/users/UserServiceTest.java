@@ -10,19 +10,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.auction.app.TestReflectionUtils;
 import com.auction.app.domains.auth.auth.AuthService;
+import com.auction.app.domains.auth.auth.dtos.VerifyRequest;
 import com.auction.app.domains.users.users.UserRepository;
 import com.auction.app.domains.users.users.UserServiceImpl;
 import com.auction.app.domains.users.users.dtos.PasswordRequest;
@@ -37,9 +38,6 @@ class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
-
-    @Mock
-    private PasswordEncoder passwordEncoder;
 
     @Mock
     private AuthService authService;
@@ -66,15 +64,12 @@ class UserServiceTest {
 
     @AfterEach
     void tearDown() {
-        // reset mock stubs
-        // no-op: Mockito will reset between tests automatically when using @ExtendWith(MockitoExtension.class)
+        // no-op: Mockito resets between tests automatically with @ExtendWith(MockitoExtension.class)
     }
 
     // =========================================================================
-    // METHOD 1: getCurrentUserInfo (3 Tests)
+    // METHOD 1: getCurrentUserInfo (1 Test)
     // =========================================================================
-
-    // --- Happy Path (1 Test) ---
 
     @Test
     void getCurrentUserInfo_WhenAuthenticated_ShouldReturnCurrentUserResponse() {
@@ -84,12 +79,9 @@ class UserServiceTest {
         assertThat(response.getBalance()).isEqualByComparingTo("150.00");
     }
 
-
     // =========================================================================
     // METHOD 2: updateUsername (4 Tests)
     // =========================================================================
-
-    // --- Happy Paths (2 Tests) ---
 
     @Test
     void updateUsername_WhenRequestIsValid_ShouldCallRepositoryUpdate() {
@@ -109,8 +101,6 @@ class UserServiceTest {
         verify(userRepository).updateUsername(1L, "");
     }
 
-    // --- Edge Cases (2 Tests) ---
-
     @Test
     void updateUsername_WhenRequestIsNull_ShouldThrowException() {
         assertThatThrownBy(() -> userService.updateUsername(null))
@@ -128,59 +118,45 @@ class UserServiceTest {
         verify(userRepository).updateUsername(1L, null);
     }
 
-
     // =========================================================================
-    // METHOD 4: updatePassword (6 Tests)
+    // METHOD 4: updatePassword (4 Tests)
     // =========================================================================
 
     // --- Happy Paths (2 Tests) ---
 
     @Test
-    void updatePassword_WhenRequestIsValid_ShouldEncodeAndPersistNewPassword() {
+    void updatePassword_WhenRequestIsValid_ShouldVerifyOtpThenResetPassword() {
         PasswordRequest request = createPasswordRequest("696969", "newPassword");
-        when(passwordEncoder.matches("oldPassword", "encodedOldPassword")).thenReturn(true);
-        when(passwordEncoder.encode("newPassword")).thenReturn("encodedNewPassword");
 
         userService.updatePassword(request);
 
-        verify(userRepository).updatePassword(1L, "encodedNewPassword");
+        verify(authService).verifyPasswordReset(any(VerifyRequest.class));
+        verify(authService).resetPassword("buyer@example.com", "newPassword");
     }
 
     @Test
-    void updatePassword_WhenNewPasswordHasBoundaryLength_ShouldEncodeAndPersistNewPassword() {
-        PasswordRequest request = createPasswordRequest("oldPassword", "123456");
-        when(passwordEncoder.matches("oldPassword", "encodedOldPassword")).thenReturn(true);
-        when(passwordEncoder.encode("123456")).thenReturn("encodedBoundaryPassword");
+    void updatePassword_WhenNewPasswordHasBoundaryLength_ShouldVerifyOtpThenResetPassword() {
+        PasswordRequest request = createPasswordRequest("696969", "123456");
 
         userService.updatePassword(request);
 
-        verify(userRepository).updatePassword(1L, "encodedBoundaryPassword");
+        verify(authService).verifyPasswordReset(any(VerifyRequest.class));
+        verify(authService).resetPassword("buyer@example.com", "123456");
     }
 
-    // --- Edge Cases (4 Tests) ---
+    // --- Edge Cases (2 Tests) ---
 
     @Test
-    void updatePassword_WhenCurrentPasswordIsIncorrect_ShouldThrowException() {
-        PasswordRequest request = createPasswordRequest("wrongPassword", "newPassword");
-        when(passwordEncoder.matches("wrongPassword", "encodedOldPassword")).thenReturn(false);
+    void updatePassword_WhenOtpVerificationFails_ShouldThrowExceptionAndNotResetPassword() {
+        PasswordRequest request = createPasswordRequest("wrongCode", "newPassword");
+        doThrow(new RuntimeException("Invalid or expired verification code"))
+                .when(authService).verifyPasswordReset(any(VerifyRequest.class));
 
-    assertThatThrownBy(() -> userService.updatePassword(request))
-        .isInstanceOf(RuntimeException.class)
-    .hasMessageContaining("Current password is incorrect");
+        assertThatThrownBy(() -> userService.updatePassword(request))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Invalid or expired verification code");
 
-        verify(userRepository, never()).updatePassword(any(), any());
-    }
-
-    @Test
-    void updatePassword_WhenNewPasswordMatchesCurrentPassword_ShouldThrowException() {
-        PasswordRequest request = createPasswordRequest("samePassword", "samePassword");
-        when(passwordEncoder.matches("samePassword", "encodedOldPassword")).thenReturn(true);
-
-    assertThatThrownBy(() -> userService.updatePassword(request))
-        .isInstanceOf(RuntimeException.class)
-    .hasMessageContaining("different from current password");
-
-        verify(userRepository, never()).updatePassword(any(), any());
+        verify(authService, never()).resetPassword(any(), any());
     }
 
     @Test
@@ -188,25 +164,13 @@ class UserServiceTest {
         assertThatThrownBy(() -> userService.updatePassword(null))
                 .isInstanceOf(NullPointerException.class);
 
-        verify(userRepository, never()).updatePassword(any(), any());
-    }
-
-    @Test
-    void updatePassword_WhenNewPasswordIsNull_CurrentServiceStillEncodesNullValue() {
-        PasswordRequest request = createPasswordRequest("oldPassword", null);
-        when(passwordEncoder.matches("oldPassword", "encodedOldPassword")).thenReturn(true);
-        when(passwordEncoder.encode(null)).thenReturn("encodedNullPassword");
-
-        userService.updatePassword(request);
-
-        verify(userRepository).updatePassword(1L, "encodedNullPassword");
+        verify(authService, never()).verifyPasswordReset(any());
+        verify(authService, never()).resetPassword(any(), any());
     }
 
     // =========================================================================
     // METHOD 5: getAllUsers (4 Tests)
     // =========================================================================
-
-    // --- Happy Paths (2 Tests) ---
 
     @Test
     void getAllUsers_WhenUsersExist_ShouldReturnMappedPage() {
@@ -229,8 +193,6 @@ class UserServiceTest {
         assertThat(response.getContent()).hasSize(1);
     }
 
-    // --- Edge Cases (2 Tests) ---
-
     @Test
     void getAllUsers_WhenPageIsNegative_ShouldThrowException() {
         assertThatThrownBy(() -> userService.getAllUsers(-1, 10))
@@ -248,10 +210,8 @@ class UserServiceTest {
     }
 
     // =========================================================================
-    // METHOD 6: disableUser (4 Tests)
+    // Helpers
     // =========================================================================
-
-    // --- Happy Path (1 Test) ---
 
     private User createUser(Long id, String username, String email, String password, Role role) {
         return User.builder()
