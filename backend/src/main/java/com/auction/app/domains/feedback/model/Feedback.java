@@ -27,6 +27,9 @@ public class Feedback {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    @Column(name = "admin_response", columnDefinition = "TEXT")
+    private String adminResponse;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();

@@ -1,7 +1,6 @@
 package com.auction.app.domains.feedback;
 
-import com.auction.app.domains.feedback.dtos.FeedbackRequest;
-import com.auction.app.domains.feedback.dtos.FeedbackResponse;
+import com.auction.app.domains.feedback.dtos.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +57,15 @@ public class FeedbackController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         Page<FeedbackResponse> response = feedbackService.getAllFeedback(page, size);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{id}/respond")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<FeedbackResponse> respondToFeedback(
+            @PathVariable Long id,
+            @RequestBody @Valid FeedbackAdminResponseRequest request) {
+        FeedbackResponse response = feedbackService.respondToFeedback(id, request);
         return ResponseEntity.ok(response);
     }
 }

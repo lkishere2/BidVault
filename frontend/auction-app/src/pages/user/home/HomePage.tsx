@@ -3,6 +3,7 @@ import GuideSection from './GuideSection';
 import PreviewSection from './PreviewSection';
 import UserSection from './UserSection';
 import CreatorSection from './CreatorSection';
+import MessageButton from './feedback/MessageButton';
 
 export default function HomePage() {
     return (
@@ -14,6 +15,7 @@ export default function HomePage() {
                 <UserSection />
                 <CreatorSection />
             </main>
+            <MessageButton />
         </div>
     );
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Outlet, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Header from './components/header/Header';
 import Footer from './components/footer/Footer';
 import HomePage from './pages/user/home/HomePage';
@@ -7,6 +7,7 @@ import AdminPage from './pages/admin/home/AdminPage';
 import AdminNavbar from './pages/admin/AdminNavbar';
 import TransactionPage from './pages/admin/transaction/TransactionPage';
 import { UserControlPage } from './pages/admin/user/UserControlPage';
+import FeedbackPage from './pages/admin/feedback/FeedbackPage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import VerifyPage from './pages/auth/VerifyPage';
@@ -31,9 +32,6 @@ import './App.css';
 import NotFoundPage from './pages/NotFoundPage';
 import AuthCallbackPage from './pages/auth/AuthCallbackPage';
 
-const MyBidsPage = () => <div className="p-4"><h1 className="text-xl font-bold">My Bids</h1></div>;
-const AdminUserControlPage = () => <div className="p-4"><h1 className="text-xl font-bold">User Control Panel</h1></div>;
-
 type UserData = { id?: string | number; username: string; initials: string; role?: string; profileImageUrl?: string };
 
 function RootLayout({
@@ -44,7 +42,22 @@ function RootLayout({
   onLogout: () => void;
 }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const isAuthPage = ['/login', '/register', '/forget-password', '/verify'].some(path => location.pathname.startsWith(path));
+
+  useEffect(() => {
+    // If logged out and not on home or auth page, redirect to home
+    if (!isLoggedIn) {
+      if (!isAuthPage && location.pathname !== '/' && location.pathname !== '/oauth2/callback') {
+        navigate('/', { replace: true });
+      }
+    } else {
+      // If logged in and trying to access an auth page, redirect back or to home
+      if (isAuthPage) {
+        navigate('/', { replace: true });
+      }
+    }
+  }, [isLoggedIn, isAuthPage, location.pathname, navigate]);
 
   return (
     <div className="flex flex-col min-h-screen bg-neutral-50/50">
@@ -123,7 +136,26 @@ function App() {
     }
   }, [user]);
 
-  const handleLoginSuccess = (userData: UserData) => setUser(userData);
+  const handleLoginSuccess = async () => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      try {
+        const response = await userApi.getInfo();
+        const { id, username, role, profileImageUrl, profile_image_url } = response.data as any;
+        const initials = username
+          .split(/[\s._-]+/)
+          .slice(0, 2)
+          .map((w: string) => w.toUpperCase())
+          .join('');
+        const rawProfile = profileImageUrl ?? profile_image_url;
+        setUser({ id, username, initials, role, profileImageUrl: rawProfile });
+      } catch (error) {
+        console.error(error);
+        setUser(null);
+      }
+    }
+  };
+
   const handleLogout = async () => {
     try {
       await authApi.logout();
@@ -182,6 +214,7 @@ function App() {
             <Route index element={<AdminPage />} />
             <Route path="user-control" element={<UserControlPage />} />
             <Route path="transaction-request" element={<TransactionPage />} />
+            <Route path="feedback" element={<FeedbackPage />} />
           </Route>
 
         </Route>

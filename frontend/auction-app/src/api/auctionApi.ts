@@ -21,7 +21,8 @@ export const auctionApi = {
                 return searchParams.toString();
             }
         }),
-    getMyAuctions: (pageNo: number = 0, size: number = 10) => api.get<Page<AuctionResponse>>(`/api/v1/auctions/me?pageNo=${pageNo}&size=${size}`),
-    getTopAuctions: () => api.get<AuctionResponse[]>('/api/v1/auctions/top'),
+    getMyAuctions: (pageNo: number = 0, size: number = 10) => api.get<Page<AuctionResponse>>(`/auctions/me?pageNo=${pageNo}&size=${size}`),
+    getAuctionsBySellerId: (sellerId: number, page: number = 0, size: number = 10) => api.get<Page<AuctionResponse>>(`/auctions/seller/${sellerId}?page=${page}&size=${size}`),
+    getTopAuctions: () => api.get<AuctionResponse[]>('/auctions/top'),
 };
 export default auctionApi;

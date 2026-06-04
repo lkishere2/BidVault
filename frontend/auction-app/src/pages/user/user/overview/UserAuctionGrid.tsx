@@ -23,16 +23,12 @@ export const UserAuctionGrid: React.FC<UserAuctionGridProps> = ({ userId, isMe =
             try {
                 const res = isMe
                     ? await auctionApi.getMyAuctions(0, 10)
-                    : await auctionApi.getDiscoverableAuctions({ status: 'ACTIVE' }, 0, 20);
+                    : await auctionApi.getAuctionsBySellerId(userId, 0, 20);
 
                 if (cancelled) return;
 
                 const data = res.data as unknown as { content?: AuctionResponse[] } | AuctionResponse[];
-                let rawList = Array.isArray(data) ? data : (data?.content ?? []);
-
-                if (!isMe) {
-                    rawList = rawList.filter(auction => auction.sellerId === userId);
-                }
+                const rawList = Array.isArray(data) ? data : (data?.content ?? []);
 
                 setAuctions(rawList);
             } catch (error) {

@@ -6,6 +6,7 @@ import java.util.List;
 
 public interface UserService {
     UserResponse getCurrentUserInfo();
+    UserResponse getUserById(Long id);
     Page<UserResponse> searchUsersByUsername(String username, int page, int size);
     void updateUsername(UsernameRequest usernameRequest);
     void updateEmail(EmailRequest emailRequest);

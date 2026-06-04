@@ -15,5 +15,6 @@ public class FeedbackResponse {
     private String username;
     private String email;
     private String content;
+    private String adminResponse;
     private LocalDateTime createdAt;
 }

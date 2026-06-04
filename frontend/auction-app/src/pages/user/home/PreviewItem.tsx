@@ -3,14 +3,15 @@ import { useNavigate } from 'react-router-dom';
 
 interface PreviewItemProps {
     item: AuctionLot;
+    onClick?: () => void;
 }
 
-export default function PreviewItem({ item }: PreviewItemProps) {
+export default function PreviewItem({ item, onClick }: PreviewItemProps) {
     const navigate = useNavigate();
 
     return (
         <div 
-            onClick={() => navigate(`/auctions/hub/${item.id}`)}
+            onClick={() => onClick ? onClick() : navigate(`/auctions/hub/${item.id}`)}
             className="group bg-white border border-neutral-200 rounded-xl overflow-hidden flex flex-col cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:border-[#F5C518]/50 hover:shadow-[0_8px_32px_rgba(0,0,0,0.10)]"
         >
             <div className="relative overflow-hidden">
