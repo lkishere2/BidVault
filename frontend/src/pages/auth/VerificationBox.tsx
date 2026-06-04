@@ -47,15 +47,7 @@ export default function VerificationBox({ email, onError }: VerificationBoxProps
 
     return (
         <Card
-            className="border border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.1)] px-[16px] rounded-[16px] flex-shrink-0 flex flex-col justify-between overflow-hidden bg-white"
-            style={{
-                width: '448px',
-                minWidth: '448px',
-                maxWidth: '448px',
-                height: '420px',
-                minHeight: '420px',
-                maxHeight: '420px'
-            }}
+            className="w-full max-w-[448px] sm:h-[420px] sm:min-h-[420px] sm:max-h-[420px] min-h-[420px] border border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.1)] px-[16px] rounded-[16px] flex-shrink-0 flex flex-col justify-between overflow-hidden bg-white mx-4 sm:mx-0"
         >
             <CardHeader className="text-center space-y-[12px] pt-[40px] pb-[10px]">
                 <CardTitle className="text-[26px] font-extrabold text-[#0D0D0D] tracking-tight">

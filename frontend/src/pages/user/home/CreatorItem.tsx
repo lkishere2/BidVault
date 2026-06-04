@@ -17,22 +17,20 @@ export default function CreatorItem({ creator, isActive, onClick }: CreatorItemP
                 className={`relative transition-all duration-700 ease-in-out ${isActive ? 'w-40 h-40 md:w-56 md:h-56' : 'w-24 h-24 md:w-32 md:h-32'}`}
             >
                 <div
-                    className="absolute inset-0 rounded-full transition-all duration-700 ease-in-out"
-                    style={{
-                        boxShadow: isActive
-                            ? '0 0 0 4px #F5C518, 0 16px 40px rgba(245,197,24,0.30)'
-                            : '0 0 0 1.5px rgba(0,0,0,0.12)',
-                        transform: isActive ? 'scale(1)' : 'scale(0.95)',
-                    }}
+                    className={`absolute inset-0 rounded-full transition-all duration-700 ease-in-out ${
+                        isActive
+                            ? 'shadow-[0_0_0_4px_#F5C518,0_16px_40px_rgba(245,197,24,0.30)] scale-100'
+                            : 'shadow-[0_0_0_1.5px_rgba(0,0,0,0.12)] scale-95 group-hover:shadow-[0_0_0_3px_#F5C518,0_8px_20px_rgba(245,197,24,0.20)] group-hover:scale-[1.02]'
+                    }`}
                 />
                 <img
                     src={creator.avatar}
                     alt={creator.name}
-                    className="w-full h-full rounded-full object-cover transition-all duration-700 ease-in-out"
-                    style={{
-                        filter: isActive ? 'none' : 'grayscale(20%) brightness(0.95)',
-                        transform: isActive ? 'scale(1.02)' : 'scale(1)',
-                    }}
+                    className={`w-full h-full rounded-full object-cover transition-all duration-700 ease-in-out ${
+                        isActive
+                            ? 'scale-[1.02]'
+                            : 'grayscale-[20%] brightness-95 group-hover:grayscale-0 group-hover:brightness-100 group-hover:scale-[1.02]'
+                    }`}
                 />
             </div>
             

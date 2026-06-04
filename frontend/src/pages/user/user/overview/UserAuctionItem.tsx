@@ -41,6 +41,10 @@ export const UserAuctionItem: React.FC<UserAuctionItemProps> = ({ auction, onCli
                 src={imageUrl}
                 alt={auction.productName}
                 style={{ width: '100%', height: '160px', objectFit: 'cover', borderRadius: '6px', background: '#f3f4f6' }}
+                onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = 'https://placehold.co/400x300/f3f4f6/9ca3af?text=No+Image';
+                }}
             />
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 <h4 style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: '#1f2937', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>

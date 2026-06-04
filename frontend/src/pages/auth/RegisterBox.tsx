@@ -36,15 +36,7 @@ export default function RegisterBox({ onError }: RegisterBoxProps) {
 
     return (
         <Card
-            className="border border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.1)] px-[16px] rounded-[16px] flex-shrink-0 flex flex-col justify-between overflow-hidden bg-white"
-            style={{
-                width: '448px',
-                minWidth: '448px',
-                maxWidth: '448px',
-                height: '640px',
-                minHeight: '640px',
-                maxHeight: '640px'
-            }}
+            className="w-full max-w-[448px] sm:h-[640px] sm:min-h-[640px] sm:max-h-[640px] min-h-[560px] border border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.1)] px-[16px] rounded-[16px] flex-shrink-0 flex flex-col justify-between overflow-hidden bg-white mx-4 sm:mx-0"
         >
             <CardHeader className="text-center space-y-[6px] pt-[30px] pb-[5px]">
                 <CardTitle className="text-[30px] font-extrabold text-[#0D0D0D] tracking-tight">

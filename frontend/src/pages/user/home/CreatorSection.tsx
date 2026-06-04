@@ -186,14 +186,14 @@ export default function CreatorSection() {
         if (active === null) {
             const scattered = isMobile ? [
                 { top: '15%', left: '25%' },
-                { top: '75%', left: '30%' },
-                { top: '35%', left: '75%' },
-                { top: '85%', left: '70%' },
+                { top: '75%', left: '25%' },
+                { top: '45%', left: '75%' },
+                { top: '85%', left: '75%' },
             ] : [
-                { top: '20%', left: '15%' },
-                { top: '80%', left: '35%' },
+                { top: '25%', left: '15%' },
+                { top: '75%', left: '40%' },
                 { top: '30%', left: '65%' },
-                { top: '75%', left: '85%' },
+                { top: '70%', left: '85%' },
             ];
             return scattered[i];
         } else if (active === i) {
@@ -212,6 +212,15 @@ export default function CreatorSection() {
             className="px-[7vw] py-16 relative overflow-hidden"
             style={{ background: '#ffffff' }}
         >
+            <div 
+                className="absolute inset-0 z-0 opacity-[0.08] pointer-events-none"
+                style={{
+                    backgroundImage: 'url("https://images.unsplash.com/photo-1589391886645-d51941baf7fb?q=80&w=2000&auto=format&fit=crop")',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    mixBlendMode: 'luminosity'
+                }}
+            />
             <div className="relative z-10 mb-4">
                 <p className="text-[11px] font-bold tracking-[.16em] uppercase text-[#F5C518] mb-3">
                     Meet the Team
@@ -227,7 +236,7 @@ export default function CreatorSection() {
                 </p>
             </div>
             
-            <div className={`relative w-full ${isMobile ? 'h-[750px]' : 'h-[600px]'}`}>
+            <div className={`relative w-full ${isMobile ? 'h-[500px]' : 'h-[400px]'}`}>
                 {CREATORS.map((c, i) => {
                     const isActive = active === i;
                     const posStyle = getPos(i);

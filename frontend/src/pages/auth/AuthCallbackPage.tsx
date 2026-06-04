@@ -23,7 +23,7 @@ const AuthCallback = () => {
     return (
         <div className="min-h-screen flex items-center justify-center bg-[#f8fafc]">
             <div className="text-center">
-                <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <div className="w-12 h-12 border-4 border-[#F5C518] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                 <p className="text-zinc-600 font-medium">Finalizing secure connection...</p>
             </div>
         </div>

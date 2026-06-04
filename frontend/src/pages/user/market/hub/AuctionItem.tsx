@@ -22,6 +22,10 @@ export default function AuctionItem({ auction, onClick }: AuctionItemProps) {
                         src={productImageUrl || "/placeholder-auction.jpg"}
                         alt={productName}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                            e.currentTarget.onerror = null; // Prevent infinite loops
+                            e.currentTarget.src = "/placeholder-auction.jpg";
+                        }}
                     />
                     {status === 'ACTIVE' && (
                         <span className="absolute top-3 left-3 bg-emerald-500 text-white text-[10px] font-black tracking-wider uppercase px-2 py-1 rounded-md flex items-center gap-1.5 shadow-sm">

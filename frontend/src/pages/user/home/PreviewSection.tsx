@@ -59,7 +59,18 @@ export default function PreviewSection() {
     //   xs  → 1 col
 
     return (
-        <section id="sec-preview" className="px-[7vw] py-24 bg-neutral-50">
+        <section id="sec-preview" className="px-[7vw] py-24 relative overflow-hidden" style={{ background: '#ffffff' }}>
+            <div 
+                className="absolute inset-0 z-0 opacity-[0.04] pointer-events-none"
+                style={{
+                    backgroundImage: 'url("https://images.unsplash.com/photo-1577720580479-7d839d829c73?q=80&w=2000&auto=format&fit=crop")',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundAttachment: 'fixed',
+                    mixBlendMode: 'luminosity'
+                }}
+            />
+            <div className="relative z-10 w-full">
             <div className="flex items-end justify-between mb-12 flex-wrap gap-4">
                 <div>
                     <p className="text-[11px] font-bold tracking-[.16em] uppercase text-[#F5C518] mb-2.5">
@@ -99,6 +110,7 @@ export default function PreviewSection() {
             </div>
 
             <LoginNotification isOpen={showLoginNotif} onClose={() => setShowLoginNotif(false)} />
+            </div>
         </section>
     );
 }

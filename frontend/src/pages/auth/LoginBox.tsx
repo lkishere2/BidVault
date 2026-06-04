@@ -64,15 +64,7 @@ export default function LoginBox({ onError, onSuccess }: LoginBoxProps) {
 
     return (
         <Card
-            className="border border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.1)] px-[16px] rounded-[16px] flex-shrink-0 flex flex-col justify-between overflow-hidden bg-white"
-            style={{
-                width: '448px',
-                minWidth: '448px',
-                maxWidth: '448px',
-                height: '580px',
-                minHeight: '580px',
-                maxHeight: '580px'
-            }}
+            className="w-full max-w-[448px] sm:h-[580px] sm:min-h-[580px] sm:max-h-[580px] min-h-[500px] border border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.1)] px-[16px] rounded-[16px] flex-shrink-0 flex flex-col justify-between overflow-hidden bg-white mx-4 sm:mx-0"
         >
             <CardHeader className="text-center space-y-[12px] pt-[40px] pb-[10px]">
                 <CardTitle className="text-[30px] font-extrabold text-[#0D0D0D] tracking-tight">

@@ -43,9 +43,21 @@ export default function UserSection() {
     return (
         <section
             id="sec-users"
-            className="px-[7vw] py-16"
-            style={{ background: '#F7F6F3' }}
+            className="px-[7vw] py-16 relative overflow-hidden"
+            style={{ background: '#fdfbf4' }}
         >
+            <div 
+                className="absolute inset-0 z-0 opacity-[0.04] pointer-events-none"
+                style={{
+                    backgroundImage: 'url("https://images.unsplash.com/photo-1544256718-3bcf237f3974?q=80&w=2000&auto=format&fit=crop")',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundAttachment: 'fixed',
+                    mixBlendMode: 'luminosity'
+                }}
+            />
+            <div className="absolute inset-0 z-0 bg-[#F5C518]/5 pointer-events-none" />
+            <div className="relative z-10 w-full">
             {/* Header */}
             <div className="flex items-end justify-between mb-8 flex-wrap gap-4">
                 <div>
@@ -83,6 +95,7 @@ export default function UserSection() {
             </div>
 
             <LoginNotification isOpen={showLoginNotif} onClose={() => setShowLoginNotif(false)} />
+            </div>
         </section>
     );
 }

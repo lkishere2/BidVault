@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Outlet, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import Header from './components/header/Header';
 import Footer from './components/footer/Footer';
 import HomePage from './pages/user/home/HomePage';
@@ -210,7 +210,7 @@ function App() {
             <Route path="settings" element={<SettingPage />} />
           </Route>
 
-          <Route path="/admin" element={<AdminNavbar />}>
+          <Route path="/admin" element={user?.role === 'ADMIN' ? <AdminNavbar /> : <Navigate to="/" replace />}>
             <Route index element={<AdminPage />} />
             <Route path="user-control" element={<UserControlPage />} />
             <Route path="transaction-request" element={<TransactionPage />} />

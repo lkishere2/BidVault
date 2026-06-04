@@ -56,12 +56,24 @@ export default function GuideSection() {
     return (
         <section
             id="sec-guide"
-            className="flex flex-col justify-center px-[7vw] py-16"
-            style={{ background: '#F7F6F3' }}
+            className="flex flex-col justify-center px-[7vw] py-16 relative overflow-hidden"
+            style={{ background: '#fdfbf4' }}
         >
-            <p className="text-[11px] font-bold tracking-[.16em] uppercase text-[#F5C518] mb-3">
-                How it works
-            </p>
+            <div 
+                className="absolute inset-0 z-0 opacity-[0.04] pointer-events-none"
+                style={{
+                    backgroundImage: 'url("https://images.unsplash.com/photo-1506784926709-22f1ec395907?q=80&w=2000&auto=format&fit=crop")',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundAttachment: 'fixed',
+                    mixBlendMode: 'luminosity'
+                }}
+            />
+            <div className="absolute inset-0 z-0 bg-[#F5C518]/5 pointer-events-none" />
+            <div className="relative z-10 w-full">
+                <p className="text-[11px] font-bold tracking-[.16em] uppercase text-[#F5C518] mb-3">
+                    How it works
+                </p>
             <h2
                 className="text-[clamp(26px,3.2vw,42px)] font-black text-[#0D0D0D] mb-10"
                 style={{ fontFamily: "'Playfair Display', serif" }}
@@ -70,19 +82,19 @@ export default function GuideSection() {
             </h2>
 
             {/* Stage */}
-            <div className="flex items-center gap-5">
+            <div className="flex items-center gap-2 md:gap-5">
                 <button
                     onClick={() => move(-1)}
                     disabled={cur === 0}
                     aria-label="Previous step"
-                    className="flex-shrink-0 w-11 h-11 rounded-full border border-neutral-300 text-[#0D0D0D] text-base flex items-center justify-center transition hover:border-[#F5C518] hover:text-[#F5C518] disabled:opacity-20 disabled:cursor-default bg-white shadow-sm"
+                    className="flex-shrink-0 w-8 h-8 md:w-11 md:h-11 rounded-full border border-neutral-300 text-[#0D0D0D] text-sm md:text-base flex items-center justify-center transition hover:border-[#F5C518] hover:text-[#F5C518] disabled:opacity-20 disabled:cursor-default bg-white shadow-sm"
                 >
                     ←
                 </button>
 
                 <div className="flex-1 overflow-hidden">
                     <div
-                        className={`rounded-xl px-8 py-8 flex flex-row gap-10 items-center ${cardClass}`}
+                        className={`rounded-xl px-5 md:px-8 py-6 md:py-8 flex flex-col md:flex-row gap-3 md:gap-10 items-start md:items-center ${cardClass}`}
                         style={{
                             background: '#fff',
                             border: '1px solid rgba(0,0,0,0.07)',
@@ -121,7 +133,7 @@ export default function GuideSection() {
                     onClick={() => move(1)}
                     disabled={cur === STEPS.length - 1}
                     aria-label="Next step"
-                    className="flex-shrink-0 w-11 h-11 rounded-full border border-neutral-300 text-[#0D0D0D] text-base flex items-center justify-center transition hover:border-[#F5C518] hover:text-[#F5C518] disabled:opacity-20 disabled:cursor-default bg-white shadow-sm"
+                    className="flex-shrink-0 w-8 h-8 md:w-11 md:h-11 rounded-full border border-neutral-300 text-[#0D0D0D] text-sm md:text-base flex items-center justify-center transition hover:border-[#F5C518] hover:text-[#F5C518] disabled:opacity-20 disabled:cursor-default bg-white shadow-sm"
                 >
                     →
                 </button>
@@ -151,6 +163,7 @@ export default function GuideSection() {
                 <span className="text-[11px] font-bold tracking-[.06em] text-neutral-400">
                     <span className="text-[#0D0D0D]">{cur + 1}</span> / {STEPS.length}
                 </span>
+            </div>
             </div>
         </section>
     );

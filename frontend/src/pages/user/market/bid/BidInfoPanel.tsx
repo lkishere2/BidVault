@@ -86,6 +86,10 @@ export default function BidInfoPanel({ auction, ticker, onPlaceBid }: BidInfoPan
                         alt={auction.productName}
                         className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl object-cover flex-shrink-0 border border-neutral-200 shadow-sm cursor-zoom-in hover:opacity-90 transition-opacity"
                         onClick={() => setViewerImage(auction.productImageUrl!)}
+                        onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = "/placeholder-auction.jpg";
+                        }}
                     />
                 ) : (
                     <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl bg-neutral-100 flex items-center justify-center flex-shrink-0 border border-neutral-200 shadow-sm">
