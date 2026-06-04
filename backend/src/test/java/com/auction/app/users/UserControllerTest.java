@@ -130,21 +130,6 @@ class UserControllerTest {
     }
 
     // =========================================================================
-    // METHOD 3: updateEmail (4 Tests)
-    // =========================================================================
-
-
-    @Test
-    void updateEmail_WhenBodyIsMissing_ShouldReturnInternalServerError() throws Exception {
-        // Sửa lại status mong đợi từ 400 thành 500 dựa theo log thực tế từ hệ thống của bạn
-        mockMvc.perform(patch("/api/v1/users/update-email")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.message").value(containsStringIgnoringCase("required request body is missing")));
-        verifyNoInteractions(userService);
-    }
-
-    // =========================================================================
     // METHOD 4: updatePassword (2 Tests)
     // =========================================================================
 

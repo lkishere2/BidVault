@@ -12,6 +12,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -138,11 +140,14 @@ class UserServiceTest {
     @Test
     void updatePassword_WhenRequestIsValid_ShouldEncodeAndPersistNewPassword() {
         PasswordRequest request = createPasswordRequest("696969", "newPassword");
+    
+    // Add this line to satisfy the service dependency
+        doNothing().when(authService).verifyPasswordReset(any()); 
+    
         when(passwordEncoder.matches("oldPassword", "encodedOldPassword")).thenReturn(true);
         when(passwordEncoder.encode("newPassword")).thenReturn("encodedNewPassword");
 
         userService.updatePassword(request);
-
         verify(userRepository).updatePassword(1L, "encodedNewPassword");
     }
 
