@@ -8,8 +8,18 @@ export default function HubPage() {
     const [filters, setFilters] = useState<AuctionFindingRequest>({});
 
     return (
-        <div className="min-h-screen bg-[#FAFAFA]">
-            <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="min-h-screen relative bg-white overflow-hidden">
+            <div 
+                className="absolute inset-0 z-0 opacity-[0.05] pointer-events-none"
+                style={{
+                    backgroundImage: 'url("https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=2000&auto=format&fit=crop")',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundAttachment: 'fixed',
+                    mixBlendMode: 'luminosity'
+                }}
+            />
+            <div className="relative z-10 max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="mb-8">
                     <div className="flex items-center gap-2.5 mb-1">
                         <div className="w-8 h-8 rounded-[8px] bg-[#0D0D0D] flex items-center justify-center flex-shrink-0">

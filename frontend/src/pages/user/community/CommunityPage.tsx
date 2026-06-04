@@ -50,7 +50,7 @@ export const CommunityPage: React.FC = () => {
     }, [searchQuery]);
 
     return (
-        <div className="min-h-screen w-full bg-neutral-50 py-10 px-4 sm:px-6 md:px-8 max-w-[1200px] mx-auto">
+        <div className="min-h-screen w-full bg-white py-10 px-4 sm:px-6 md:px-8 max-w-[1200px] mx-auto">
             <h1 className="text-[28px] font-black text-[#0D0D0D] mb-2 tracking-tight">Community</h1>
             <p className="text-[15px] font-medium text-neutral-500 mb-8">Discover and connect with other auctioneers.</p>
 
