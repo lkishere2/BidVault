@@ -13,9 +13,9 @@ export default function UserItem({ user, rank, onClick }: UserItemProps) {
     return (
         <div onClick={() => onClick ? onClick() : navigate(`/profile/${user.id}`)} className="group flex flex-col items-center text-center cursor-pointer transition-all duration-500 ease-out group-hover/grid:opacity-40 group-hover/grid:scale-90 hover:!opacity-100 hover:!scale-110 hover:-translate-y-3">
             {/* Avatar */}
-            <div className="relative mb-3 sm:mb-4">
+            <div className="relative mb-4 sm:mb-5">
                 {/* Ring is done via outline so no invalid CSS prop is needed */}
-                <div className="w-12 h-12 sm:w-14 sm:h-14 xl:w-16 xl:h-16 rounded-full overflow-hidden transition-all duration-300 group-hover:[outline:2px_solid_#F5C518] group-hover:[outline-offset:3px]">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 xl:w-28 xl:h-28 rounded-full overflow-hidden transition-all duration-300 group-hover:[outline:2px_solid_#F5C518] group-hover:[outline-offset:3px]">
                     <img
                         src={user.avatar}
                         alt={user.name}
@@ -30,7 +30,7 @@ export default function UserItem({ user, rank, onClick }: UserItemProps) {
 
                 {/* Rank badge — scales with avatar */}
                 <span
-                    className="absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center text-[8px] sm:text-[9px] font-black"
+                    className="absolute bottom-0 right-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-[10px] sm:text-[11px] font-black"
                     style={{
                         background: rank <= 3 ? '#F5C518' : '#0D0D0D',
                         color: rank <= 3 ? '#0D0D0D' : '#fff',
@@ -43,7 +43,7 @@ export default function UserItem({ user, rank, onClick }: UserItemProps) {
 
             {/* Name */}
             <p
-                className="text-[11px] sm:text-[12px] xl:text-[13px] font-bold text-[#0D0D0D] leading-tight mb-1 transition-colors duration-200 group-hover:text-[#c9a20f]"
+                className="text-[13px] sm:text-[14px] xl:text-[15px] font-bold text-[#0D0D0D] leading-tight mb-1.5 transition-colors duration-200 group-hover:text-[#c9a20f]"
                 style={{ fontFamily: "'Playfair Display', serif" }}
             >
                 {user.name}

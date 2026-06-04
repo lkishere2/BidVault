@@ -14,11 +14,7 @@ export default function CreatorItem({ creator, isActive, onClick }: CreatorItemP
             className="relative flex flex-col items-center gap-3 focus:outline-none group"
         >
             <div
-                className="relative transition-all duration-700 ease-in-out"
-                style={{
-                    width: isActive ? '160px' : '80px',
-                    height: isActive ? '160px' : '80px',
-                }}
+                className={`relative transition-all duration-700 ease-in-out ${isActive ? 'w-40 h-40 md:w-56 md:h-56' : 'w-24 h-24 md:w-32 md:h-32'}`}
             >
                 <div
                     className="absolute inset-0 rounded-full transition-all duration-700 ease-in-out"

@@ -73,12 +73,10 @@ export default function UserSection() {
 
             {/*
                 8 users in two rows:
-                  xl+  → 8 cols  (1 row of 8)
-                  lg   → 4 cols  (2 rows of 4)
-                  sm   → 4 cols  (2 rows of 4)
+                  sm+  → 4 cols  (2 rows of 4)
                   xs   → 2 cols  (4 rows of 2)
             */}
-            <div className="group/grid grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-8 gap-x-2 gap-y-6">
+            <div className="group/grid grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-10">
                 {users.map((user, i) => (
                     <UserItem key={user.id} user={user} rank={i + 1} onClick={() => handleIntercept(`/profile/${user.id}`)} />
                 ))}
