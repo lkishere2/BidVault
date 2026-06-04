@@ -17,7 +17,6 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 
 **[Live Demo](https://bid-vault-seven.vercel.app/)** &nbsp;•&nbsp; **[Main Repository](https://github.com/lkishere2/BidVault)** &nbsp;•&nbsp; **[Deployment Fork](https://github.com/2cpk-fin/BidVault)**
 
@@ -25,281 +24,138 @@
 
 ---
 
-## ![Overview](https://img.shields.io/badge/-%20Overview-4A90D9?style=flat-square&labelColor=4A90D9&color=1a1a2e)
+## 1. Problem Description and System Scope
 
-**BidVault** is a real-time auction and bidding platform built with a microservice-inspired architecture. It features a highly secure authentication system, a live bidding engine, and a dual-interface approach — accessible via both a modern web app (ReactTS) and a desktop JavaFX application.
+**Problem:** Traditional physical auctions are limited by geography and time. Existing online bidding systems often suffer from latency issues, race conditions during high-traffic bidding wars, and lack a unified experience across different devices.
+**System Scope:** **BidVault** is a real-time, highly resilient auction and bidding platform. The system is designed to provide a secure, fraud-resistant environment for users to manage digital wallets, host auctions, and participate in live bidding. It features a dual-interface architecture, offering both a modern web application and a desktop application, backed by a robust microservice-inspired Domain-Driven Design (DDD) backend.
 
----
+## 2. Technologies, Environment, and Prerequisites
 
-## ![Achievements](https://img.shields.io/badge/-%20Key%20Achievements-F5A623?style=flat-square&labelColor=F5A623&color=1a1a2e)
+### Technologies Used
+* **Backend API & Desktop UI:** Java, Spring Boot 3.4.0, JavaFX
+* **Web Frontend:** React 19, TypeScript, Vite, Tailwind CSS
+* **Databases:** PostgreSQL (Main persistent storage via Supabase), Upstash Redis (Cache, Pub/Sub, Queue, Auth storage)
+* **Security:** JWT, OAuth2 (Google Provider)
+* **Deployment & DevOps:** Docker, Vercel (Frontend), Cloudinary (Image CDN)
 
-- **Highly secure** authentication & authorization system with `ADMIN` and `USER` roles
-- **Fully functional** real-time auction and bidding engine
-- **Dual interface** — Web (ReactTS) + Desktop (JavaFX)
-- **Deployed** on third-party cloud platforms
-
----
-
-## ![Technologies](https://img.shields.io/badge/-%20Technologies-7ED321?style=flat-square&labelColor=7ED321&color=1a1a2e)
-
-| Layer | Technology |
-|-------|-----------|
-| ![](https://img.shields.io/badge/Backend%20API-6DB33F?style=flat-square) | Spring Boot (Java) |
-| ![](https://img.shields.io/badge/Web%20UI-61DAFB?style=flat-square&logoColor=black) | React + TypeScript |
-| ![](https://img.shields.io/badge/Desktop%20UI-ED8B00?style=flat-square) | JavaFX |
-| ![](https://img.shields.io/badge/Main%20Database-316192?style=flat-square) | PostgreSQL |
-| ![](https://img.shields.io/badge/Cache%20Database-DC382D?style=flat-square) | Redis |
-| ![](https://img.shields.io/badge/Authentication-yellow?style=flat-square) | JWT, OAuth2 |
-| ![](https://img.shields.io/badge/Containerization-2496ED?style=flat-square) | Docker |
-| ![](https://img.shields.io/badge/Testing-25A162?style=flat-square) | JUnit, Mockito |
-| ![](https://img.shields.io/badge/Documentation-85EA2D?style=flat-square&logoColor=black) | Swagger |
+### Runtime Environment & Prerequisites
+To run this project locally, your environment must have:
+* **Java:** JDK 17 or higher
+* **Node.js:** v18.0 or higher (with `npm`)
+* **Docker & Docker Compose:** Required if running the full containerized stack.
+* **Internet Connection:** Required to connect to managed cloud databases (Supabase, Upstash) and OAuth providers.
 
 ---
 
-## ![Team](https://img.shields.io/badge/-%20Team%20%E2%80%94%20Group%207-E91E8C?style=flat-square&labelColor=E91E8C&color=1a1a2e)
+## 3. Directory Structure and Main Modules
 
-| Member | Role |
-|--------|------|
-| **Trần Vũ Duy Hưng** | System design, business logic, caching layers, Deployment |
-| **Vũ Long Khánh** | Security, authentication & authorization,database architecture, ReactJS web UI |
-| **Nguyễn Hoàng Lâm** | Feature testing (JUnit/Mockito), JavaFX UI, RESTful API |
-| **Đinh Thái Hữu Khánh** | Feature testing (JUnit/Mockito), JavaFX UI, RESTful API |
+The repository is organized into two main monolithic modules (Backend and Frontend) adopting Domain-Driven Design.
 
----
-
-## ![Architecture](https://img.shields.io/badge/-%20Architecture-9B59B6?style=flat-square&labelColor=9B59B6&color=1a1a2e)
-
-The backend follows **Domain-Driven Design (DDD)**, with each domain cleanly separated and deployed across multi-cloud services.
-
-### Project Structure
-
-```
-/bidvault
-├── /backend
-│   └── /src
-│       ├── /main/java/com/auction/app
-│       │   ├── /controllers        # JavaFX UI Controllers
-│       │   ├── /domains            # Business Logic (DDD)
-│       │   └── /infrastructure     # Configurations
-│       └── /resources/ui           # JavaFX UI (components, styles, views)
-└── /frontend/auction-app           # React UI
-    └── /src
-        ├── /api
-        ├── /components
-        ├── /pages
-        │   ├── /admin
-        │   ├── /auth
-        │   └── /user
-        └── /types
-```
-
-### Domain Structure
-
-```
-/domain
-├── /dtos
-├── /model
-├── Repository.java
-├── Controller.java
-└── Service.java
-```
-
-### Test Structure
-
-```
-/folder
-├── ControllerTests.java
-├── ServiceTests.java
-└── RepositoryTests.java
+```text
+/BidVault
+├── backend/                       # Java backend & JavaFX application
+│   ├── src/main/java/com/auction/app/
+│   │   ├── controllers/           # JavaFX UI Controllers
+│   │   ├── domains/               # Core Business Logic separated by domain
+│   │   │   ├── auction/           # Bidding and Auction logic
+│   │   │   ├── auth/              # Security and Token management
+│   │   │   ├── products/          # Product storage management
+│   │   │   ├── transaction/       # Wallet and money logic
+│   │   │   └── users/             # User profiles and connections
+│   │   └── infrastructure/        # Configurations (Security, WebSocket, Redis)
+│   └── src/main/resources/ui/     # JavaFX FXML views and styles
+│
+├── frontend/auction-app/          # ReactTS Web Application
+│   └── src/
+│       ├── api/                   # Axios HTTP clients and Interceptors
+│       ├── components/            # Reusable UI components
+│       ├── pages/                 # Route-based page components
+│       └── types/                 # TypeScript interfaces
+│
+├── docker-compose.yml             # Orchestration for containerized deployment
+├── DB.md                          # Database Entity-Relationship documentation
+├── EXPLAINATION.md                # In-depth technical logic (Concurrency, Auth)
+└── FEATURE.md                     # Client-facing feature descriptions
 ```
 
 ---
 
-## ![Features](https://img.shields.io/badge/-%20Features%20%26%20Architecture-E74C3C?style=flat-square&labelColor=E74C3C&color=1a1a2e)
+## 4. Running the Application (Cross-Platform)
 
-### ![Auth](https://img.shields.io/badge/1.-Authentication%20%26%20Authorization-FF6B6B?style=flat-square)
+You can run the application using Docker, or locally using your native OS tools. The commands below are verified to work across **Windows**, **Linux**, and **macOS**.
 
-#### Registration
-
-- **Google users** — OAuth2 integration allows one-click registration via *Continue with Google*.
-- **Local users** — Stricter flow powered by Spring Boot Mail and Redis:
-  1. User submits username, email, and password → server hashes the password → DB saves the account with `enabled = false`.
-  2. A verification code is dispatched to the user's email via a message broker → Redis stores the code with a **15-minute TTL**.
-  3. On successful verification → Redis deletes the key → DB sets `enabled = true` → user can now log in.
-
-#### Login
-
-- **Google users** — Same OAuth2 flow, minimal friction.
-- **Local users** — Submit email and password → server validates credentials → issues a **JWT** and a **Refresh Token**.
-
-#### Forgot Password
-
-- **Google users** — Password reset is disabled for security reasons; users must authenticate via their Google account.
-- **Local users** — Redis-backed reset flow:
-  1. User requests a password reset → a verification code is sent via broker → Redis stores the code with a **15-minute TTL**.
-  2. On successful verification → Redis creates a **reset ticket with a 5-minute TTL**.
-  3. Within those 5 minutes, the user can reset their password. After expiry, the ticket is invalidated and verification must be repeated.
-
----
-
-#### ![JWT](https://img.shields.io/badge/JWT%20%26%20the%20Filter%20Chain-F39C12?style=flat-square)
-
-Upon login, users receive a **JWT** (short-lived) and a **Refresh Token** (long-lived).
-
-A JWT consists of three Base64URL-encoded parts: `Header.Payload.Signature`
-
-- **Header** — declares the token type and signing algorithm (HS256).
-- **Payload** — contains claims: `sub` (user email & role), `iat` (issued at), `exp` (expiration).
-- **Signature** — `HMAC-SHA256(base64(header) + "." + base64(payload), secret)` — tamper-proof seal.
-
-**Filter flow** — the JWT filter extends `OncePerRequestFilter` and runs on every request:
-
-```
-Incoming Request
-      │
-      ▼
-Extract Bearer token from Authorization header
-      │
-      ▼
-Decode token → extract sub claim (email / role)
-      │
-      ▼
-UserDetailsService.loadUserByUsername() → UserDetails from DB
-      │
-      ▼
-Validate signature + check exp claim
-      │
-      ▼
-Build UsernamePasswordAuthenticationToken(UserDetails, authorities)
-      │
-      ▼
-Set into SecurityContextHolder → request proceeds
-      │
-      ▼ (on any failure)
-401 Unauthorized
-```
-
----
-
-#### ![Refresh](https://img.shields.io/badge/Refresh%20Token-27AE60?style=flat-square)
-
-| Property | JWT | Refresh Token |
-|----------|-----|---------------|
-| Lifespan | Short (e.g. 15 min) | Long (e.g. 7 days) |
-| Stateless | Yes | No |
-| Storage | Client-side | DB / Redis |
-
-- **Rotation** — every time a Refresh Token is used, the old one is invalidated and a new one is issued.
-- **Revocation** — on logout, the Refresh Token is deleted from Redis and blacklisted, ensuring it cannot be reused.
-- **Expiry flow** — when the JWT expires, the client sends the Refresh Token to `/auth/refresh` → server validates against DB/Redis → issues a new JWT and Refresh Token pair.
-
----
-
-#### ![Optimization](https://img.shields.io/badge/Filter%20Chain%20Optimization-1ABC9C?style=flat-square)
-
-Calling `UserDetailsService` on every request means a DB hit on every request — a bottleneck under high traffic.
-
-**Solution:** a lightweight `UserDetails` object is cached in Redis with a **30-minute TTL**. The filter reads from Redis first, bypassing the DB entirely for authenticated sessions. Result: drastically reduced DB load and near-instant request validation.
-
-```
-Request → JWT Filter → Redis cache hit? ──Yes──→ Use cached UserDetails
-                                │
-                               No
-                                │
-                                ▼
-                         Load from DB → cache in Redis → proceed
-```
-
----
-
-### ![User](https://img.shields.io/badge/2.-User%20Features-3498DB?style=flat-square)
-
-#### Profile
-
-- Users can update their profile image, username, and password.
-
-#### Money Management
-
-- **Deposit / Withdraw** — users submit a transaction request → server validates and saves it as `PENDING`.
-- Users can cancel a `PENDING` transaction at any time → record is removed from DB.
-- **Admin side** — admin reviews transactions and sets status to `SUCCESS` or `FAILED`.
-
----
-
-### ![Auction](https://img.shields.io/badge/3.-Auction%20System-E67E22?style=flat-square)
-
-#### Product Storage
-
-- Users add products (name, tags, quantity, image, etc.) to their personal storage before listing.
-- Spring Security ensures users can only manage their own storage — cross-user access is rejected at the authorization layer.
-
-#### Launching an Auction
-
-- Users select a product and set starting price, quantity, start time, and end time.
-- The server auto-calculates the minimum bid increment as **+5% of the current price**.
-- Auction is saved to DB with `UPCOMING` status.
-
-#### Bidding
-
-- Users can browse and place bids on active auctions.
-- Race conditions( simultaneous bid attempts ) are prevented using Pessimistic Lock and dead bid draining system, can be slower on production since multi-cloud architecture
-
----
-
-### ![Social](https://img.shields.io/badge/4.-Social%20%26%20Notification%20System-8E44AD?style=flat-square)
-
-#### Following
-
-- Users can search and follow other users via the community page.
-- Followers are notified whenever a followed user launches a new auction.
-
-#### Notifications
-
-| Event | Recipients |
-|-------|-----------|
-| New system update (admin broadcast) | All users |
-| New follower | Followed user |
-| New auction launched | All followers of that user |
-
----
-
-## ![Getting Started](https://img.shields.io/badge/-%20Getting%20Started-2ECC71?style=flat-square&labelColor=2ECC71&color=1a1a2e)
-
-### Prerequisites
-
-- Java 17+
-- Node.js 18+
-- Docker & Docker Compose
-- PostgreSQL
-- Redis
-
-### Run with Docker
-
+### Option A: Running via Docker (Easiest)
+Make sure Docker daemon is running.
 ```bash
 git clone https://github.com/lkishere2/BidVault
 cd BidVault
 docker-compose up --build -d
 ```
+*Note: The frontend will be exposed on port 80. Ensure no other service is using port 80.*
 
-WARNING : DOCKER FRONTEND IS PORT 80, change before actually use it!
+### Option B: Running Locally (Development Mode)
+If you prefer running the source code directly without Docker:
 
-### Run locally
+**For Backend (Java/Spring Boot/JavaFX):**
+*   **Windows (PowerShell/CMD):**
+    ```cmd
+    cd backend
+    .\mvnw javafx:run
+    ```
+*   **Linux / macOS (Terminal):**
+    ```bash
+    cd backend
+    ./mvnw javafx:run
+    ```
 
+**For Frontend (React/Vite):** (Universal across all OS)
 ```bash
-# Backend
-cd backend
-./mvnw javafx:run
-
-# Frontend
 cd frontend/auction-app
-npm install (installing node_modules)
+npm install
 npm run dev
 ```
 
 ---
 
+## 5. Execution Order (Server / Client)
+
+If you are running the system locally (Option B), you **must** follow this strict execution order:
+
+1. **Start the Backend Server FIRST:** 
+   Navigate to the `backend/` directory and execute the Maven wrapper command (as shown above). Wait until the Spring Boot console logs indicate the server has started (typically on `localhost:8000`). The JavaFX Desktop app will also launch simultaneously.
+2. **Start the Frontend Web Client SECOND:** 
+   Once the backend is running and accepting connections, navigate to `frontend/auction-app/`, install dependencies, and run the development server. The web app will typically be available at `localhost:5173`.
+3. *(Reasoning: The React frontend immediately attempts to establish a WebSocket STOMP connection and fetch initial configurations on load. If the backend is not running first, the frontend will throw network errors.)*
+
+---
+
+## 6. List of Completed Features
+
+The system successfully implements the following core features:
+
+### Authentication & Authorization
+* **OAuth2 Integration:** One-click Google Sign-In.
+* **Local Registration:** Secure email verification using Redis OTPs (15-minute TTL).
+* **Robust Security:** JWT-based stateless authentication with secure Refresh Token rotation and Redis-backed Filter Chain optimization.
+* **Role-Based Access Control:** Distinct capabilities for `USER` and `ADMIN` roles.
+
+### User & Wallet Management
+* **Profile Customization:** Users can update avatars, passwords, and usernames.
+* **Financial Transactions:** Users can request Deposits and Withdrawals. Admins review and approve/deny these requests on a dedicated dashboard to maintain financial integrity.
+
+### Auction & Bidding Engine (Real-Time)
+* **Product Storage:** Users manage personal inventories of items.
+* **Auction Hosting:** Users can launch live auctions with custom start/end times and dynamic minimum bid calculations.
+* **Automated Lifecycle:** A background scheduler automatically transitions auctions from `UPCOMING` → `ACTIVE` → `ENDED`.
+* **High-Concurrency Bidding:** Utilizes a Redis Queue and background async workers to process simultaneous bids sequentially, preventing database locks and race conditions.
+* **Live Updates:** Bids and price changes are broadcasted in real-time to all clients via STOMP WebSockets and Redis Pub/Sub.
+
+### Social & Community
+* **Following System:** Users can search and follow their favorite sellers.
+* **Real-Time Notifications:** Instant alerts pushed to clients when a followed seller launches a new auction, or when a user gains a new follower.
+* **Admin Broadcasts:** Administrators can push system-wide announcements to all active users.
+
+---
 <div align="center">
-
-Made with coffee and hard work by **Group 7**
-
+Made with coffee and hard work by <b>Group 7</b>
 </div>
