@@ -153,6 +153,9 @@ public class AuctionExecutor {
         seller.setBalance(seller.getBalance().add(winningBid.getAmount()));
         userRepository.save(seller);
 
+        winner.setBalance(winner.getBalance().subtract(winningBid.getAmount()));
+        userRepository.save(winner);
+
         Product soldProduct = auction.getProduct();
         Product winnerProduct = productRepository
         .findByIdAndOwnerUserId(soldProduct.getId(), winner.getId())
