@@ -17,7 +17,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
