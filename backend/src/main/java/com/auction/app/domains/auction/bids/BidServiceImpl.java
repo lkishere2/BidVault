@@ -116,6 +116,7 @@ public class BidServiceImpl implements BidService {
     public void processNextBid(Long auctionId) {
         // PESSIMISTIC LOCK: Thread will wait here until any previous
         // processNextBid for this auction is fully complete.
+        auctionRepository.findByIdForUpdate(auctionId);
 
         while (true) {
             PendingBid pendingBid = cache.dequeueBid(auctionId);
