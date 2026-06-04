@@ -136,7 +136,26 @@ function App() {
     }
   }, [user]);
 
-  const handleLoginSuccess = (userData: UserData) => setUser(userData);
+  const handleLoginSuccess = async () => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      try {
+        const response = await userApi.getInfo();
+        const { id, username, role, profileImageUrl, profile_image_url } = response.data as any;
+        const initials = username
+          .split(/[\s._-]+/)
+          .slice(0, 2)
+          .map((w: string) => w.toUpperCase())
+          .join('');
+        const rawProfile = profileImageUrl ?? profile_image_url;
+        setUser({ id, username, initials, role, profileImageUrl: rawProfile });
+      } catch (error) {
+        console.error(error);
+        setUser(null);
+      }
+    }
+  };
+
   const handleLogout = async () => {
     try {
       await authApi.logout();

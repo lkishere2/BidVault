@@ -5,7 +5,7 @@ import ErrorBox from '../../components/ErrorBox';
 import { authApi } from '../../api/authApi';
 
 interface LoginPageProps {
-    onLoginSuccess: (user: { username: string; initials: string }) => void;
+    onLoginSuccess: () => Promise<void> | void;
 }
 
 export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
@@ -28,9 +28,9 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
     };
 
     // Xử lý khi đăng nhập thành công
-    const handleLoginSuccessInternal = (userData: { username: string; initials: string }) => {
+    const handleLoginSuccessInternal = async () => {
         // Gọi callback truyền ngược lên App.tsx để lưu thông tin user / token vào state tổng
-        onLoginSuccess(userData);
+        await onLoginSuccess();
 
         // Chuyển hướng người dùng sang trang Dashboard ở đường dẫn /office
         navigate('/');

@@ -16,7 +16,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface BidRepository extends JpaRepository<Bid, Long> {
 
-    @Query("SELECT b FROM Bid b JOIN FETCH b.bidder WHERE b.auction.id = :auctionId AND b.status = 'HELD' ORDER BY b.placedAt DESC")
+    @Query("SELECT b FROM Bid b JOIN FETCH b.bidder WHERE b.auction.id = :auctionId ORDER BY b.placedAt DESC")
     Slice<Bid> findByAuctionIdOrderByPlacedAtDesc(@Param("auctionId") Long auctionId, Pageable pageable);
 
     @Modifying
