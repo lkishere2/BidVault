@@ -18,7 +18,7 @@ export interface EmailRequest {
 }
 
 export interface PasswordRequest {
-    currentPassword: string;
+    verificationCode: string;
     newPassword: string;
 }
 

@@ -1,6 +1,7 @@
 package com.auction.app.domains.auction.bids.validator;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ public class BidValidatorServiceImpl implements BidValidatorService {
     public void validateBidAmount(BigDecimal amount, AuctionResponse response) {
         BigDecimal minimumBid = response.getCurrentPrice().add(response.getMinBidIncrement());
         if (amount.compareTo(minimumBid) < 0) {
-            throw new InvalidBidException("Bid must be at least " + minimumBid + " (current price + minimum increment)");
+            throw new InvalidBidException("Bid must be at least " + minimumBid.setScale(0, RoundingMode.HALF_UP));
         }
     }
 
@@ -39,13 +40,15 @@ public class BidValidatorServiceImpl implements BidValidatorService {
     public void validateSpendableBalance(User bidder, BigDecimal amount) {
         BigDecimal spendable = getSpendableBalance(bidder);
         if (amount.compareTo(spendable) > 0) {
-            throw new InsufficientBalanceException("Insufficient spendable balance. Available: " + spendable + ", Attempted: " + amount);
+            throw new InsufficientBalanceException(
+                    "Insufficient spendable balance. Available: " + spendable + ", Attempted: " + amount);
         }
     }
 
     @Override
     public boolean isBidEligible(AuctionResponse response, BigDecimal amount) {
-        if (response.getStatus() != AuctionStatus.ACTIVE) return false;
+        if (response.getStatus() != AuctionStatus.ACTIVE)
+            return false;
         BigDecimal minimumBid = response.getCurrentPrice().add(response.getMinBidIncrement());
         return amount.compareTo(minimumBid) >= 0;
     }
@@ -57,8 +60,7 @@ public class BidValidatorServiceImpl implements BidValidatorService {
 
     private BigDecimal getSpendableBalance(User user) {
         BigDecimal locked = bidRepository.sumLockedAmountByBidderIdAndStatuses(
-                user.getId(), List.of(BidStatus.PENDING, BidStatus.HELD)
-        );
+                user.getId(), List.of(BidStatus.PENDING, BidStatus.HELD));
         return user.getBalance().subtract(locked);
     }
 }

@@ -33,8 +33,8 @@ export default function BidInfoPanel({ auction, ticker, onPlaceBid }: BidInfoPan
     const currentPrice = ticker ? ticker.currentPrice : auction.currentPrice;
     const bidCount = ticker ? ticker.bidCount : auction.bidCount;
     const endTime = ticker ? ticker.endTime : auction.endTime;
-    const minBidIncrement = ticker 
-        ? (parseFloat(ticker.minNextBid) - parseFloat(ticker.currentPrice)).toString() 
+    const minBidIncrement = ticker
+        ? (parseFloat(ticker.minNextBid) - parseFloat(ticker.currentPrice)).toString()
         : auction.minBidIncrement;
     const isEnded = ticker ? ticker.ended : auction.status === 'ENDED';
     const isExtended = ticker ? ticker.extended : auction.extended;
@@ -47,7 +47,7 @@ export default function BidInfoPanel({ auction, ticker, onPlaceBid }: BidInfoPan
     useEffect(() => {
         const nextMin = parseFloat(currentPrice) + parseFloat(minBidIncrement);
         if (!isNaN(nextMin)) {
-            const roundedAmount = Math.ceil(nextMin) + 1;
+            const roundedAmount = Math.round(nextMin + 1);
             setBidAmount(roundedAmount.toString());
         }
     }, [currentPrice, minBidIncrement]);

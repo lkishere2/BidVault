@@ -40,11 +40,6 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/update-email")
-    public ResponseEntity<Void> updateEmail(@Valid @RequestBody EmailRequest userRequest) {
-        userService.updateEmail(userRequest);
-        return ResponseEntity.ok().build();
-    }
 
     @PatchMapping("/update-password")
     public ResponseEntity<Void> updatePassword(@Valid @RequestBody PasswordRequest userRequest) {

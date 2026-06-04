@@ -8,6 +8,7 @@ import type { AuctionResponse } from '../../../../types/auction';
 import type { BidFeedEvent, BidNotificationPayload, BidResponse } from '../../../../types/bid';
 import BidInfoPanel from './BidInfoPanel';
 import BidFeedPanel from './BidFeedPanel';
+import ErrorBox from './ErrorBox';
 
 export default function BidPage() {
     const { auction_id } = useParams<{ auction_id: string }>();
@@ -20,6 +21,11 @@ export default function BidPage() {
     const [isConnected, setIsConnected] = useState(false);
     const [ticker, setTicker] = useState<BidNotificationPayload | null>(null);
     const [bids, setBids] = useState<BidFeedEvent[]>([]);
+    const [historyPage, setHistoryPage] = useState(0);
+    const [hasMoreHistory, setHasMoreHistory] = useState(true);
+    const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+    
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const stompClientRef = useRef<Client | null>(null);
 
     const normalizeBidFeedEvent = (data: Partial<BidFeedEvent>): BidFeedEvent => {
@@ -49,6 +55,7 @@ export default function BidPage() {
                 bidApi.getBidHistory(Number(auction_id), 0, 50).then(bRes => {
                     const data = bRes.data as any;
                     const content = Array.isArray(data) ? data : (data?.content || []);
+                    if (content.length < 50) setHasMoreHistory(false);
                     const history = content.map((b: BidResponse) => ({
                         bidId: b.bidId,
                         auctionId: b.auctionId,
@@ -90,6 +97,17 @@ export default function BidPage() {
             connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
             onConnect: () => {
                 setIsConnected(true);
+
+                client.subscribe('/user/queue/errors', (message) => {
+                    if (message.body) {
+                        try {
+                            const err = JSON.parse(message.body);
+                            setErrorMessage(err.message || err.error || message.body);
+                        } catch {
+                            setErrorMessage(message.body);
+                        }
+                    }
+                });
 
                 client.subscribe(`/topic/auction/${auction.id}`, (message) => {
                     if (message.body) {
@@ -137,6 +155,45 @@ export default function BidPage() {
         };
     }, [auction]);
 
+    const loadMoreHistory = async () => {
+        if (!auction_id || isLoadingHistory || !hasMoreHistory) return;
+        setIsLoadingHistory(true);
+        try {
+            const nextPage = historyPage + 1;
+            const res = await bidApi.getBidHistory(Number(auction_id), nextPage, 50);
+            const data = res.data as any;
+            const content = Array.isArray(data) ? data : (data?.content || []);
+            
+            if (content.length < 50) {
+                setHasMoreHistory(false);
+            }
+            if (content.length > 0) {
+                const history = content.map((b: BidResponse) => ({
+                    bidId: b.bidId,
+                    auctionId: b.auctionId,
+                    bidderId: (b as any).bidderId ?? 0,
+                    bidderLabel: b.bidderLabel,
+                    amount: b.amount,
+                    placedAt: b.placedAt
+                }));
+                setBids(prev => {
+                    const newBids = [...prev];
+                    history.forEach(hBid => {
+                        if (!newBids.some(b => b.bidId === hBid.bidId || (`${b.bidderLabel}-${b.amount}-${b.placedAt}`) === `${hBid.bidderLabel}-${hBid.amount}-${hBid.placedAt}`)) {
+                            newBids.push(hBid);
+                        }
+                    });
+                    return newBids.sort((a, b) => new Date(b.placedAt).getTime() - new Date(a.placedAt).getTime());
+                });
+                setHistoryPage(nextPage);
+            }
+        } catch (err) {
+            console.error('Failed to load older bids:', err);
+        } finally {
+            setIsLoadingHistory(false);
+        }
+    };
+
     const handlePlaceBid = (amount: string) => {
         if (stompClientRef.current && stompClientRef.current.connected && auction) {
             stompClientRef.current.publish({
@@ -175,7 +232,13 @@ export default function BidPage() {
 
     return (
         <div className="flex-1 bg-neutral-50/50 py-8 px-4 sm:px-6 lg:px-8 min-h-[calc(100vh-64px)]">
-            <div className="max-w-6xl mx-auto flex flex-col gap-6">
+            {errorMessage && (
+                <ErrorBox 
+                    message={errorMessage} 
+                    onClose={() => setErrorMessage(null)} 
+                />
+            )}
+            <div className="max-w-7xl mx-auto flex flex-col gap-6 w-full">
                 <div>
                     <button 
                         onClick={() => navigate(-1)}
@@ -186,15 +249,21 @@ export default function BidPage() {
                     </button>
                 </div>
 
-                <div className="bg-white rounded-2xl shadow-xl border border-neutral-200 overflow-hidden flex flex-col lg:flex-row lg:h-[750px]">
+                <div className="bg-white rounded-2xl shadow-xl border border-neutral-200 overflow-hidden flex flex-col lg:flex-row lg:h-[750px] w-full">
                     {/* Left: Info Panel */}
-                    <div className="w-full lg:w-3/5 border-b lg:border-b-0 lg:border-r border-neutral-200 flex flex-col h-auto min-h-[500px] lg:min-h-0 lg:h-auto overflow-y-auto">
+                    <div className="w-full lg:w-1/2 shrink-0 border-b lg:border-b-0 lg:border-r border-neutral-200 flex flex-col h-auto min-h-[500px] lg:min-h-0 lg:h-auto overflow-y-auto">
                         <BidInfoPanel auction={auction} ticker={ticker} onPlaceBid={handlePlaceBid} />
                     </div>
 
                     {/* Right: Feed Panel */}
-                    <div className="w-full lg:w-2/5 flex flex-col bg-neutral-50/50 h-[500px] lg:h-auto min-h-0">
-                        <BidFeedPanel bids={bids} isConnected={isConnected} />
+                    <div className="w-full lg:w-1/2 flex flex-col bg-neutral-50/50 h-[500px] lg:h-auto min-h-0">
+                        <BidFeedPanel 
+                            bids={bids} 
+                            isConnected={isConnected} 
+                            onLoadMore={loadMoreHistory}
+                            hasMore={hasMoreHistory}
+                            isLoadingMore={isLoadingHistory}
+                        />
                     </div>
                 </div>
             </div>

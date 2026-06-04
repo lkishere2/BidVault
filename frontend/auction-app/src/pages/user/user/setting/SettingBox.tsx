@@ -1,6 +1,5 @@
 import type { UserResponse } from '../../../../types/user';
 import { UsernameChangingBox } from './UsernameChangingBox';
-import { EmailChangingBox } from './EmailChangingBox';
 import { ProfileImageChangingBox } from './ProfileImageChangingBox';
 import { PasswordChangingBox } from './PasswordChangingBox';
 
@@ -11,8 +10,7 @@ export const SettingBox = ({ user }: { user: UserResponse }) => {
             <div className="flex flex-col gap-5">
                 <ProfileImageChangingBox currentImage={user.profileImageUrl} />
                 <UsernameChangingBox currentUsername={user.username} />
-                <EmailChangingBox currentEmail={user.email} />
-                <PasswordChangingBox />
+                <PasswordChangingBox userEmail={user.email} />
             </div>
         </div>
     );

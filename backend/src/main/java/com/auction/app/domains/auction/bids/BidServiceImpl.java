@@ -23,13 +23,11 @@ import com.auction.app.domains.auction.bids.model.Bid;
 import com.auction.app.domains.auction.bids.model.BidStatus;
 import com.auction.app.domains.auction.bids.validator.BidValidatorService;
 import com.auction.app.domains.auction.exceptions.*;
-import com.auction.app.domains.users.exceptions.UserNotFoundException;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -116,14 +114,13 @@ public class BidServiceImpl implements BidService {
     @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void processNextBid(Long auctionId) {
-        // PESSIMISTIC LOCK: Thread will wait here until any previous 
+        // PESSIMISTIC LOCK: Thread will wait here until any previous
         // processNextBid for this auction is fully complete.
-        Auction auction = auctionRepository.findByIdForUpdate(auctionId)
-                .orElseThrow(() -> new AuctionNotFoundException("Auction not found."));
 
         while (true) {
             PendingBid pendingBid = cache.dequeueBid(auctionId);
-            if (pendingBid == null) break;
+            if (pendingBid == null)
+                break;
 
             Bid bid = findBidById(pendingBid.getBidId());
             AuctionResponse response = getActiveAuctionResponse(auctionId);
@@ -137,7 +134,7 @@ public class BidServiceImpl implements BidService {
             // ATOMIC STEP:
             // 1. Clear previous HELD status (The repo method is atomic)
             bidRepository.refundPreviousHighest(auctionId);
-            
+
             // 2. Set current bid to HELD
             bid.setStatus(BidStatus.HELD);
             bidRepository.save(bid);
@@ -155,11 +152,11 @@ public class BidServiceImpl implements BidService {
         response.setBidCount(response.getBidCount() + 1);
         response.setWinnerId(pendingBid.getBidderId());
         response.setWinnerLabel(pendingBid.getBidderLabel());
-        
+
         // Check if sniper protection applies
         boolean isExtended = applySniperProtection(auctionId, response);
         response.setExtended(isExtended);
-        
+
         // Immediately persist auction to DB
         Auction auction = findAuctionById(auctionId);
         auction.setCurrentPrice(response.getCurrentPrice());
@@ -194,16 +191,15 @@ public class BidServiceImpl implements BidService {
                 .ended(false)
                 .build();
         publisher.publish(ticker);
-        
-        log.info("[Bid Service] Auction #{} updated: price ${}, bids {}, minIncrement ${}", 
+
+        log.info("[Bid Service] Auction #{} updated: price ${}, bids {}, minIncrement ${}",
                 auctionId, response.getCurrentPrice(), response.getBidCount(), response.getMinBidIncrement());
     }
 
-
     @Override
     public Slice<BidResponse> getBidHistory(Long auctionId, Pageable pageable) {
-    return bidRepository.findByAuctionIdOrderByPlacedAtDesc(auctionId, pageable)
-            .map(BidResponse::from);
+        return bidRepository.findByAuctionIdOrderByPlacedAtDesc(auctionId, pageable)
+                .map(BidResponse::from);
     }
 
     @Override
@@ -255,21 +251,6 @@ public class BidServiceImpl implements BidService {
     private Bid findBidById(Long bidId) {
         return bidRepository.findById(bidId)
                 .orElseThrow(() -> new BidNotFoundException("Bid record with ID " + bidId + " was not found."));
-    }
-
-    private User findBidderById(Long bidderId) {
-        return userRepository.findById(bidderId)
-                .orElseThrow(() -> new UserNotFoundException("Bidder with ID " + bidderId + " was not found."));
-    }
-
-    private void refundPreviousHighestBidder(Long auctionId) {
-        bidRepository.findByAuctionIdAndStatus(auctionId, BidStatus.HELD)
-                .forEach(oldBid -> {
-                    oldBid.setStatus(BidStatus.REFUNDED);
-                    bidRepository.save(oldBid);
-                    log.info("[Bid Service] Bid #{} flipped to REFUNDED — outbid on auction #{}", oldBid.getId(),
-                            auctionId);
-                });
     }
 
     private boolean applySniperProtection(Long auctionId, AuctionResponse response) {
@@ -326,7 +307,7 @@ public class BidServiceImpl implements BidService {
             for (Auction auction : activeAuctions) {
                 int deletedCount = bidRepository.deleteDeadBids(auction.getId(), auction.getCurrentPrice());
                 if (deletedCount > 0) {
-                    log.info("[Dead Bid Drainer] Auction #{} — deleted {} dead bids at price ${}", 
+                    log.info("[Dead Bid Drainer] Auction #{} — deleted {} dead bids at price ${}",
                             auction.getId(), deletedCount, auction.getCurrentPrice());
                 }
             }

@@ -8,7 +8,7 @@ import lombok.Data;
 public class PasswordRequest {
 
     @NotBlank
-    private String currentPassword;
+    private String verificationCode;
 
     @NotBlank
     @Size(min = 6, max = 15)

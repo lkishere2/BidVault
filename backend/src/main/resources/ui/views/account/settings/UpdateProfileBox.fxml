@@ -56,46 +56,6 @@
         </HBox>
     </VBox>
 
-    <!-- ─── CARD 2: Email ─── -->
-    <VBox spacing="14"
-          style="-fx-background-color: #0D0D0D;
-                 -fx-background-radius: 16;
-                 -fx-border-color: rgba(245,197,24,0.22);
-                 -fx-border-radius: 16; -fx-border-width: 1;
-                 -fx-effect: dropshadow(gaussian, rgba(245,197,24,0.14), 18, 0.12, 0, 4);">
-        <padding>
-            <Insets top="22" right="22" bottom="22" left="22"/>
-        </padding>
-
-        <VBox spacing="4">
-            <Label text="EMAIL ADDRESS"
-                   style="-fx-text-fill: rgba(245,197,24,0.60);
-                          -fx-font-size: 10px; -fx-font-weight: bold;"/>
-            <Label text="Update the email linked to your account."
-                   style="-fx-text-fill: rgba(255,255,255,0.28); -fx-font-size: 11px;"/>
-        </VBox>
-
-        <Region prefHeight="0.5" maxWidth="Infinity"
-                style="-fx-background-color: rgba(255,255,255,0.06);"/>
-
-        <HBox spacing="12" alignment="CENTER_LEFT">
-            <TextField fx:id="emailField" HBox.hgrow="ALWAYS"
-                       style="-fx-background-color: #080808;
-                              -fx-text-fill: #FFFFFF;
-                              -fx-prompt-text-fill: rgba(255,255,255,0.20);
-                              -fx-background-radius: 8;
-                              -fx-border-color: rgba(255,255,255,0.08);
-                              -fx-border-radius: 8; -fx-border-width: 0.5;
-                              -fx-font-size: 13px;
-                              -fx-padding: 10 14;"/>
-            <Button text="Update" onAction="#handleEmailUpdate"
-                    style="-fx-background-color: #F5C518;
-                           -fx-text-fill: #0D0D0D;
-                           -fx-font-size: 12px; -fx-font-weight: bold;
-                           -fx-background-radius: 8; -fx-cursor: hand;
-                           -fx-padding: 10 22;"/>
-        </HBox>
-    </VBox>
 
     <!-- ─── CARD 3: Avatar ─── -->
     <VBox spacing="14"
@@ -183,8 +143,19 @@
                 style="-fx-background-color: rgba(255,255,255,0.06);"/>
 
         <VBox spacing="10">
-            <PasswordField fx:id="currentPasswordField"
-                           promptText="Confirm current password"
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <Button text="Request Verification Code" onAction="#handleRequestOTP"
+                        style="-fx-background-color: #1A1A1A;
+                               -fx-text-fill: rgba(255,255,255,0.55);
+                               -fx-font-size: 12px; -fx-font-weight: bold;
+                               -fx-background-radius: 8;
+                               -fx-border-color: rgba(255,255,255,0.10);
+                               -fx-border-radius: 8; -fx-border-width: 0.5;
+                               -fx-cursor: hand; -fx-padding: 9 18;"/>
+            </HBox>
+
+            <TextField fx:id="verificationCodeField"
+                           promptText="Enter 6-digit verification code"
                            style="-fx-background-color: #080808;
                                   -fx-text-fill: #FFFFFF;
                                   -fx-prompt-text-fill: rgba(255,255,255,0.20);

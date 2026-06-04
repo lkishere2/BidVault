@@ -3,9 +3,10 @@ package com.auction.app.controllers.account.settings;
 import com.auction.app.domains.users.users.UserController;
 import com.auction.app.domains.users.users.dtos.UserResponse;
 import com.auction.app.domains.users.users.dtos.UsernameRequest;
-import com.auction.app.domains.users.users.dtos.EmailRequest;
 import com.auction.app.domains.users.users.dtos.PasswordRequest;
 import com.auction.app.domains.users.users.dtos.ProfileImageRequest;
+import com.auction.app.domains.auth.auth.AuthController;
+import com.auction.app.domains.auth.auth.dtos.EmailRequest;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
@@ -30,16 +31,20 @@ import java.util.Map;
 public class UpdateProfileBoxController {
 
     @FXML private TextField usernameField;
-    @FXML private TextField emailField;
 
     @FXML private TextField fileSelectedPathField;
     @FXML private Button uploadImageButton;
 
-    @FXML private PasswordField currentPasswordField;
+    @FXML private TextField verificationCodeField;
     @FXML private PasswordField passwordField;
 
     @Autowired
     private UserController userController;
+
+    @Autowired
+    private AuthController authController;
+
+    private String currentEmail;
 
     @Value("${cloudinary.cloud-name}") private String cloudName;
     @Value("${cloudinary.api-key}") private String apiKey;
@@ -66,9 +71,9 @@ public class UpdateProfileBoxController {
             if (response != null && response.getBody() != null) {
                 UserResponse userInfo = response.getBody();
                 usernameField.setText(userInfo.getUsername());
-                emailField.setText(userInfo.getEmail());
-                currentPasswordField.clear();
-                passwordField.clear();
+                currentEmail = userInfo.getEmail();
+                if (verificationCodeField != null) verificationCodeField.clear();
+                if (passwordField != null) passwordField.clear();
             }
         } catch (Exception e) {
             System.err.println("Failed to initialize UpdateProfileBox from live database info endpoint: " + e.getMessage());
@@ -85,19 +90,6 @@ public class UpdateProfileBoxController {
             showSuccessNotification("Username Changed", "Your profile account nickname synchronized completely.");
         } catch (Exception ex) {
             showErrorNotification("Username Error", ex.getMessage());
-        }
-    }
-
-    @FXML
-    private void handleEmailUpdate() {
-        try {
-            EmailRequest req = new EmailRequest();
-            req.setEmail(emailField.getText());
-
-            userController.updateEmail(req);
-            showSuccessNotification("Email Saved", "System data records point safely to your new email.");
-        } catch (Exception ex) {
-            showErrorNotification("Email Error", ex.getMessage());
         }
     }
 
@@ -147,21 +139,37 @@ public class UpdateProfileBoxController {
     }
 
     @FXML
+    private void handleRequestOTP() {
+        if (currentEmail == null || currentEmail.isBlank()) {
+            showErrorNotification("Error", "User email not loaded yet.");
+            return;
+        }
+        try {
+            EmailRequest req = new EmailRequest();
+            req.setEmail(currentEmail);
+            authController.requestPasswordReset(req);
+            showSuccessNotification("OTP Sent", "Verification code sent to your email.");
+        } catch (Exception ex) {
+            showErrorNotification("OTP Error", ex.getMessage());
+        }
+    }
+
+    @FXML
     private void handlePasswordUpdate() {
-        if (currentPasswordField.getText().isBlank() || passwordField.getText().isBlank()) {
+        if (verificationCodeField.getText().isBlank() || passwordField.getText().isBlank()) {
             showErrorNotification("Validation Blank", "You must populate both fields to change credentials.");
             return;
         }
 
         try {
             PasswordRequest req = new PasswordRequest();
-            req.setCurrentPassword(currentPasswordField.getText());
+            req.setVerificationCode(verificationCodeField.getText());
             req.setNewPassword(passwordField.getText());
 
             userController.updatePassword(req);
 
             showSuccessNotification("Password Changed", "Security parameters updated cleanly.");
-            currentPasswordField.clear();
+            verificationCodeField.clear();
             passwordField.clear();
         } catch (Exception ex) {
             showErrorNotification("Security Sync Error", ex.getMessage());

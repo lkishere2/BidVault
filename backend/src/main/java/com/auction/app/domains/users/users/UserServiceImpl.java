@@ -1,5 +1,7 @@
 package com.auction.app.domains.users.users;
 
+import com.auction.app.domains.auth.auth.AuthService;
+import com.auction.app.domains.auth.auth.dtos.VerifyRequest;
 import com.auction.app.domains.users.exceptions.InvalidPasswordException;
 import com.auction.app.domains.users.exceptions.UserUpdateException;
 import com.auction.app.domains.users.users.dtos.*;
@@ -20,6 +22,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final SecurityUtils securityUtils;
+    private final AuthService authService;
 
     @Override
     public UserResponse getCurrentUserInfo() {
@@ -45,38 +48,21 @@ public class UserServiceImpl implements UserService {
         userRepository.updateUsername(securityUtils.getCurrentUserId(), usernameRequest.getUsername());
     }
 
-    @Override
-    @Transactional
-    public void updateEmail(EmailRequest emailRequest) {
 
-        String newEmail = emailRequest.getEmail();
-        User user = securityUtils.getCurrentUser();
-
-        // Valid check
-        if (newEmail.equals(user.getEmail())) {
-            throw new UserUpdateException("Update failed: New email must be different from current email.");
-        }
-        if (userRepository.existsByEmail(newEmail)) {
-            throw new UserUpdateException("Update failed.");
-        }
-
-        userRepository.updateEmail(user.getId(), newEmail);
-    }
 
     @Override
     @Transactional
     public void updatePassword(PasswordRequest passwordRequest) {
-
         User user = securityUtils.getCurrentUser();
 
-        if (!passwordEncoder.matches(passwordRequest.getCurrentPassword(), user.getPassword())) {
-            throw new InvalidPasswordException("Update failed: Current password is incorrect.");
-        }
-        if (passwordRequest.getCurrentPassword().equals(passwordRequest.getNewPassword())) {
-            throw new InvalidPasswordException("Update failed: New password must be different from current password.");
-        }
-
-        userRepository.updatePassword(user.getId(), passwordEncoder.encode(passwordRequest.getNewPassword()));
+        // 1. Verify the OTP code
+        VerifyRequest verifyReq = new VerifyRequest();
+        verifyReq.setEmail(user.getEmail());
+        verifyReq.setVerificationCode(passwordRequest.getVerificationCode());
+        authService.verifyPasswordReset(verifyReq);
+        
+        // 2. Reset the password (handles encoding, saving, and ticket cleanup)
+        authService.resetPassword(user.getEmail(), passwordRequest.getNewPassword());
     }
 
     @Override

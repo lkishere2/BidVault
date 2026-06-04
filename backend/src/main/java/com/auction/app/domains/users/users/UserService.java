@@ -9,7 +9,7 @@ public interface UserService {
     UserResponse getUserById(Long id);
     Page<UserResponse> searchUsersByUsername(String username, int page, int size);
     void updateUsername(UsernameRequest usernameRequest);
-    void updateEmail(EmailRequest emailRequest);
+
     void updatePassword(PasswordRequest passwordRequest);
     void updateProfileImage(ProfileImageRequest profileImageRequest);
     Page<UserResponse> getAllUsers(int page, int size);
