@@ -65,7 +65,7 @@ The repository is organized into two main monolithic modules (Backend and Fronte
 │   │   └── infrastructure/        # Configurations (Security, WebSocket, Redis)
 │   └── src/main/resources/ui/     # JavaFX FXML views and styles
 │
-├── frontend/auction-app/          # ReactTS Web Application
+├── frontend/                      # ReactTS Web Application
 │   └── src/
 │       ├── api/                   # Axios HTTP clients and Interceptors
 │       ├── components/            # Reusable UI components
