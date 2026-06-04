@@ -26,6 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.auction.app.domains.auth.auth.AuthService;
 import com.auction.app.domains.users.users.UserController;
 import com.auction.app.domains.users.users.UserService;
 import com.auction.app.domains.users.users.dtos.PasswordRequest;
@@ -55,6 +56,9 @@ class UserControllerTest {
 
     @MockitoBean
     private UserService userService;
+
+    @MockitoBean
+    private AuthService authService;
 
     // =========================================================================
     // METHOD 1: getCurrentUserInformation (2 Tests)

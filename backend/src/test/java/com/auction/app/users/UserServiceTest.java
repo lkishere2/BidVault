@@ -22,6 +22,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.auction.app.TestReflectionUtils;
+import com.auction.app.domains.auth.auth.AuthService;
 import com.auction.app.domains.users.users.UserRepository;
 import com.auction.app.domains.users.users.UserServiceImpl;
 import com.auction.app.domains.users.users.dtos.PasswordRequest;
@@ -39,6 +40,9 @@ class UserServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private AuthService authService;
 
     private TestSecurityUtils securityUtils;
 
@@ -133,7 +137,7 @@ class UserServiceTest {
 
     @Test
     void updatePassword_WhenRequestIsValid_ShouldEncodeAndPersistNewPassword() {
-        PasswordRequest request = createPasswordRequest("oldPassword", "newPassword");
+        PasswordRequest request = createPasswordRequest("696969", "newPassword");
         when(passwordEncoder.matches("oldPassword", "encodedOldPassword")).thenReturn(true);
         when(passwordEncoder.encode("newPassword")).thenReturn("encodedNewPassword");
 
