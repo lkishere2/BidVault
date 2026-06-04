@@ -8,7 +8,7 @@ export interface FeedbackResponse {
     email: string;
     content: string;
     adminResponse?: string;
-    createdAt: string; // Khớp với LocalDateTime từ Backend
+    createdAt: string;
 }
 
 export interface FeedbackAdminResponseRequest {
