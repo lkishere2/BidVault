@@ -8,7 +8,10 @@ import org.springframework.context.annotation.FilterType;
 @SpringBootApplication
 @ComponentScan(excludeFilters = @ComponentScan.Filter(
     type = FilterType.REGEX, 
-    pattern = "com.auction.app.MainController"
+    pattern = {
+        "com.auction.app.MainController",
+        "com.auction.app.controllers\\..*"
+    }
 ))
 public class BackendApplication {
     public static void main(String[] args) {

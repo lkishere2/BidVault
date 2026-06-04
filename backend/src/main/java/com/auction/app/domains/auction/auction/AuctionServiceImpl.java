@@ -191,11 +191,11 @@ public class AuctionServiceImpl implements AuctionService {
     public Page<AuctionResponse> getDiscoverableAuctions(AuctionFindingRequest request, Pageable pageable) {
         log.info("[Auction Service - Get Discoverable Auctions] Mapping tag enums to string values for native query execution");
 
-        String[] tagStrings = (request.getTags() != null)
-                ? request.getTags().stream().map(Enum::name).toArray(String[]::new)
-                : new String[0];
+        List<String> tagStrings = (request.getTags() != null)
+                ? request.getTags().stream().map(Enum::name).toList()
+                : List.of();
 
-        boolean hasTags = tagStrings.length > 0;
+        boolean hasTags = !tagStrings.isEmpty();
         String statusString = (request.getStatus() != null) ? request.getStatus().name() : null;
         
         Page<Long> idPage = auctionRepository.findAuctionIds(

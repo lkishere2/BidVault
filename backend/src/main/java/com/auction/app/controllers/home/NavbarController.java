@@ -55,7 +55,7 @@ public class NavbarController {
 
         if (navExplore != null) {
             navExplore.setOnMouseClicked(event -> {
-                System.out.println("Routing to the dynamic Explore View framework...");
+                System.out.println("Routing to the dynamic Community View framework...");
                 mainController.navigateTo("/ui/views/explore/ExploreView.fxml");
             });
         }
@@ -88,7 +88,7 @@ public class NavbarController {
 
     private void configureNavLabels() {
         if (navDashboardController != null) navDashboardController.setItemText("Dashboard");
-        if (navExploreController != null) navExploreController.setItemText("Explore");
+        if (navExploreController != null) navExploreController.setItemText("Community");
         if (navMarketController != null) navMarketController.setItemText("Market");
         if (navAccountController != null) navAccountController.setItemText("Account");
         if (navAdminInnerController != null) navAdminInnerController.setItemText("Admin");

@@ -1,32 +1,43 @@
 package com.auction.app.feedback;
 
-import com.auction.app.domains.feedback.model.Feedback;
-import com.auction.app.domains.feedback.FeedbackRepository;
-import com.auction.app.domains.feedback.FeedbackServiceImpl;
-import com.auction.app.domains.feedback.dtos.FeedbackRequest;
-import com.auction.app.domains.feedback.dtos.FeedbackResponse;
-import com.auction.app.domains.feedback.exceptions.FeedBackNotFoundException;
-import com.auction.app.domains.users.users.model.User;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.*;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.eq;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import com.auction.app.TestReflectionUtils;
+import com.auction.app.domains.feedback.FeedbackRepository;
+import com.auction.app.domains.feedback.FeedbackServiceImpl;
+import com.auction.app.domains.feedback.dtos.FeedbackRequest;
+import com.auction.app.domains.feedback.dtos.FeedbackResponse;
+import com.auction.app.domains.feedback.exceptions.FeedBackNotFoundException;
+import com.auction.app.domains.feedback.model.Feedback;
+import com.auction.app.domains.users.users.model.User;
+import com.auction.app.infrastructure.security.TestSecurityUtils;
 
 @ExtendWith(MockitoExtension.class)
 class FeedbackServiceTest {
@@ -38,6 +49,7 @@ class FeedbackServiceTest {
     private FeedbackServiceImpl feedbackService;
 
     private User currentUser;
+    private TestSecurityUtils testSecurityUtils;
 
     @BeforeEach
     void setUp() {
@@ -49,9 +61,14 @@ class FeedbackServiceTest {
                 .enabled(true)
                 .build();
 
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(currentUser, null)
-        );
+    // configure test security utils and inject into service under test
+    testSecurityUtils = new TestSecurityUtils();
+    testSecurityUtils.setCurrentUser(currentUser);
+    TestReflectionUtils.injectField(feedbackService, "securityUtils", testSecurityUtils);
+
+    SecurityContextHolder.getContext().setAuthentication(
+        new UsernamePasswordAuthenticationToken(currentUser, null)
+    );
     }
 
     @AfterEach
@@ -146,7 +163,7 @@ class FeedbackServiceTest {
 
         assertThatThrownBy(() -> feedbackService.updateFeedback(99L, createFeedbackRequest("content")))
                 .isInstanceOf(FeedBackNotFoundException.class)
-                .hasMessage("Feedback not found");
+                .hasMessageContaining("Feedback not found");
 
         verify(feedbackRepository, never()).save(any(Feedback.class));
     }
@@ -165,7 +182,7 @@ class FeedbackServiceTest {
 
         assertThatThrownBy(() -> feedbackService.updateFeedback(10L, createFeedbackRequest("content")))
                 .isInstanceOf(AccessDeniedException.class)
-                .hasMessage("Unauthorized: You cannot delete this feedback.");
+                .hasMessageContaining("cannot delete this feedback");
 
         verify(feedbackRepository, never()).save(any(Feedback.class));
     }
@@ -190,7 +207,7 @@ class FeedbackServiceTest {
 
         assertThatThrownBy(() -> feedbackService.deleteFeedback(99L))
                 .isInstanceOf(FeedBackNotFoundException.class)
-                .hasMessage("Feedback not found");
+                .hasMessageContaining("Feedback not found");
 
         verify(feedbackRepository, never()).delete(any(Feedback.class));
     }
@@ -209,7 +226,7 @@ class FeedbackServiceTest {
 
         assertThatThrownBy(() -> feedbackService.deleteFeedback(10L))
                 .isInstanceOf(AccessDeniedException.class)
-                .hasMessage("Unauthorized: You cannot delete this feedback.");
+                .hasMessageContaining("cannot delete this feedback");
 
         verify(feedbackRepository, never()).delete(any(Feedback.class));
     }

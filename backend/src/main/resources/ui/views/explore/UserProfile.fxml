@@ -3,12 +3,14 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.TilePane?>
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.auction.app.controllers.explore.UserProfileController"
       spacing="28" alignment="TOP_LEFT" style="-fx-background-color: transparent;">
 
-    <Button text="← Back to Search" onAction="#handleBackToSearch"
+    <Button text="Back to Community" onAction="#handleBackToSearch"
             style="-fx-background-color: transparent; -fx-text-fill: #F5C518; -fx-font-size: 14; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 0;"/>
 
     <HBox spacing="32" alignment="CENTER_LEFT" style="-fx-background-color: #1A1A1A; -fx-padding: 32; -fx-background-radius: 16; -fx-border-color: #F5C518; -fx-border-radius: 16; -fx-border-width: 1;">
@@ -35,4 +37,19 @@
         <Button fx:id="followButton" text="Follow" onAction="#handleToggleFollow"
                 style="-fx-background-color: #F5C518; -fx-text-fill: #0D0D0D; -fx-background-radius: 8; -fx-padding: 10 24; -fx-font-weight: bold; -fx-font-size: 14; -fx-cursor: hand;"/>
     </HBox>
+
+    <VBox spacing="14" VBox.vgrow="ALWAYS">
+        <Label text="Auctions"
+               style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #FFFFFF;"/>
+        <Label fx:id="auctionsStatusLabel"
+               style="-fx-text-fill: #94A3B8; -fx-font-size: 14;"/>
+        <ScrollPane fitToWidth="true"
+                    style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;"
+                    VBox.vgrow="ALWAYS">
+            <TilePane fx:id="auctionGrid"
+                      hgap="16" vgap="16"
+                      prefColumns="4"
+                      style="-fx-padding: 2 18 18 2;"/>
+        </ScrollPane>
+    </VBox>
 </VBox>

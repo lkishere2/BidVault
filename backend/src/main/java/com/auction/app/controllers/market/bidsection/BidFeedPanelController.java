@@ -8,6 +8,9 @@ import com.auction.app.domains.auction.bids.dtos.BidResponse;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -39,8 +42,13 @@ public class BidFeedPanelController {
     @FXML private ListView<BidFeedEvent> feedListView;
     @FXML private Label                  connectionStatusLabel;
     @FXML private Label                  emptyLabel;
+    @FXML private LineChart<Number, Number> bidPriceChart;
+    @FXML private NumberAxis             chartXAxis;
+    @FXML private NumberAxis             chartYAxis;
 
     private final BidService bidService;
+    private final XYChart.Series<Number, Number> priceSeries = new XYChart.Series<>();
+    private Instant firstChartPointAt;
 
     private static final DateTimeFormatter TIME_FMT =
             DateTimeFormatter.ofPattern("HH:mm:ss").withZone(ZoneId.systemDefault());
@@ -51,6 +59,7 @@ public class BidFeedPanelController {
 
     public void initialize(AuctionResponse auction, AuctionStatus mode) {
         feedListView.setCellFactory(lv -> new BidFeedCell());
+        configureChart();
 
         // Load history from REST on a background thread
         Thread worker = new Thread(() -> {
@@ -64,11 +73,13 @@ public class BidFeedPanelController {
                         // History comes DESC from server — add oldest-first so newest is at bottom
                         for (int i = history.size() - 1; i >= 0; i--) {
                             BidResponse h = history.get(i);
-                            feedListView.getItems().add(BidFeedEvent.builder()
+                            BidFeedEvent event = BidFeedEvent.builder()
                                     .bidderLabel(h.getBidderLabel())
                                     .amount(h.getAmount())
                                     .placedAt(h.getPlacedAt())
-                                    .build());
+                                    .build();
+                            feedListView.getItems().add(event);
+                            addChartPoint(event);
                         }
                         scrollToBottom();
                     }
@@ -93,7 +104,34 @@ public class BidFeedPanelController {
     public void appendEvent(BidFeedEvent event) {
         showEmpty(false);
         feedListView.getItems().add(event);
+        addChartPoint(event);
         scrollToBottom();
+    }
+
+    private void configureChart() {
+        priceSeries.setName("Current price");
+        bidPriceChart.getData().setAll(priceSeries);
+        bidPriceChart.setLegendVisible(false);
+        bidPriceChart.setAnimated(false);
+        bidPriceChart.setCreateSymbols(false);
+        chartXAxis.setLabel("Time");
+        chartYAxis.setLabel("Price");
+        chartXAxis.setForceZeroInRange(false);
+        chartYAxis.setForceZeroInRange(false);
+    }
+
+    private void addChartPoint(BidFeedEvent event) {
+        if (event == null || event.getAmount() == null) return;
+        Instant placedAt = event.getPlacedAt() != null ? event.getPlacedAt() : Instant.now();
+        if (firstChartPointAt == null) {
+            firstChartPointAt = placedAt;
+        }
+
+        long secondsFromStart = Math.max(0, java.time.Duration.between(firstChartPointAt, placedAt).getSeconds());
+        priceSeries.getData().add(new XYChart.Data<>(secondsFromStart, event.getAmount()));
+        if (priceSeries.getData().size() > 80) {
+            priceSeries.getData().remove(0);
+        }
     }
 
     public void setConnectionStatus(boolean connected) {

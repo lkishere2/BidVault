@@ -25,6 +25,7 @@ public class AccountNavbarController {
     @FXML private Parent navProfile;
     @FXML private Parent navBalance;
     @FXML private Parent navInventory;
+    @FXML private Parent navNotifications;
     @FXML private Parent navSettings;
     @FXML private Parent navBack;
 
@@ -32,6 +33,7 @@ public class AccountNavbarController {
     @FXML private NavbarItemController navProfileController;
     @FXML private NavbarItemController navBalanceController;
     @FXML private NavbarItemController navInventoryController;
+    @FXML private NavbarItemController navNotificationsController;
     @FXML private NavbarItemController navSettingsController;
     @FXML private NavbarItemController navBackController;
 
@@ -41,6 +43,7 @@ public class AccountNavbarController {
         if (navProfileController != null) navProfileController.setItemText("Profile");
         if (navBalanceController != null) navBalanceController.setItemText("Balance");
         if (navInventoryController != null) navInventoryController.setItemText("Inventory");
+        if (navNotificationsController != null) navNotificationsController.setItemText("Notifications");
         if (navSettingsController != null) navSettingsController.setItemText("Settings");
         if (navBackController != null) navBackController.setItemText("Back to Dashboard");
 
@@ -48,6 +51,7 @@ public class AccountNavbarController {
         if (navProfile != null) navProfile.setOnMouseClicked(e -> handlePanelSwap("Profile"));
         if (navBalance != null) navBalance.setOnMouseClicked(e -> handlePanelSwap("Balance"));
         if (navInventory != null) navInventory.setOnMouseClicked(e -> handlePanelSwap("Inventory"));
+        if (navNotifications != null) navNotifications.setOnMouseClicked(e -> handlePanelSwap("Notifications"));
         if (navSettings != null) navSettings.setOnMouseClicked(e -> handlePanelSwap("Settings"));
 
         if (navBack != null) {
@@ -74,6 +78,8 @@ public class AccountNavbarController {
         } else if ("Inventory".equals(panelName)) {
             // Point path directly to your master personal inventory workspace panel view
             fxmlPath = "/ui/views/account/inventory/InventoryView.fxml";
+        } else if ("Notifications".equals(panelName)) {
+            fxmlPath = "/ui/views/account/notifications/NotificationView.fxml";
         }
 
         // If an explicit route mapping matches, process dynamic FXML scene injection

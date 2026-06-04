@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlGroup;
 
@@ -13,6 +14,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 @DataJpaTest
+@ContextConfiguration(classes = com.auction.app.TestApplication.class)
 @SqlGroup({
         @Sql(scripts = "/test-init.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS),
         @Sql(statements = "DROP TABLE IF EXISTS tests", executionPhase = Sql.ExecutionPhase.AFTER_TEST_CLASS)

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.auction.app.controllers.account.notifications.NotificationViewController"
+      spacing="22"
+      style="-fx-background-color: #0D0D0D;"
+      VBox.vgrow="ALWAYS">
+
+    <padding>
+        <Insets top="28" right="28" bottom="20" left="28"/>
+    </padding>
+
+    <HBox alignment="CENTER_LEFT" spacing="16"
+          style="-fx-background-color: #1A1A1A; -fx-background-radius: 10; -fx-border-color: rgba(255,255,255,0.06); -fx-border-radius: 10; -fx-padding: 24;">
+        <VBox spacing="6" HBox.hgrow="ALWAYS">
+            <Label text="Notifications"
+                   style="-fx-text-fill: #FFFFFF; -fx-font-size: 22; -fx-font-weight: bold;"/>
+            <Label text="Follow activity, auction updates, and account events."
+                   style="-fx-text-fill: #94A3B8; -fx-font-size: 13;"/>
+        </VBox>
+        <Button text="Refresh" onAction="#handleRefresh"
+                style="-fx-background-color: rgba(255,255,255,0.08); -fx-text-fill: #E2E8F0; -fx-background-radius: 8; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 10 16;"/>
+        <Button text="Mark all read" onAction="#handleMarkAllRead"
+                style="-fx-background-color: #F5C518; -fx-text-fill: #0D0D0D; -fx-background-radius: 8; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 10 16;"/>
+    </HBox>
+
+    <Label fx:id="statusLabel"
+           style="-fx-text-fill: #94A3B8; -fx-font-size: 14;"/>
+
+    <ScrollPane fitToWidth="true"
+                style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;"
+                VBox.vgrow="ALWAYS">
+        <VBox fx:id="notificationList"
+              spacing="12"
+              style="-fx-padding: 0 18 18 0;"/>
+    </ScrollPane>
+
+    <Region VBox.vgrow="NEVER"/>
+
+    <HBox spacing="16" alignment="CENTER">
+        <Button fx:id="prevButton" text="Previous" onAction="#handlePrevPage"
+                style="-fx-background-color: rgba(245,197,24,0.16); -fx-text-fill: #F5C518; -fx-background-radius: 8; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 14;"/>
+        <Label fx:id="pageLabel" text="Page 1"
+               style="-fx-text-fill: #E2E8F0; -fx-font-size: 13;"/>
+        <Button fx:id="nextButton" text="Next" onAction="#handleNextPage"
+                style="-fx-background-color: rgba(245,197,24,0.16); -fx-text-fill: #F5C518; -fx-background-radius: 8; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 14;"/>
+    </HBox>
+</VBox>

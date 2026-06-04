@@ -159,13 +159,6 @@ public class BidSectionController {
 
                     @Override
                     public void handleFrame(StompHeaders headers, Object payload) {
-                        // --- TEMPORARY DIAGNOSTIC LOG — remove once price label is confirmed working ---
-                        log.info("Ticker received — payload class: {}, price: {}, bidCount: {}",
-                                payload.getClass().getName(),
-                                ((BidNotificationPayload) payload).getCurrentPrice(),
-                                ((BidNotificationPayload) payload).getBidCount());
-                        // --- END DIAGNOSTIC ---
-
                         BidNotificationPayload ticker = (BidNotificationPayload) payload;
                         Platform.runLater(() -> {
                             bidInfoPanel.updateFromTicker(ticker);
@@ -189,7 +182,10 @@ public class BidSectionController {
                         BidFeedEvent event = (BidFeedEvent) payload;
                         log.debug("Bid event for #{}: bidder={} amount={}",
                                 auctionId, event.getBidderLabel(), event.getAmount());
-                        Platform.runLater(() -> bidFeedPanel.appendEvent(event));
+                        Platform.runLater(() -> {
+                            bidFeedPanel.appendEvent(event);
+                            bidInfoPanel.updateFromBidEvent(event);
+                        });
                     }
                 });
             }

@@ -3,7 +3,9 @@ package com.auction.app.notifications;
 import com.auction.app.domains.notifications.NotificationController;
 import com.auction.app.domains.notifications.NotificationService;
 import com.auction.app.domains.notifications.dtos.NotificationResponse;
-import com.auction.app.domains.users.users.model.User;
+import com.auction.app.domains.users.users.model.Role;
+import com.auction.app.infrastructure.exception.GlobalExceptionHandler;
+import com.auction.app.infrastructure.security.CachedUserDetails;
 import com.auction.app.infrastructure.security.JwtAuthenticationFilter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,11 +15,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -39,6 +43,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         )
 )
 @AutoConfigureMockMvc(addFilters = false)
+@ContextConfiguration(classes = {com.auction.app.TestApplication.class, NotificationController.class})
+@Import(GlobalExceptionHandler.class)
 class NotificationControllerTest {
 
     @Autowired
@@ -47,15 +53,16 @@ class NotificationControllerTest {
     @MockitoBean
     private NotificationService notificationService;
 
-    private User currentUser;
+    private CachedUserDetails currentUser;
 
     @BeforeEach
     void setUp() {
-        currentUser = User.builder()
+        currentUser = CachedUserDetails.builder()
                 .id(1L)
-                .username("testuser")
+                .displayName("testuser")
                 .email("testuser@example.com")
                 .password("password")
+                .role(Role.USER)
                 .enabled(true)
                 .build();
 
