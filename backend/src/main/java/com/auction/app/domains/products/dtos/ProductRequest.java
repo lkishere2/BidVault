@@ -14,6 +14,7 @@ public class ProductRequest {
     @Pattern(regexp = "^(?:\\S+\\s*){1,50}$", message = "Product name must not exceed 50 words")
     private String productName;
 
+    @NotBlank(message = "Description cannot be empty")
     @Pattern(regexp = "^(?:\\S+\\s*){0,350}$", message = "Description must not exceed 350 words")
     private String description;
 

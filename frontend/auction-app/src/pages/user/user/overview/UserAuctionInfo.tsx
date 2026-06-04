@@ -1,12 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { AuctionResponse } from '../../../../types/auction';
+import { ImageViewerModal } from '../../../../components/ui/ImageViewerModal';
 
 interface UserAuctionInfoProps {
     auction: AuctionResponse;
     onClose: () => void;
+    isMe?: boolean;
+    onCancel?: (id: number) => void;
 }
 
-export const UserAuctionInfo: React.FC<UserAuctionInfoProps> = ({ auction, onClose }) => {
+export const UserAuctionInfo: React.FC<UserAuctionInfoProps> = ({ auction, onClose, isMe, onCancel }) => {
+    const [viewerImage, setViewerImage] = useState<string | null>(null);
+
     // Smart image URL handler with a modern placeholder
     const imageUrl = auction.productImageUrl
         ? auction.productImageUrl.startsWith('http')
@@ -20,7 +25,12 @@ export const UserAuctionInfo: React.FC<UserAuctionInfoProps> = ({ auction, onClo
                 <button onClick={onClose} style={{ position: 'absolute', top: '20px', right: '20px', border: 'none', background: 'transparent', fontSize: '24px', color: '#9ca3af', cursor: 'pointer', outline: 'none' }}>✕</button>
 
                 <h2 style={{ margin: '0 0 16px 0', fontSize: '22px', fontWeight: '700', color: '#1f2937', paddingRight: '24px' }}>{auction.productName}</h2>
-                <img src={imageUrl} alt={auction.productName} style={{ width: '100%', maxHeight: '260px', objectFit: 'cover', borderRadius: '8px', background: '#f3f4f6', marginBottom: '20px' }} />
+                <img 
+                    src={imageUrl} 
+                    alt={auction.productName} 
+                    style={{ width: '100%', maxHeight: '260px', objectFit: 'cover', borderRadius: '8px', background: '#f3f4f6', marginBottom: '20px', cursor: 'zoom-in' }} 
+                    onClick={() => setViewerImage(imageUrl)}
+                />
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', borderBottom: '1px solid #e5e7eb', paddingBottom: '20px' }}>
                     <div><span style={{ color: '#6b7280', fontSize: '13px' }}>Status</span><div style={{ fontWeight: '600', color: '#1f2937', marginTop: '2px' }}>{auction.status}</div></div>
@@ -52,7 +62,19 @@ export const UserAuctionInfo: React.FC<UserAuctionInfoProps> = ({ auction, onClo
                         ))}
                     </div>
                 )}
+
+                {isMe && (auction.status === 'UPCOMING' || (auction.status === 'ACTIVE' && auction.bidCount === 0)) && onCancel && (
+                    <button 
+                        onClick={() => onCancel(auction.id)}
+                        style={{ marginTop: '24px', width: '100%', padding: '12px', background: '#ef4444', color: 'white', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', border: 'none', transition: 'background 0.2s' }}
+                        onMouseOver={(e) => e.currentTarget.style.background = '#dc2626'}
+                        onMouseOut={(e) => e.currentTarget.style.background = '#ef4444'}
+                    >
+                        Cancel Auction
+                    </button>
+                )}
             </div>
+            {viewerImage && <ImageViewerModal imageUrl={viewerImage} onClose={() => setViewerImage(null)} />}
         </div>
     );
 };

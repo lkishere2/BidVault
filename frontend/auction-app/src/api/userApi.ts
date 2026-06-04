@@ -11,5 +11,6 @@ export const userApi = {
     updateProfileImage: (data: ProfileImageRequest) => api.patch<void>('/api/v1/users/update-profile-image', data),
     getAllUsers: (page = 0, size = 20) => api.get<Page<UserResponse>>(`/api/v1/users/all?page=${page}&size=${size}`),
     getTopUsers: () => api.get<UserResponse[]>('/api/v1/users/top'),
+    updateRole: (id: number, role: string) => api.patch<void>(`/api/v1/users/${id}/role?role=${role}`),
 };
 export default userApi;

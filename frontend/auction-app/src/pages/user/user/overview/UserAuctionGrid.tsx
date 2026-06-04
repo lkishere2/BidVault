@@ -45,6 +45,18 @@ export const UserAuctionGrid: React.FC<UserAuctionGridProps> = ({ userId, isMe =
         return () => { cancelled = true; };
     }, [userId, isMe]);
 
+    const handleCancel = async (id: number) => {
+        if (!window.confirm('Are you sure you want to cancel this auction?')) return;
+        try {
+            await auctionApi.cancelAuction(id);
+            setAuctions(prev => prev.map(a => a.id === id ? { ...a, status: 'CANCELLED' } : a));
+            setSelectedAuction(null);
+        } catch (error) {
+            console.error('Failed to cancel auction', error);
+            alert('Failed to cancel auction. Please try again.');
+        }
+    };
+
     return (
         <div className="flex flex-col gap-6 mt-10">
             <h3 className="text-[20px] font-black text-[#0D0D0D] tracking-tight">Auctions</h3>
@@ -69,6 +81,8 @@ export const UserAuctionGrid: React.FC<UserAuctionGridProps> = ({ userId, isMe =
                 <UserAuctionInfo
                     auction={selectedAuction}
                     onClose={() => setSelectedAuction(null)}
+                    isMe={isMe}
+                    onCancel={handleCancel}
                 />
             )}
         </div>

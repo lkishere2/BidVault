@@ -39,8 +39,14 @@ public class AuctionValidatorServiceImpl implements AuctionValidatorService {
 
     @Override
     public void validateAuctionCancellation(Auction auction) {
-        if (auction == null || auction.getStatus() != AuctionStatus.UPCOMING) {
-            throw new NotUpcommingAuctionException("Only UPCOMING auctions can be cancelled");
+        if (auction == null) {
+            throw new NotUpcommingAuctionException("Auction not found");
+        }
+        if (auction.getStatus() == AuctionStatus.ENDED || auction.getStatus() == AuctionStatus.CANCELLED) {
+            throw new NotUpcommingAuctionException("Cannot cancel an already ended or cancelled auction");
+        }
+        if (auction.getStatus() == AuctionStatus.ACTIVE && auction.getBidCount() > 0) {
+            throw new NotUpcommingAuctionException("Cannot cancel an active auction that already has bids");
         }
     }
 }

@@ -3,6 +3,7 @@ import { Pencil, Trash2, X, Check } from 'lucide-react';
 import { productApi } from '../../../../api/productApi';
 import type { ProductResponse, Tag } from '../../../../types/product';
 import { SuccessNotification, FailedNotification } from '../setting/Notification';
+import { ImageViewerModal } from '../../../../components/ui/ImageViewerModal';
 
 interface UserItemInfoProps {
     product: ProductResponse;
@@ -21,6 +22,7 @@ export const UserItemInfo: React.FC<UserItemInfoProps> = ({ product, onClose, on
     const [isDeleting, setIsDeleting] = useState(false);
     const [loading, setLoading] = useState(false);
     const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+    const [viewerImage, setViewerImage] = useState<string | null>(null);
 
     const [editName, setEditName] = useState(product.productName);
     const [editDescription, setEditDescription] = useState(product.description || '');
@@ -116,10 +118,16 @@ export const UserItemInfo: React.FC<UserItemInfoProps> = ({ product, onClose, on
                         <X size={20} />
                     </button>
 
-                    {/* Image — clickable to change when editing */}
+                    {/* Image — clickable to change when editing, or view when not editing */}
                     <div
-                        style={{ position: 'relative', marginBottom: '20px', borderRadius: '8px', overflow: 'hidden', cursor: isEditing ? 'pointer' : 'default' }}
-                        onClick={() => isEditing && fileInputRef.current?.click()}
+                        style={{ position: 'relative', marginBottom: '20px', borderRadius: '8px', overflow: 'hidden', cursor: isEditing ? 'pointer' : 'zoom-in' }}
+                        onClick={() => {
+                            if (isEditing) {
+                                fileInputRef.current?.click();
+                            } else {
+                                setViewerImage(imageUrl);
+                            }
+                        }}
                     >
                         <img
                             src={imageUrl}
@@ -272,6 +280,7 @@ export const UserItemInfo: React.FC<UserItemInfoProps> = ({ product, onClose, on
                     )}
                 </div>
             </div>
+            {viewerImage && <ImageViewerModal imageUrl={viewerImage} onClose={() => setViewerImage(null)} />}
             {notification?.type === 'success' && <SuccessNotification message={notification.message} onClose={() => setNotification(null)} />}
             {notification?.type === 'error' && <FailedNotification message={notification.message} onClose={() => setNotification(null)} />}
         </>

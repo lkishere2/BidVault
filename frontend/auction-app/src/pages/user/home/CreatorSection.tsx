@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import CreatorItem from './CreatorItem';
 
 export interface Creator {
@@ -11,106 +11,70 @@ export interface Creator {
     totalSold: number;
     since: number;
     bio: string;
-    badge: string;
 }
+
+import img1 from '../../../assets/1.gif';
+import img2 from '../../../assets/2.png';
+import img3 from '../../../assets/3.jpg';
+import img4 from '../../../assets/4.jpg';
 
 const CREATORS: Creator[] = [
     {
         id: '1',
-        name: 'Eleanor Voss',
-        avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=300',
-        role: 'Fine Watches Curator',
-        specialty: 'Patek Philippe · A. Lange · Independent',
-        auctions: 142,
-        totalSold: 4800000,
-        since: 2019,
-        bio: 'Eleanor spent a decade at Christie\'s watches department before joining as our lead horological curator. Her eye for undervalued references has returned collectors an average of 34% above estimate.',
-        badge: '👑',
+        name: 'Trần Vũ Duy Hưng',
+        avatar: img1,
+        role: 'System Architect',
+        specialty: 'Main features, App deployment',
+        auctions: 100,
+        totalSold: 5000000,
+        since: 2023,
+        bio: 'Hưng implemented the main features of BidVault and manages the deployment of the application.',
     },
     {
         id: '2',
-        name: 'Marcus Hale',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300',
-        role: 'Collector Cars Specialist',
-        specialty: 'Ferrari · Porsche · Pre-War Classics',
-        auctions: 89,
-        totalSold: 12300000,
-        since: 2020,
-        bio: 'Marcus has authenticated and sold some of the rarest metal on four wheels. A former Le Mans correspondent, he knows racing provenance better than anyone on the platform.',
-        badge: '🏎',
+        name: 'Vũ Long Khánh',
+        avatar: img2,
+        role: 'System Architect',
+        specialty: 'Database, Caching, Authentication',
+        auctions: 120,
+        totalSold: 4200000,
+        since: 2023,
+        bio: 'Khánh designed the core database architecture, caching layers, and the robust authentication system.',
     },
     {
         id: '3',
-        name: 'Irina Sorel',
-        avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=300',
-        role: 'Fine Art & Jewels Director',
-        specialty: 'Post-War · Contemporary · High Jewellery',
-        auctions: 210,
-        totalSold: 9100000,
-        since: 2018,
-        bio: 'Irina\'s background at Sotheby\'s Paris brought an uncompromising standard for provenance and attribution. She personally verifies every lot under her category before it goes live.',
-        badge: '💎',
+        name: 'Nguyễn Hoàng Lâm',
+        avatar: img3,
+        role: 'Tester, Desktop UI',
+        specialty: 'Quality Assurance, JavaFX UI',
+        auctions: 150,
+        totalSold: 3000000,
+        since: 2023,
+        bio: 'Lâm ensures product reliability through rigorous testing and builds the JavaFX desktop interface.',
     },
     {
         id: '4',
-        name: 'David Kwon',
-        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=300',
-        role: 'Wine & Spirits Head',
-        specialty: 'Bordeaux First-Growths · Single Malt · Rare Spirits',
-        auctions: 67,
-        totalSold: 2600000,
-        since: 2021,
-        bio: 'A Master of Wine candidate with a cellar spanning four decades of Pétrus, David brings rigorous condition assessment and storage history to every bottle that passes through his hands.',
-        badge: '🍷',
+        name: 'Đinh Thái Hữu Khánh',
+        avatar: img4,
+        role: 'Tester, Desktop UI',
+        specialty: 'Quality Assurance, JavaFX UI',
+        auctions: 110,
+        totalSold: 3800000,
+        since: 2023,
+        bio: 'Khánh focuses on comprehensive software testing and developing the seamless desktop UI experience.',
     },
 ];
 
-// Animate number count-up
-function useCountUp(target: number, active: boolean) {
-    const [val, setVal] = useState(0);
-    const raf = useRef<number>(0);
-    useEffect(() => {
-        cancelAnimationFrame(raf.current);
-        if (!active) {
-            // Defer reset into RAF to avoid calling setState synchronously in effect body
-            raf.current = requestAnimationFrame(() => setVal(0));
-            return () => cancelAnimationFrame(raf.current);
-        }
-        let start: number | null = null;
-        const duration = 700;
-        const step = (ts: number) => {
-            if (!start) start = ts;
-            const p = Math.min((ts - start) / duration, 1);
-            const e = 1 - Math.pow(1 - p, 3);
-            setVal(Math.floor(e * target));
-            if (p < 1) raf.current = requestAnimationFrame(step);
-        };
-        raf.current = requestAnimationFrame(step);
-        return () => cancelAnimationFrame(raf.current);
-    }, [target, active]);
-    return val;
-}
-
-function InfoPanel({ creator, visible }: { creator: Creator; visible: boolean }) {
-    const auctions = useCountUp(creator.auctions, visible);
-    const sold = useCountUp(creator.totalSold, visible);
-
+function InfoPanel({ creator }: { creator: Creator }) {
     return (
-        <div
-            className="flex-1 min-w-0 transition-all duration-500"
-            style={{
-                opacity: visible ? 1 : 0,
-                transform: visible ? 'translateX(0)' : 'translateX(16px)',
-            }}
-        >
-            {/* Badge + role */}
-            <div className="flex items-center gap-3 mb-5">
-                <span className="text-[28px] leading-none">{creator.badge}</span>
+        <div className="flex-1 min-w-0">
+            {/* Role */}
+            <div className="flex items-center gap-3 mb-4">
                 <div>
-                    <p className="text-[10px] font-extrabold tracking-[.14em] uppercase mb-0.5" style={{ color: '#F5C518' }}>
+                    <p className="text-[12px] font-extrabold tracking-[.14em] uppercase mb-1" style={{ color: '#F5C518' }}>
                         {creator.role}
                     </p>
-                    <p className="text-[11px] font-medium" style={{ color: '#a3a39e' }}>
+                    <p className="text-[14px] font-medium" style={{ color: '#a3a39e' }}>
                         {creator.specialty}
                     </p>
                 </div>
@@ -118,127 +82,119 @@ function InfoPanel({ creator, visible }: { creator: Creator; visible: boolean })
 
             {/* Name */}
             <h3
-                className="text-[clamp(26px,3vw,40px)] font-black text-[#0D0D0D] leading-[1.05] mb-4"
+                className="text-[clamp(28px,3.5vw,48px)] font-black text-[#0D0D0D] leading-[1.05] mb-5"
                 style={{ fontFamily: "'Playfair Display', serif" }}
             >
                 {creator.name}
             </h3>
 
             {/* Bio */}
-            <p className="text-[14px] leading-[1.8] mb-7 max-w-[460px]" style={{ color: '#6b6b63' }}>
+            <p className="text-[15px] leading-[1.7] max-w-[500px]" style={{ color: '#6b6b63' }}>
                 {creator.bio}
             </p>
-
-            {/* Stats row */}
-            <div className="flex gap-8 mb-8">
-                <div>
-                    <p
-                        className="text-[clamp(22px,2.5vw,32px)] font-black tabular-nums leading-none mb-1"
-                        style={{ fontFamily: "'Playfair Display', serif", color: '#0D0D0D' }}
-                    >
-                        {auctions}<span style={{ color: '#F5C518' }}>+</span>
-                    </p>
-                    <p className="text-[10px] font-bold tracking-[.12em] uppercase" style={{ color: '#a3a39e' }}>
-                        Auctions run
-                    </p>
-                </div>
-                <div
-                    className="self-stretch"
-                    style={{ width: '1px', background: 'rgba(0,0,0,0.08)' }}
-                />
-                <div>
-                    <p
-                        className="text-[clamp(22px,2.5vw,32px)] font-black tabular-nums leading-none mb-1"
-                        style={{ fontFamily: "'Playfair Display', serif", color: '#0D0D0D' }}
-                    >
-                        ${(sold / 1000000).toFixed(1)}<span style={{ color: '#F5C518' }}>M</span>
-                    </p>
-                    <p className="text-[10px] font-bold tracking-[.12em] uppercase" style={{ color: '#a3a39e' }}>
-                        Total sold
-                    </p>
-                </div>
-                <div
-                    className="self-stretch"
-                    style={{ width: '1px', background: 'rgba(0,0,0,0.08)' }}
-                />
-                <div>
-                    <p
-                        className="text-[clamp(22px,2.5vw,32px)] font-black tabular-nums leading-none mb-1"
-                        style={{ fontFamily: "'Playfair Display', serif", color: '#0D0D0D' }}
-                    >
-                        {creator.since}<span style={{ color: '#F5C518' }}></span>
-                    </p>
-                    <p className="text-[10px] font-bold tracking-[.12em] uppercase" style={{ color: '#a3a39e' }}>
-                        Member since
-                    </p>
-                </div>
-            </div>
-
-            <a
-                href="#"
-                className="inline-flex items-center gap-2 text-[12px] font-extrabold tracking-[.08em] uppercase text-[#0D0D0D] border-b-2 border-[#F5C518] pb-0.5 no-underline transition hover:text-[#F5C518]"
-            >
-                View all lots →
-            </a>
         </div>
     );
 }
 
 export default function CreatorSection() {
-    const [active, setActive] = useState(0);
-    const [visible, setVisible] = useState(true);
+    const [active, setActive] = useState<number | null>(null);
+    const [visible, setVisible] = useState(false);
+    const [displayIndex, setDisplayIndex] = useState<number>(0);
 
     const select = (i: number) => {
-        if (i === active) return;
-        setVisible(false);
-        setTimeout(() => {
-            setActive(i);
-            setVisible(true);
-        }, 220);
+        if (i === active) {
+            // Deselect if clicking the active one
+            setActive(null);
+            setVisible(false);
+            return;
+        }
+        
+        setActive(i);
+        if (active === null) {
+            setDisplayIndex(i);
+            setTimeout(() => setVisible(true), 50);
+        } else {
+            setVisible(false);
+            setTimeout(() => {
+                setDisplayIndex(i);
+                setVisible(true);
+            }, 300);
+        }
     };
 
     return (
         <section
             id="sec-creators"
-            className="px-[7vw] py-20"
+            className="px-[7vw] py-16 relative overflow-hidden"
             style={{ background: '#ffffff' }}
         >
-            {/* Header */}
-            <p className="text-[11px] font-bold tracking-[.16em] uppercase text-[#F5C518] mb-3">
-                Expert curators
-            </p>
-            <h2
-                className="text-[clamp(26px,3.2vw,42px)] font-black text-[#0D0D0D] mb-12"
-                style={{ fontFamily: "'Playfair Display', serif" }}
-            >
-                The people behind the lots
-            </h2>
+            <div className="relative z-10 mb-4">
+                <p className="text-[11px] font-bold tracking-[.16em] uppercase text-[#F5C518] mb-3">
+                    Meet the Team
+                </p>
+                <h2
+                    className="text-[clamp(26px,3.2vw,42px)] font-black text-[#0D0D0D] mb-4"
+                    style={{ fontFamily: "'Playfair Display', serif" }}
+                >
+                    The people behind BidVault
+                </h2>
+                <p className="text-[#a3a39e] mb-2 max-w-[500px] text-[15px]">
+                    Click on a team member to see their responsibilities.
+                </p>
+            </div>
+            
+            <div className="relative w-full h-[450px]">
+                {CREATORS.map((c, i) => {
+                    const isScattered = active === null;
+                    const isActive = active === i;
+                    
+                    let posStyle: React.CSSProperties = {};
+                    if (isScattered) {
+                        const scattered = [
+                            { top: '20%', left: '15%' },
+                            { top: '80%', left: '35%' },
+                            { top: '30%', left: '65%' },
+                            { top: '75%', left: '85%' },
+                        ];
+                        posStyle = scattered[i];
+                    } else if (isActive) {
+                        posStyle = { top: '50%', left: '20%' };
+                    } else {
+                        // Inactive items at the top right
+                        const inactiveIndex = i < active ? i : i - 1;
+                        posStyle = { top: '10%', left: `${60 + inactiveIndex * 15}%` };
+                    }
 
-            {/* Layout: circles left | info right */}
-            <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-start">
+                    return (
+                        <div 
+                            key={c.id} 
+                            className="absolute transition-all duration-700 ease-in-out cursor-pointer" 
+                            style={{ ...posStyle, transform: 'translate(-50%, -50%)', zIndex: isActive ? 20 : 10 }}
+                        >
+                            <CreatorItem
+                                creator={c}
+                                isActive={isActive}
+                                onClick={() => select(i)}
+                            />
+                        </div>
+                    );
+                })}
 
-                {/* Left — circle stack */}
-                <div className="flex lg:flex-col gap-6 lg:gap-8 items-center lg:items-start flex-shrink-0 lg:pt-2">
-                    {CREATORS.map((c, i) => (
-                        <CreatorItem
-                            key={c.id}
-                            creator={c}
-                            isActive={i === active}
-                            onClick={() => select(i)}
-                        />
-                    ))}
-                </div>
-
-                {/* Right — info panel */}
-                <div
-                    className="flex-1 rounded-2xl px-10 py-10 min-h-[280px]"
+                {/* Info Panel */}
+                <div 
+                    className="absolute transition-all duration-500 ease-in-out"
                     style={{
-                        background: '#fff',
-                        border: '1px solid rgba(0,0,0,0.07)',
-                        boxShadow: '0 2px 20px rgba(0,0,0,0.05)',
+                        top: '55%',
+                        left: '42%', 
+                        opacity: active !== null && visible ? 1 : 0,
+                        pointerEvents: active !== null ? 'auto' : 'none',
+                        transform: active !== null && visible ? 'translateY(-50%)' : 'translateY(-40%)',
+                        width: '55%',
+                        maxWidth: '650px',
+                        zIndex: 5
                     }}
                 >
-                    <InfoPanel creator={CREATORS[active]} visible={visible} />
+                    <InfoPanel creator={CREATORS[displayIndex]} />
                 </div>
             </div>
         </section>

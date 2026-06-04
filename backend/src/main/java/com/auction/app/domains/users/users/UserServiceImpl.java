@@ -85,6 +85,24 @@ public class UserServiceImpl implements UserService {
                 .toList();
     }
 
+    @Override
+    @Transactional
+    public void updateUserRole(Long userId, String role) {
+        Long currentUserId = securityUtils.getCurrentUserId();
+        if (currentUserId.equals(userId)) {
+            throw new RuntimeException("Admins cannot modify their own role.");
+        }
+        
+        com.auction.app.domains.users.users.model.Role newRole;
+        try {
+            newRole = com.auction.app.domains.users.users.model.Role.valueOf(role.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid role provided.");
+        }
+
+        userRepository.updateRole(userId, newRole);
+    }
+
     // Helpers
     private UserResponse mapToResponse(User user){
         return UserResponse.builder()

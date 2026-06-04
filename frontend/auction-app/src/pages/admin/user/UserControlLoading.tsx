@@ -14,14 +14,14 @@ export const UserControlLoading: React.FC = () => (
                 border-radius: 6px;
             }
         `}</style>
-        <div style={{ padding: '32px', minHeight: '100vh', background: '#f9fafb' }}>
-            <div style={{ marginBottom: '32px' }}>
-                <div className="shimmer" style={{ width: '180px', height: '26px', marginBottom: '10px' }} />
-                <div className="shimmer" style={{ width: '280px', height: '14px' }} />
+        <div style={{ width: '100%' }}>
+            {/* Toolbar Loading */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', gap: '16px', flexWrap: 'wrap' }}>
+                <div className="shimmer" style={{ width: '100%', maxWidth: '400px', height: '42px', borderRadius: '8px' }} />
+                <div className="shimmer" style={{ width: '80px', height: '18px' }} />
             </div>
 
-            <div className="shimmer" style={{ width: '100%', maxWidth: '400px', height: '42px', marginBottom: '28px', borderRadius: '8px' }} />
-
+            {/* Grid Loading */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '16px' }}>
                 {Array.from({ length: 12 }).map((_, i) => (
                     <div key={i} style={{ background: '#ffffff', borderRadius: '12px', padding: '20px', border: '1px solid #f3f4f6' }}>

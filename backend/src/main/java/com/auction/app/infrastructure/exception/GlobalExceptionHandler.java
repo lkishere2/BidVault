@@ -34,7 +34,8 @@ public class GlobalExceptionHandler {
     // Validation
     @ExceptionHandler({
             MethodArgumentNotValidException.class,
-            ConstraintViolationException.class
+            ConstraintViolationException.class,
+            org.springframework.dao.DataIntegrityViolationException.class
     })
     public ResponseEntity<ErrorResponse> handleValidationExceptions(Exception ex, HttpServletRequest request) {
         return buildErrorResponse(ex, HttpStatus.BAD_REQUEST, request);

@@ -41,4 +41,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u ORDER BY size(u.followers) DESC")
     List<User> findTopUsersByFollowers(Pageable pageable);
 
+    @Modifying
+    @Query("UPDATE User u SET u.role = :role WHERE u.id = :id")
+    void updateRole(@Param("id") Long id, @Param("role") com.auction.app.domains.users.users.model.Role role);
 }

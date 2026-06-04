@@ -65,4 +65,11 @@ public class UserController {
     public ResponseEntity<List<UserResponse>> getTopUsers() {
         return ResponseEntity.ok(userService.getTop8Users());
     }
+
+    @PatchMapping("/{id}/role")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> updateUserRole(@PathVariable Long id, @RequestParam String role) {
+        userService.updateUserRole(id, role);
+        return ResponseEntity.ok().build();
+    }
 }

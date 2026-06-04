@@ -2,6 +2,7 @@ import { Gavel, Users, Clock, ArrowUpRight } from 'lucide-react';
 import type { AuctionResponse } from '../../../../types/auction';
 import type { BidNotificationPayload } from '../../../../types/bid';
 import { useEffect, useState } from 'react';
+import { ImageViewerModal } from '../../../../components/ui/ImageViewerModal';
 
 interface BidInfoPanelProps {
     auction: AuctionResponse;
@@ -42,6 +43,7 @@ export default function BidInfoPanel({ auction, ticker, onPlaceBid }: BidInfoPan
 
     const [timeLeft, setTimeLeft] = useState<string>('');
     const [bidAmount, setBidAmount] = useState<string>('');
+    const [viewerImage, setViewerImage] = useState<string | null>(null);
 
     // Pre-fill next minimum bid when minBidIncrement changes
     useEffect(() => {
@@ -82,7 +84,8 @@ export default function BidInfoPanel({ auction, ticker, onPlaceBid }: BidInfoPan
                     <img
                         src={auction.productImageUrl}
                         alt={auction.productName}
-                        className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl object-cover flex-shrink-0 border border-neutral-200 shadow-sm"
+                        className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl object-cover flex-shrink-0 border border-neutral-200 shadow-sm cursor-zoom-in hover:opacity-90 transition-opacity"
+                        onClick={() => setViewerImage(auction.productImageUrl!)}
                     />
                 ) : (
                     <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl bg-neutral-100 flex items-center justify-center flex-shrink-0 border border-neutral-200 shadow-sm">
@@ -94,10 +97,15 @@ export default function BidInfoPanel({ auction, ticker, onPlaceBid }: BidInfoPan
                     <h3 className="text-[18px] sm:text-[22px] md:text-[26px] font-black text-[#0D0D0D] leading-snug mt-1 line-clamp-2">
                         {auction.productName}
                     </h3>
-                    {!isEnded && (
+                    {!isEnded && auction.status === 'ACTIVE' && (
                         <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 text-[10px] font-bold w-max">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                             LIVE
+                        </span>
+                    )}
+                    {!isEnded && auction.status === 'UPCOMING' && (
+                        <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-bold w-max">
+                            UPCOMING
                         </span>
                     )}
                     {isEnded && (
@@ -159,6 +167,7 @@ export default function BidInfoPanel({ auction, ticker, onPlaceBid }: BidInfoPan
                     {!isEnded && <ArrowUpRight size={14} strokeWidth={2} />}
                 </button>
             </div>
+            {viewerImage && <ImageViewerModal imageUrl={viewerImage} onClose={() => setViewerImage(null)} />}
         </div>
     );
 }

@@ -17,6 +17,23 @@ export const UserControlPage: React.FC = () => {
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
+    const savedUser = localStorage.getItem('bidvault_user');
+    const currentUser = savedUser ? JSON.parse(savedUser) : null;
+    const currentAdminId = currentUser ? Number(currentUser.id) : -1;
+
+    const handleRoleUpdate = async (user: UserResponse, newRole: string) => {
+        try {
+            await userApi.updateRole(user.id, newRole);
+            setRefreshTrigger(t => t + 1);
+            setNotification({ type: 'success', message: `${user.username} is now ${newRole}.` });
+            setTimeout(() => setNotification(null), 3000);
+            setSelectedUser({ ...user, role: newRole });
+        } catch {
+            setNotification({ type: 'error', message: `Failed to update role for ${user.username}.` });
+            setTimeout(() => setNotification(null), 3000);
+        }
+    };
+
     const handleDelete = async (user: UserResponse) => {
         try {
             await userApi.deleteUser(user.id);
@@ -58,8 +75,10 @@ export const UserControlPage: React.FC = () => {
             {selectedUser && (
                 <UserInfoModal
                     user={selectedUser}
+                    currentAdminId={currentAdminId}
                     onClose={() => setSelectedUser(null)}
                     onDelete={handleDelete}
+                    onRoleUpdate={handleRoleUpdate}
                 />
             )}
 

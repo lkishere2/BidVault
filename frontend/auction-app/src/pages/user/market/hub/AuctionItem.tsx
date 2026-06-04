@@ -29,6 +29,11 @@ export default function AuctionItem({ auction, onClick }: AuctionItemProps) {
                             Live Now
                         </span>
                     )}
+                    {status === 'UPCOMING' && (
+                        <span className="absolute top-3 left-3 bg-[#F5C518] text-[#0D0D0D] text-[10px] font-black tracking-wider uppercase px-2 py-1 rounded-md shadow-sm">
+                            Upcoming
+                        </span>
+                    )}
                 </div>
 
                 <div className="p-4 pb-1">

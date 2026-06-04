@@ -4,6 +4,7 @@ import { userApi } from '../../../../api/userApi';
 import type { UserStats } from '../../../../types/connection';
 import type { UserResponse } from '../../../../types/user';
 import UserInfoLoading from './UserInfoLoading';
+import { ImageViewerModal } from '../../../../components/ui/ImageViewerModal';
 
 interface UserInfoProps {
     userId: number;
@@ -14,6 +15,7 @@ export const UserInfo: React.FC<UserInfoProps> = ({ userId, currentUserId }) => 
     const [user, setUser] = useState<UserResponse | null>(null);
     const [isFollowing, setIsFollowing] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [viewerImage, setViewerImage] = useState<string | null>(null);
 
     // Determine if this profile belongs to the logged-in user.
     // If currentUserId hasn't loaded yet (undefined), we don't assume it's "me".
@@ -119,7 +121,12 @@ export const UserInfo: React.FC<UserInfoProps> = ({ userId, currentUserId }) => 
     return (
         <div className="w-full bg-white p-6 sm:p-8 rounded-2xl border border-neutral-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex flex-col sm:flex-row items-center gap-5 md:gap-6 text-center sm:text-left">
-                <img src={avatarUrl} alt={user?.username || 'User Avatar'} className="w-24 h-24 rounded-full object-cover border-4 border-neutral-50 shadow-sm" />
+                <img 
+                    src={avatarUrl} 
+                    alt={user?.username || 'User Avatar'} 
+                    className="w-24 h-24 rounded-full object-cover border-4 border-neutral-50 shadow-sm cursor-zoom-in transition-transform hover:scale-105" 
+                    onClick={() => setViewerImage(avatarUrl)}
+                />
                 <div className="flex flex-col gap-1.5">
                     <h2 className="text-[22px] md:text-[26px] font-black text-[#0D0D0D] tracking-tight">
                         {user ? user.username : `User #${userId}`}
@@ -146,6 +153,8 @@ export const UserInfo: React.FC<UserInfoProps> = ({ userId, currentUserId }) => 
                     {isFollowing ? 'Unfollow' : 'Follow'}
                 </button>
             )}
+            
+            {viewerImage && <ImageViewerModal imageUrl={viewerImage} onClose={() => setViewerImage(null)} />}
         </div>
     );
 };

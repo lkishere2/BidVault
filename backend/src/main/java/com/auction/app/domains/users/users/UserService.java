@@ -14,4 +14,5 @@ public interface UserService {
     void updateProfileImage(ProfileImageRequest profileImageRequest);
     Page<UserResponse> getAllUsers(int page, int size);
     List<UserResponse> getTop8Users();
+    void updateUserRole(Long userId, String role);
 }

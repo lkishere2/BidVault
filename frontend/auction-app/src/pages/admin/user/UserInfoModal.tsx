@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Trash2, Mail, Wallet, Shield, User as UserIcon } from 'lucide-react';
 import type { UserResponse } from '../../../types/user';
+import { ImageViewerModal } from '../../../components/ui/ImageViewerModal';
 
 const theme = {
     gold: '#F5C518',
@@ -11,12 +12,15 @@ const theme = {
 
 interface UserInfoModalProps {
     user: UserResponse;
+    currentAdminId: number;
     onClose: () => void;
     onDelete: (user: UserResponse) => void;
+    onRoleUpdate: (user: UserResponse, newRole: string) => void;
 }
 
-export const UserInfoModal: React.FC<UserInfoModalProps> = ({ user, onClose, onDelete }) => {
+export const UserInfoModal: React.FC<UserInfoModalProps> = ({ user, currentAdminId, onClose, onDelete, onRoleUpdate }) => {
     const [confirmDelete, setConfirmDelete] = useState(false);
+    const [viewerImage, setViewerImage] = useState<string | null>(null);
 
     const avatarUrl = user.profileImageUrl
         ? user.profileImageUrl.startsWith('http')
@@ -42,7 +46,12 @@ export const UserInfoModal: React.FC<UserInfoModalProps> = ({ user, onClose, onD
 
                     {/* Avatar + name */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
-                        <img src={avatarUrl} alt={user.username} style={{ width: '68px', height: '68px', borderRadius: '50%', objectFit: 'cover', border: `3px solid ${isAdmin ? theme.gold : '#e5e7eb'}`, flexShrink: 0 }} />
+                        <img 
+                            src={avatarUrl} 
+                            alt={user.username} 
+                            style={{ width: '68px', height: '68px', borderRadius: '50%', objectFit: 'cover', border: `3px solid ${isAdmin ? theme.gold : '#e5e7eb'}`, flexShrink: 0, cursor: 'zoom-in' }} 
+                            onClick={() => setViewerImage(avatarUrl)}
+                        />
                         <div>
                             <h2 style={{ margin: '0 0 6px 0', fontSize: '20px', fontWeight: 700, color: '#1f2937' }}>{user.username}</h2>
                             <span style={{
@@ -71,6 +80,24 @@ export const UserInfoModal: React.FC<UserInfoModalProps> = ({ user, onClose, onD
                             </div>
                         ))}
                     </div>
+
+                    {/* Role update section */}
+                    {user.id !== currentAdminId && (
+                        <button
+                            onClick={() => onRoleUpdate(user, isAdmin ? 'USER' : 'ADMIN')}
+                            style={{
+                                width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
+                                padding: '10px 0', borderRadius: '8px', marginBottom: '12px',
+                                border: `1px solid ${isAdmin ? '#e5e7eb' : theme.gold}`, background: isAdmin ? '#f9fafb' : `${theme.gold}20`,
+                                color: isAdmin ? '#4b5563' : '#92400e', fontWeight: 600, fontSize: '14px',
+                                cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s',
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = isAdmin ? '#f3f4f6' : `${theme.gold}30`; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = isAdmin ? '#f9fafb' : `${theme.gold}20`; }}
+                        >
+                            <Shield size={14} /> {isAdmin ? 'Revoke Admin Access' : 'Grant Admin Access'}
+                        </button>
+                    )}
 
                     {/* Delete section */}
                     {!confirmDelete ? (
@@ -110,6 +137,7 @@ export const UserInfoModal: React.FC<UserInfoModalProps> = ({ user, onClose, onD
                     )}
                 </div>
             </div>
+            {viewerImage && <ImageViewerModal imageUrl={viewerImage} onClose={() => setViewerImage(null)} />}
         </div>
     );
 };

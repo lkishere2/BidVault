@@ -2,29 +2,16 @@ import { useState, useRef } from 'react';
 
 const STEPS = [
     {
-        icon: '🔍',
-        title: 'Discover',
-        desc: 'Browse curated live and upcoming auctions across all luxury categories — watches, cars, art, jewellery and more.',
+        title: 'How to create an auction',
+        desc: 'List your items by setting up a starting price, adding high-quality images, and defining the auction duration to attract bidders.',
     },
     {
-        icon: '📋',
-        title: 'Register',
-        desc: 'Create your account and complete our quick identity verification in just a few minutes. Completely free.',
+        title: 'How to bid',
+        desc: 'Browse active auctions and place your bids in real time. Set your maximum bid to let the system automatically bid for you.',
     },
     {
-        icon: '💳',
-        title: 'Deposit',
-        desc: 'Add a small refundable deposit to unlock live bidding. It is returned in full if you do not win.',
-    },
-    {
-        icon: '🔨',
-        title: 'Bid Live',
-        desc: 'Place bids in real time from any device. Set a maximum bid and let the system bid on your behalf automatically.',
-    },
-    {
-        icon: '🏆',
-        title: 'Win & Collect',
-        desc: 'Secure checkout, white-glove shipping, and full provenance documentation delivered to your door.',
+        title: 'How to follow other users to see more auctions',
+        desc: 'Follow your favorite creators and curators to get notified whenever they launch new and exciting auctions.',
     },
 ];
 
@@ -79,7 +66,7 @@ export default function GuideSection() {
                 className="text-[clamp(26px,3.2vw,42px)] font-black text-[#0D0D0D] mb-10"
                 style={{ fontFamily: "'Playfair Display', serif" }}
             >
-                Five steps to your next treasure
+                Your guide to BidVault
             </h2>
 
             {/* Stage */}
@@ -102,7 +89,7 @@ export default function GuideSection() {
                             boxShadow: '0 2px 16px rgba(0,0,0,0.05)',
                         }}
                     >
-                        {/* Left: number + icon stacked */}
+                        {/* Left: number stacked */}
                         <div className="flex flex-col items-start gap-3 flex-shrink-0">
                             <span
                                 className="leading-none font-black text-[56px]"
@@ -110,12 +97,6 @@ export default function GuideSection() {
                             >
                                 0{cur + 1}
                             </span>
-                            <div
-                                className="w-11 h-11 rounded-lg flex items-center justify-center text-[20px]"
-                                style={{ background: 'rgba(245,197,24,.12)', border: '1px solid rgba(245,197,24,.3)' }}
-                            >
-                                {s.icon}
-                            </div>
                         </div>
 
                         {/* Right: text */}
