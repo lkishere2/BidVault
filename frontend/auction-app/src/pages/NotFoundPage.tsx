@@ -12,9 +12,6 @@ export default function NotFoundPage() {
             >
                 <h1 className="text-[24px] font-extrabold text-[#0D0D0D] tracking-tight mb-8">BidVault</h1>
 
-                {/* gavel icon — swap for any lucide icon you prefer */}
-                <div className="text-[#F5C518] text-5xl mb-3">⚖️</div>
-
                 <p className="text-[72px] font-extrabold text-[#F5C518] leading-none tracking-tighter">404</p>
                 <p className="text-[20px] font-bold text-[#0D0D0D] mt-1 mb-2">Page not found</p>
                 <p className="text-[15px] text-gray-500 mb-8 leading-relaxed">

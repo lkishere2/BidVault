@@ -78,8 +78,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse login(LoginRequest request, HttpServletRequest httpRequest) {
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
@@ -143,7 +142,8 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(verifyRequest.getEmail()).orElse(null);
         String savedCode = cache.getEmailVerificationCode(verifyRequest.getEmail());
 
-        if (user == null || user.isEnabled() || savedCode == null || !savedCode.equals(verifyRequest.getVerificationCode())) {
+        if (user == null || user.isEnabled() || savedCode == null
+                || !savedCode.equals(verifyRequest.getVerificationCode())) {
             throw new InvalidVerificationCodeException("The verification code is invalid or has expired.");
         }
 

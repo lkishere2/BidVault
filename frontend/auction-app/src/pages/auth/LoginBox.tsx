@@ -8,7 +8,7 @@ import { authApi } from '../../api/authApi';
 
 interface LoginBoxProps {
     onError: (title: string, message: string, email?: string, isUnverified?: boolean) => void;
-    onSuccess: (user: { username: string; initials: string }) => void;
+    onSuccess: () => void;
 }
 
 const GoogleIcon = () => (
@@ -43,15 +43,8 @@ export default function LoginBox({ onError, onSuccess }: LoginBoxProps) {
             localStorage.setItem('accessToken', response.data.accessToken);
             localStorage.setItem('refreshToken', response.data.refreshToken);
 
-            // Build user display data from the response and bubble up to App.tsx
-            // which owns navigation — it will navigate('/') after setting state
-            const username = response.data.username ?? email.split('@')[0];
-            const initials = username
-                .split(/[\s._-]+/)
-                .slice(0, 2)
-                .map((w: string) => w[0]?.toUpperCase() ?? '')
-                .join('');
-            onSuccess({ username, initials });
+            // Bubble up to App.tsx which will fetch user data and navigate
+            onSuccess();
         } catch (error: any) {
             // Read backend error message directly from your response body structure
             const errorMsg = error.response?.data?.message || 'Invalid email address or password.';
