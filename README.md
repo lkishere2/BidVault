@@ -60,8 +60,8 @@
 
 | Member | Role |
 |--------|------|
-| **Trần Vũ Duy Hưng** | System design, database architecture, caching layers |
-| **Vũ Long Khánh** | Security, authentication & authorization, ReactJS web UI |
+| **Trần Vũ Duy Hưng** | System design, business logic, caching layers, Deployment |
+| **Vũ Long Khánh** | Security, authentication & authorization,database architecture, ReactJS web UI |
 | **Nguyễn Hoàng Lâm** | Feature testing (JUnit/Mockito), JavaFX UI, RESTful API |
 | **Đinh Thái Hữu Khánh** | Feature testing (JUnit/Mockito), JavaFX UI, RESTful API |
 
@@ -242,6 +242,7 @@ Request → JWT Filter → Redis cache hit? ──Yes──→ Use cached UserDe
 #### Bidding
 
 - Users can browse and place bids on active auctions.
+- Race conditions( simultaneous bid attempts ) are prevented using Pessimistic Lock and dead bid draining system, can be slower on production since multi-cloud architecture
 
 ---
 
@@ -275,21 +276,23 @@ Request → JWT Filter → Redis cache hit? ──Yes──→ Use cached UserDe
 ### Run with Docker
 
 ```bash
-git clone https://github.com/lkishere2/BidVault.git
+git clone https://github.com/lkishere2/BidVault
 cd BidVault
-docker-compose up --build
+docker-compose up --build -d
 ```
+
+WARNING : DOCKER FRONTEND IS PORT 80, change before actually use it!
 
 ### Run locally
 
 ```bash
 # Backend
 cd backend
-./mvnw spring-boot:run
+./mvnw javafx:run
 
 # Frontend
 cd frontend/auction-app
-npm install
+npm install (installing node_modules)
 npm run dev
 ```
 
