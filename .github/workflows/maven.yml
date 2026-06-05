@@ -50,3 +50,11 @@ jobs:
         # Mail
         SUPPORT_EMAIL: ${{ secrets.SUPPORT_EMAIL }}
         APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
+
+    - name: Upload Build Logs
+      uses: actions/upload-artifact@v4
+      if: always() # This ensures the logs are uploaded even if the build fails
+      with:
+        name: maven-build-logs
+        path: |
+          ./backend/target/surefire-reports/
