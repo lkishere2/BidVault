@@ -1,4 +1,4 @@
-package com.auction.app.connection;
+package com.auction.app.infrastructure.connection;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
