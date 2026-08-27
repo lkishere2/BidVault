@@ -1,15 +1,14 @@
 package com.auction.app.domains.auction.auction.validator;
-
 import java.time.Instant;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
-import com.auction.app.domains.auction.auction.model.Auction;
-import com.auction.app.domains.auction.auction.model.AuctionStatus;
+import com.auction.app.domains.auction.auction.entities.Auction;
+import com.auction.app.domains.auction.auction.entities.AuctionStatus;
 import com.auction.app.domains.auction.exceptions.InvalidEndTimeException;
 import com.auction.app.domains.auction.exceptions.InvalidProductQuantity;
 import com.auction.app.domains.auction.exceptions.NotUpcommingAuctionException;
-import com.auction.app.domains.users.users.model.User;
+import com.auction.app.domains.users.users.entities.User;
 
 @Service
 public class AuctionValidatorServiceImpl implements AuctionValidatorService {

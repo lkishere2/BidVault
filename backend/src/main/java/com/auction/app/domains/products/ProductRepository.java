@@ -1,6 +1,5 @@
 package com.auction.app.domains.products;
-
-import com.auction.app.domains.products.model.Product;
+import com.auction.app.domains.products.entities.Product;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

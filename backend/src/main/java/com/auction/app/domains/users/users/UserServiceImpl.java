@@ -1,12 +1,11 @@
 package com.auction.app.domains.users.users;
-
 import com.auction.app.domains.auth.auth.AuthService;
 import com.auction.app.domains.auth.auth.dtos.VerifyRequest;
 import com.auction.app.domains.users.exceptions.InvalidPasswordException;
 import com.auction.app.domains.users.exceptions.UserUpdateException;
 import com.auction.app.domains.users.users.dtos.*;
-import com.auction.app.domains.users.users.model.User;
-import com.auction.app.infrastructure.security.SecurityUtils;
+import com.auction.app.domains.users.users.entities.User;
+import com.auction.app.shared.security.SecurityUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -92,9 +91,9 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Admins cannot modify their own role.");
         }
         
-        com.auction.app.domains.users.users.model.Role newRole;
+        com.auction.app.domains.users.users.entities.Role newRole;
         try {
-            newRole = com.auction.app.domains.users.users.model.Role.valueOf(role.toUpperCase());
+            newRole = com.auction.app.domains.users.users.entities.Role.valueOf(role.toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Invalid role provided.");
         }

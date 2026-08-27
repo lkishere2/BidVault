@@ -1,5 +1,4 @@
 package com.auction.app.domains.users.users.dtos;
-
 import jakarta.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.URL;
 import lombok.Data;

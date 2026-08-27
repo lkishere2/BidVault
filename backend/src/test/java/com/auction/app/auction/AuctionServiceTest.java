@@ -1,17 +1,16 @@
 package com.auction.app.auction;
-
 import com.auction.app.domains.auction.auction.AuctionRepository;
 import com.auction.app.domains.auction.auction.AuctionServiceImpl;
 import com.auction.app.domains.auction.auction.dtos.AuctionRequest;
 import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
-import com.auction.app.domains.auction.auction.model.Auction;
+import com.auction.app.domains.auction.auction.entities.Auction;
 import com.auction.app.domains.auction.auction.redis.AuctionRedisService;
 import com.auction.app.domains.auction.auction.validator.AuctionValidatorService;
 import com.auction.app.domains.notifications.NotificationService;
 import com.auction.app.domains.products.ProductRepository;
-import com.auction.app.domains.products.model.Product;
-import com.auction.app.domains.users.users.model.User;
-import com.auction.app.infrastructure.security.SecurityUtils;
+import com.auction.app.domains.products.entities.Product;
+import com.auction.app.domains.users.users.entities.User;
+import com.auction.app.shared.security.SecurityUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

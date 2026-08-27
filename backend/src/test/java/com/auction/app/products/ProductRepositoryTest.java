@@ -1,5 +1,4 @@
 package com.auction.app.products;
-
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -19,10 +18,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
 
 import com.auction.app.domains.products.ProductRepository;
-import com.auction.app.domains.products.model.Product;
-import com.auction.app.domains.products.model.Tag;
+import com.auction.app.domains.products.entities.Product;
+import com.auction.app.domains.products.entities.Tag;
 import com.auction.app.domains.users.users.UserRepository;
-import com.auction.app.domains.users.users.model.User;
+import com.auction.app.domains.users.users.entities.User;
 
 @DataJpaTest
 @ContextConfiguration(classes = com.auction.app.TestApplication.class)

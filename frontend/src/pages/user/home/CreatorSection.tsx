@@ -16,10 +16,10 @@ export interface Creator {
     facebookName?: string;
 }
 
-import img1 from '../../../assets/1.gif';
-import img2 from '../../../assets/2.png';
-import img3 from '../../../assets/3.jpg';
-import img4 from '../../../assets/4.jpg';
+import img1 from '../../../assets/2cpk.gif';
+import img2 from '../../../assets/lkld.jpg';
+import img3 from '../../../assets/waterboy.jpg';
+import img4 from '../../../assets/kaiser.jpg';
 
 const CREATORS: Creator[] = [
     {

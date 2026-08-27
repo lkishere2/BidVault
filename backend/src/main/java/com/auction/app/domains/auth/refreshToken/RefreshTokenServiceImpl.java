@@ -1,9 +1,8 @@
 package com.auction.app.domains.auth.refreshToken;
-
 import com.auction.app.domains.auth.exceptions.RefreshTokenExpiredException;
 import com.auction.app.domains.auth.exceptions.RefreshTokenNotFoundException;
 import com.auction.app.domains.auth.exceptions.RefreshTokenSuspiciousActivityException;
-import com.auction.app.domains.users.users.model.User;
+import com.auction.app.domains.users.users.entities.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 

@@ -1,5 +1,4 @@
 package com.auction.app.domains.auction.bids.dtos;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

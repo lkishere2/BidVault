@@ -1,7 +1,6 @@
 package com.auction.app.domains.feedback;
-
-import com.auction.app.domains.feedback.model.Feedback;
-import com.auction.app.domains.users.users.model.User;
+import com.auction.app.domains.feedback.entities.Feedback;
+import com.auction.app.domains.users.users.entities.User;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;

@@ -1,5 +1,4 @@
 package com.auction.app.domains.users.connection;
-
 import com.auction.app.domains.users.connection.dtos.UserStats;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

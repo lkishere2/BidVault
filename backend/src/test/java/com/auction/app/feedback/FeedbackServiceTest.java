@@ -1,5 +1,4 @@
 package com.auction.app.feedback;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -35,9 +34,9 @@ import com.auction.app.domains.feedback.FeedbackServiceImpl;
 import com.auction.app.domains.feedback.dtos.FeedbackRequest;
 import com.auction.app.domains.feedback.dtos.FeedbackResponse;
 import com.auction.app.domains.feedback.exceptions.FeedBackNotFoundException;
-import com.auction.app.domains.feedback.model.Feedback;
-import com.auction.app.domains.users.users.model.User;
-import com.auction.app.infrastructure.security.TestSecurityUtils;
+import com.auction.app.domains.feedback.entities.Feedback;
+import com.auction.app.domains.users.users.entities.User;
+import com.auction.app.shared.security.TestSecurityUtils;
 
 @ExtendWith(MockitoExtension.class)
 class FeedbackServiceTest {

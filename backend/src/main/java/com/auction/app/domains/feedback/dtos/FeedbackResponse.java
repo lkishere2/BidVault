@@ -1,5 +1,4 @@
 package com.auction.app.domains.feedback.dtos;
-
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;

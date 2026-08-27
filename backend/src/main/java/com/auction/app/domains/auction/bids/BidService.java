@@ -1,8 +1,7 @@
 package com.auction.app.domains.auction.bids;
-
 import com.auction.app.domains.auction.bids.dtos.BidRequest;
 import com.auction.app.domains.auction.bids.dtos.BidResponse;
-import com.auction.app.domains.users.users.model.User;
+import com.auction.app.domains.users.users.entities.User;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -1,5 +1,4 @@
 package com.auction.app.domains.auth.auth.redis;
-
 public interface AuthRedisPort {
 
     // Email registration

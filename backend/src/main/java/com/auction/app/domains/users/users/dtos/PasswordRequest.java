@@ -1,5 +1,4 @@
 package com.auction.app.domains.users.users.dtos;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;

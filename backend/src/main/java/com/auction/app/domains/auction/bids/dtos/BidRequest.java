@@ -1,5 +1,4 @@
 package com.auction.app.domains.auction.bids.dtos;
-
 import java.math.BigDecimal;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;

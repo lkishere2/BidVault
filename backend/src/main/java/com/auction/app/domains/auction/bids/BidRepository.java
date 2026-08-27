@@ -1,5 +1,4 @@
 package com.auction.app.domains.auction.bids;
-
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -7,8 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
-import com.auction.app.domains.auction.bids.model.Bid;
-import com.auction.app.domains.auction.bids.model.BidStatus;
+import com.auction.app.domains.auction.bids.entities.Bid;
+import com.auction.app.domains.auction.bids.entities.BidStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

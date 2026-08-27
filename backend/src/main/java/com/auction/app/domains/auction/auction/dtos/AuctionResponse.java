@@ -1,16 +1,15 @@
 package com.auction.app.domains.auction.auction.dtos;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.auction.app.domains.auction.auction.model.Auction;
-import com.auction.app.domains.auction.auction.model.AuctionStatus;
-import com.auction.app.domains.products.model.Product;
-import com.auction.app.domains.products.model.Tag;
-import com.auction.app.domains.users.users.model.User;
+import com.auction.app.domains.auction.auction.entities.Auction;
+import com.auction.app.domains.auction.auction.entities.AuctionStatus;
+import com.auction.app.domains.products.entities.Product;
+import com.auction.app.domains.products.entities.Tag;
+import com.auction.app.domains.users.users.entities.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -1,9 +1,8 @@
 package com.auction.app.domains.auction.bids.validator;
-
 import java.math.BigDecimal;
 
 import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
-import com.auction.app.domains.users.users.model.User;
+import com.auction.app.domains.users.users.entities.User;
 
 public interface BidValidatorService {
 

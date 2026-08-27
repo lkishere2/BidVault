@@ -1,17 +1,16 @@
 package com.auction.app.domains.auction.bids.validator;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
-import com.auction.app.domains.auction.auction.model.AuctionStatus;
+import com.auction.app.domains.auction.auction.entities.AuctionStatus;
 import com.auction.app.domains.auction.bids.BidRepository;
-import com.auction.app.domains.auction.bids.model.BidStatus;
+import com.auction.app.domains.auction.bids.entities.BidStatus;
 import com.auction.app.domains.auction.exceptions.InsufficientBalanceException;
 import com.auction.app.domains.auction.exceptions.InvalidBidException;
-import com.auction.app.domains.users.users.model.User;
+import com.auction.app.domains.users.users.entities.User;
 
 import lombok.RequiredArgsConstructor;
 

@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS bids (
+    id BIGSERIAL PRIMARY KEY,
+    amount NUMERIC(15, 2) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    placed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    auction_id BIGINT NOT NULL,
+    bidder_id BIGINT NOT NULL,
+    CONSTRAINT fk_bid_auction FOREIGN KEY (auction_id) REFERENCES auctions(id) ON DELETE CASCADE,
+    CONSTRAINT fk_bid_bidder FOREIGN KEY (bidder_id) REFERENCES users(id) ON DELETE CASCADE
+);

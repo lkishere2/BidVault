@@ -1,8 +1,7 @@
 package com.auction.app.domains.auction.auction.validator;
-
 import java.time.Instant;
-import com.auction.app.domains.auction.auction.model.Auction;
-import com.auction.app.domains.users.users.model.User;
+import com.auction.app.domains.auction.auction.entities.Auction;
+import com.auction.app.domains.users.users.entities.User;
 
 public interface AuctionValidatorService {
 

@@ -1,10 +1,9 @@
 package com.auction.app.domains.notifications;
-
 import com.auction.app.domains.notifications.dtos.NotificationResponse;
-import com.auction.app.domains.notifications.model.Notification;
-import com.auction.app.domains.notifications.model.NotificationType;
+import com.auction.app.domains.notifications.entities.Notification;
+import com.auction.app.domains.notifications.entities.NotificationType;
 import com.auction.app.domains.users.connection.ConnectionRepository;
-import com.auction.app.domains.users.users.model.User;
+import com.auction.app.domains.users.users.entities.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;

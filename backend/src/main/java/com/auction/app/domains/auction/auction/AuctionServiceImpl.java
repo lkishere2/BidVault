@@ -1,5 +1,4 @@
 package com.auction.app.domains.auction.auction;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,21 +8,21 @@ import java.util.Map;
 import com.auction.app.domains.auction.auction.dtos.AuctionFindingRequest;
 import com.auction.app.domains.auction.auction.dtos.AuctionRequest;
 import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
-import com.auction.app.domains.auction.auction.model.Auction;
-import com.auction.app.domains.auction.auction.model.AuctionStatus;
+import com.auction.app.domains.auction.auction.entities.Auction;
+import com.auction.app.domains.auction.auction.entities.AuctionStatus;
 import com.auction.app.domains.auction.auction.redis.AuctionRedisService;
 import com.auction.app.domains.auction.auction.validator.AuctionValidatorService;
 import com.auction.app.domains.auction.exceptions.*;
 import com.auction.app.domains.notifications.NotificationService;
 import com.auction.app.domains.products.exceptions.ProductNotFoundException;
-import com.auction.app.domains.users.users.model.User;
-import com.auction.app.infrastructure.security.SecurityUtils;
+import com.auction.app.domains.users.users.entities.User;
+import com.auction.app.shared.security.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.auction.app.domains.products.model.Product;
+import com.auction.app.domains.products.entities.Product;
 import com.auction.app.domains.products.ProductRepository;
 
 import lombok.RequiredArgsConstructor;

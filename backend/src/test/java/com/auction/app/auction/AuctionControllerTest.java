@@ -1,9 +1,8 @@
 package com.auction.app.auction;
-
 import com.auction.app.domains.auction.auction.AuctionController;
 import com.auction.app.domains.auction.auction.AuctionService;
 import com.auction.app.domains.users.users.UserRepository;
-import com.auction.app.infrastructure.security.JwtService;
+import com.auction.app.shared.security.JwtService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

@@ -1,5 +1,4 @@
 package com.auction.app.products;
-
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
@@ -33,8 +32,8 @@ import com.auction.app.domains.products.ProductController;
 import com.auction.app.domains.products.ProductService;
 import com.auction.app.domains.products.dtos.ProductRequest;
 import com.auction.app.domains.products.dtos.ProductResponse;
-import com.auction.app.infrastructure.exception.GlobalExceptionHandler;
-import com.auction.app.infrastructure.security.JwtAuthenticationFilter;
+import com.auction.app.shared.exception.GlobalExceptionHandler;
+import com.auction.app.shared.security.JwtAuthenticationFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = ProductController.class,

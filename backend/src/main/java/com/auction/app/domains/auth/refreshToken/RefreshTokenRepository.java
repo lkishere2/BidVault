@@ -1,5 +1,4 @@
 package com.auction.app.domains.auth.refreshToken;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

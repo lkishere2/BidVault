@@ -1,5 +1,4 @@
 package com.auction.app.domains.users.connection.dtos;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

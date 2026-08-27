@@ -1,10 +1,9 @@
 package com.auction.app.domains.feedback;
-
 import com.auction.app.domains.feedback.dtos.*;
 import com.auction.app.domains.feedback.exceptions.FeedBackNotFoundException;
-import com.auction.app.domains.feedback.model.Feedback;
-import com.auction.app.domains.users.users.model.User;
-import com.auction.app.infrastructure.security.SecurityUtils;
+import com.auction.app.domains.feedback.entities.Feedback;
+import com.auction.app.domains.users.users.entities.User;
+import com.auction.app.shared.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.security.access.AccessDeniedException;

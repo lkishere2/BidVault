@@ -1,5 +1,4 @@
 package com.auction.app;
-
 import java.lang.reflect.Field;
 
 public final class TestReflectionUtils {

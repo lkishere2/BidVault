@@ -1,5 +1,4 @@
 package com.auction.app.transaction;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,10 +30,10 @@ import com.auction.app.domains.transaction.TransactionService;
 import com.auction.app.domains.transaction.dtos.ClientRequest;
 import com.auction.app.domains.transaction.dtos.TransactionRequest;
 import com.auction.app.domains.transaction.dtos.TransactionResponse;
-import com.auction.app.domains.transaction.model.TransactionStatus;
-import com.auction.app.domains.transaction.model.TransactionType;
-import com.auction.app.infrastructure.exception.GlobalExceptionHandler;
-import com.auction.app.infrastructure.security.JwtAuthenticationFilter;
+import com.auction.app.domains.transaction.entities.TransactionStatus;
+import com.auction.app.domains.transaction.entities.TransactionType;
+import com.auction.app.shared.exception.GlobalExceptionHandler;
+import com.auction.app.shared.security.JwtAuthenticationFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(

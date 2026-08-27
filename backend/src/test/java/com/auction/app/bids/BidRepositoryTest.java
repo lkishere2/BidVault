@@ -1,16 +1,15 @@
 package com.auction.app.bids;
-
 import com.auction.app.TestApplication;
 import com.auction.app.domains.auction.auction.AuctionRepository;
-import com.auction.app.domains.auction.auction.model.Auction;
-import com.auction.app.domains.auction.auction.model.AuctionStatus;
+import com.auction.app.domains.auction.auction.entities.Auction;
+import com.auction.app.domains.auction.auction.entities.AuctionStatus;
 import com.auction.app.domains.auction.bids.BidRepository;
-import com.auction.app.domains.auction.bids.model.Bid;
-import com.auction.app.domains.auction.bids.model.BidStatus;
+import com.auction.app.domains.auction.bids.entities.Bid;
+import com.auction.app.domains.auction.bids.entities.BidStatus;
 import com.auction.app.domains.products.ProductRepository;
-import com.auction.app.domains.products.model.Product;
+import com.auction.app.domains.products.entities.Product;
 import com.auction.app.domains.users.users.UserRepository;
-import com.auction.app.domains.users.users.model.User;
+import com.auction.app.domains.users.users.entities.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

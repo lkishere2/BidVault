@@ -1,9 +1,8 @@
 package com.auction.app.bids.validator;
-
 import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
 import com.auction.app.domains.auction.bids.BidRepository;
 import com.auction.app.domains.auction.bids.validator.BidValidatorServiceImpl;
-import com.auction.app.domains.users.users.model.User;
+import com.auction.app.domains.users.users.entities.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,7 +45,7 @@ public class BidValidatorServiceTest {
     @Test
     void isBidEligible_ShouldReturnTrue_WhenAmountIsSufficient() {
         AuctionResponse response = new AuctionResponse();
-        response.setStatus(com.auction.app.domains.auction.auction.model.AuctionStatus.ACTIVE);
+        response.setStatus(com.auction.app.domains.auction.auction.entities.AuctionStatus.ACTIVE);
         response.setCurrentPrice(new BigDecimal("100.00"));
         response.setMinBidIncrement(new BigDecimal("5.00"));
         

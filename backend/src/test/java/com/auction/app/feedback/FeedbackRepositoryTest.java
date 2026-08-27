@@ -1,8 +1,7 @@
 package com.auction.app.feedback;
-
-import com.auction.app.domains.feedback.model.Feedback;
+import com.auction.app.domains.feedback.entities.Feedback;
 import com.auction.app.domains.feedback.FeedbackRepository;
-import com.auction.app.domains.users.users.model.User;
+import com.auction.app.domains.users.users.entities.User;
 import com.auction.app.domains.users.users.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

@@ -1,5 +1,4 @@
 package com.auction.app.domains.auction.auction.redis;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -9,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
-import com.auction.app.domains.auction.auction.model.AuctionStatus;
+import com.auction.app.domains.auction.auction.entities.AuctionStatus;
 import com.auction.app.domains.auction.bids.dtos.PendingBid;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisCallback;

@@ -1,5 +1,4 @@
 package com.auction.app.auth;
-
 import java.util.Map;
 
 import org.junit.jupiter.api.Nested;
@@ -31,7 +30,7 @@ import com.auction.app.domains.auth.exceptions.EmailSendFailureException;
 import com.auction.app.domains.auth.exceptions.InvalidPasswordResetFlowException;
 import com.auction.app.domains.auth.exceptions.InvalidVerificationCodeException;
 import com.auction.app.domains.users.exceptions.UserNotFoundException;
-import com.auction.app.infrastructure.exception.GlobalExceptionHandler;
+import com.auction.app.shared.exception.GlobalExceptionHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(AuthController.class)

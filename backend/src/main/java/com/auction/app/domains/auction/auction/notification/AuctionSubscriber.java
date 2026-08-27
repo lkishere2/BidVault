@@ -1,5 +1,4 @@
 package com.auction.app.domains.auction.auction.notification;
-
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -81,16 +80,16 @@ public class AuctionSubscriber implements MessageListener {
                     if (cachedCount > dbCount) {
                         // Persist a representative bid if none exists as HELD in DB
                         try {
-                            java.util.List<com.auction.app.domains.auction.bids.model.Bid> held = bidRepository.findByAuctionIdAndStatus(auctionId, com.auction.app.domains.auction.bids.model.BidStatus.HELD);
+                            java.util.List<com.auction.app.domains.auction.bids.entities.Bid> held = bidRepository.findByAuctionIdAndStatus(auctionId, com.auction.app.domains.auction.bids.entities.BidStatus.HELD);
                             if (held == null || held.isEmpty()) {
                                 Long winnerId = cached.getWinnerId();
                                 if (winnerId != null) {
                                     userRepository.findById(winnerId).ifPresent(winner -> {
-                                        com.auction.app.domains.auction.bids.model.Bid newBid = com.auction.app.domains.auction.bids.model.Bid.builder()
+                                        com.auction.app.domains.auction.bids.entities.Bid newBid = com.auction.app.domains.auction.bids.entities.Bid.builder()
                                                 .auction(dbAuction)
                                                 .bidder(winner)
                                                 .amount(cached.getCurrentPrice())
-                                                .status(com.auction.app.domains.auction.bids.model.BidStatus.HELD)
+                                                .status(com.auction.app.domains.auction.bids.entities.BidStatus.HELD)
                                                 .build();
                                         bidRepository.save(newBid);
                                         log.info("Persisted bid from Redis cache for auction #{} (bidCount {})", auctionId, cachedCount);

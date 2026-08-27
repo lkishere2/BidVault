@@ -1,12 +1,11 @@
 package com.auction.app.domains.auction.bids;
-
 import java.security.Principal;
 
 import com.auction.app.domains.auction.auction.AuctionService;
 import com.auction.app.domains.auction.bids.dtos.BidRequest;
 import com.auction.app.domains.auction.bids.dtos.BidResponse;
 import com.auction.app.domains.users.users.UserRepository;
-import com.auction.app.domains.users.users.model.User;
+import com.auction.app.domains.users.users.entities.User;
 import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

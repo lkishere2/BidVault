@@ -1,5 +1,4 @@
 package com.auction.app.users;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -19,8 +18,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ContextConfiguration;
 
 import com.auction.app.domains.users.users.UserRepository;
-import com.auction.app.domains.users.users.model.Role;
-import com.auction.app.domains.users.users.model.User;
+import com.auction.app.domains.users.users.entities.Role;
+import com.auction.app.domains.users.users.entities.User;
 
 import jakarta.persistence.EntityManager;
 

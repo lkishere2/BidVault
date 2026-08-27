@@ -1,18 +1,17 @@
 package com.auction.app.domains.auction.auction.scheduler;
-
 import com.auction.app.domains.auction.auction.*;
 import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
-import com.auction.app.domains.auction.auction.model.Auction;
-import com.auction.app.domains.auction.auction.model.AuctionStatus;
+import com.auction.app.domains.auction.auction.entities.Auction;
+import com.auction.app.domains.auction.auction.entities.AuctionStatus;
 import com.auction.app.domains.auction.auction.notification.AuctionPublisher;
 import com.auction.app.domains.auction.auction.redis.AuctionRedisService;
 import com.auction.app.domains.auction.exceptions.AuctionNotFoundException;
-import com.auction.app.domains.auction.bids.model.Bid;
+import com.auction.app.domains.auction.bids.entities.Bid;
 import com.auction.app.domains.auction.bids.BidRepository;
-import com.auction.app.domains.auction.bids.model.BidStatus;
-import com.auction.app.domains.products.model.Product;
+import com.auction.app.domains.auction.bids.entities.BidStatus;
+import com.auction.app.domains.products.entities.Product;
 import com.auction.app.domains.products.ProductRepository;
-import com.auction.app.domains.users.users.model.User;
+import com.auction.app.domains.users.users.entities.User;
 import com.auction.app.domains.users.users.UserRepository;
 
 import org.springframework.stereotype.Service;

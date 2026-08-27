@@ -1,7 +1,6 @@
 package com.auction.app.domains.notifications;
-
 import com.auction.app.domains.notifications.dtos.NotificationResponse;
-import com.auction.app.infrastructure.security.CachedUserDetails;
+import com.auction.app.shared.security.CachedUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;

@@ -1,5 +1,4 @@
 package com.auction.app.auction.notification;
-
 import com.auction.app.domains.auction.auction.notification.AuctionPublisher;
 import com.auction.app.domains.auction.bids.dtos.BidFeedEvent;
 import org.junit.jupiter.api.Test;

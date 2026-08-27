@@ -1,12 +1,11 @@
 package com.auction.app.domains.products;
-
 import com.auction.app.domains.products.dtos.ProductRequest;
 import com.auction.app.domains.products.dtos.ProductResponse;
 import com.auction.app.domains.products.exceptions.ProductNotFoundException;
-import com.auction.app.domains.products.model.Product;
-import com.auction.app.domains.products.model.Tag;
-import com.auction.app.domains.users.users.model.User;
-import com.auction.app.infrastructure.security.SecurityUtils;
+import com.auction.app.domains.products.entities.Product;
+import com.auction.app.domains.products.entities.Tag;
+import com.auction.app.domains.users.users.entities.User;
+import com.auction.app.shared.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

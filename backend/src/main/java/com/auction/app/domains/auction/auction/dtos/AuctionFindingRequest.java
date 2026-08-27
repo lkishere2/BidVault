@@ -1,10 +1,9 @@
 package com.auction.app.domains.auction.auction.dtos;
-
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Set;
-import com.auction.app.domains.auction.auction.model.AuctionStatus;
-import com.auction.app.domains.products.model.Tag;
+import com.auction.app.domains.auction.auction.entities.AuctionStatus;
+import com.auction.app.domains.products.entities.Tag;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;

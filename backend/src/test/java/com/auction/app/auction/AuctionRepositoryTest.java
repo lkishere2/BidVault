@@ -1,14 +1,13 @@
 package com.auction.app.auction;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.auction.app.domains.auction.auction.model.Auction;
+import com.auction.app.domains.auction.auction.entities.Auction;
 import com.auction.app.domains.auction.auction.AuctionRepository;
-import com.auction.app.domains.auction.auction.model.AuctionStatus;
-import com.auction.app.domains.products.model.Product;
+import com.auction.app.domains.auction.auction.entities.AuctionStatus;
+import com.auction.app.domains.products.entities.Product;
 import com.auction.app.domains.products.ProductRepository;
-import com.auction.app.domains.products.model.Tag;
-import com.auction.app.domains.users.users.model.User;
+import com.auction.app.domains.products.entities.Tag;
+import com.auction.app.domains.users.users.entities.User;
 import com.auction.app.domains.users.users.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

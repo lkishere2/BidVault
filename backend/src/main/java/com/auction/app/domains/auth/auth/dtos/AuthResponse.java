@@ -1,5 +1,4 @@
 package com.auction.app.domains.auth.auth.dtos;
-
 import lombok.*;
 
 @Getter

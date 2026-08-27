@@ -1,10 +1,9 @@
 package com.auction.app.transaction;
-
-import com.auction.app.domains.transaction.model.Transaction;
+import com.auction.app.domains.transaction.entities.Transaction;
 import com.auction.app.domains.transaction.TransactionRepository;
-import com.auction.app.domains.transaction.model.TransactionStatus;
-import com.auction.app.domains.transaction.model.TransactionType;
-import com.auction.app.domains.users.users.model.User;
+import com.auction.app.domains.transaction.entities.TransactionStatus;
+import com.auction.app.domains.transaction.entities.TransactionType;
+import com.auction.app.domains.users.users.entities.User;
 import com.auction.app.domains.users.users.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

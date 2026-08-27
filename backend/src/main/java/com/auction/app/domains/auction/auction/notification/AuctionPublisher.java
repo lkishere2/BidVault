@@ -1,9 +1,8 @@
 package com.auction.app.domains.auction.auction.notification;
-
 import java.math.BigDecimal;
 import java.time.Instant;
 
-import com.auction.app.domains.auction.auction.model.Auction;
+import com.auction.app.domains.auction.auction.entities.Auction;
 import com.auction.app.domains.auction.bids.dtos.BidFeedEvent;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;

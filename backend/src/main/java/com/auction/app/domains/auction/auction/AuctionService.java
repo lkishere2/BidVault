@@ -1,5 +1,4 @@
 package com.auction.app.domains.auction.auction;
-
 import java.util.List;
 import com.auction.app.domains.auction.auction.dtos.AuctionFindingRequest;
 import com.auction.app.domains.auction.auction.dtos.AuctionRequest;

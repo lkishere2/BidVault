@@ -1,10 +1,9 @@
 package com.auction.app.domains.auction.auction.scheduler;
-
 import java.time.Instant;
 import java.util.List;
 
 import com.auction.app.domains.auction.auction.AuctionRepository;
-import com.auction.app.domains.auction.auction.model.AuctionStatus;
+import com.auction.app.domains.auction.auction.entities.AuctionStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 

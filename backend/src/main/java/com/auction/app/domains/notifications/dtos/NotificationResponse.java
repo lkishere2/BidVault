@@ -1,5 +1,4 @@
 package com.auction.app.domains.notifications.dtos;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

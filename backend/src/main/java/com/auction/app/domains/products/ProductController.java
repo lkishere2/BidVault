@@ -1,5 +1,4 @@
 package com.auction.app.domains.products;
-
 import com.auction.app.domains.products.dtos.ProductRequest;
 import com.auction.app.domains.products.dtos.ProductResponse;
 import jakarta.validation.Valid;

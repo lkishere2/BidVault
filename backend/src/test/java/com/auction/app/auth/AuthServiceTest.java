@@ -1,5 +1,4 @@
 package com.auction.app.auth;
-
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,9 +39,9 @@ import com.auction.app.domains.auth.refreshToken.RefreshToken;
 import com.auction.app.domains.auth.refreshToken.RefreshTokenService;
 import com.auction.app.domains.users.exceptions.UserNotFoundException;
 import com.auction.app.domains.users.users.UserRepository;
-import com.auction.app.domains.users.users.model.Provider;
-import com.auction.app.domains.users.users.model.User;
-import com.auction.app.infrastructure.security.JwtService;
+import com.auction.app.domains.users.users.entities.Provider;
+import com.auction.app.domains.users.users.entities.User;
+import com.auction.app.shared.security.JwtService;
 
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;

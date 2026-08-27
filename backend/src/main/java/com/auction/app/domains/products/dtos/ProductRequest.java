@@ -1,6 +1,5 @@
 package com.auction.app.domains.products.dtos;
-
-import com.auction.app.domains.products.model.Tag;
+import com.auction.app.domains.products.entities.Tag;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.URL;
 import lombok.Data;

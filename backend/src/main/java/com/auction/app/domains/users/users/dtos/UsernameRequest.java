@@ -1,5 +1,4 @@
 package com.auction.app.domains.users.users.dtos;
-
 import lombok.Getter;
 import lombok.Setter;
 

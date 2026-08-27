@@ -1,8 +1,7 @@
 package com.auction.app.auction.validator;
-
-import com.auction.app.domains.auction.auction.model.Auction;
+import com.auction.app.domains.auction.auction.entities.Auction;
 import com.auction.app.domains.auction.auction.validator.AuctionValidatorServiceImpl;
-import com.auction.app.domains.users.users.model.User;
+import com.auction.app.domains.users.users.entities.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

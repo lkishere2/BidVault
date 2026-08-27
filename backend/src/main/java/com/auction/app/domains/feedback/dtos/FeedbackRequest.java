@@ -1,5 +1,4 @@
 package com.auction.app.domains.feedback.dtos;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;

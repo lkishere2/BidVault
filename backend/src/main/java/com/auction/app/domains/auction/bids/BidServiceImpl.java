@@ -1,5 +1,4 @@
 package com.auction.app.domains.auction.bids;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
@@ -19,8 +18,8 @@ import com.auction.app.domains.auction.bids.dtos.BidNotificationPayload;
 import com.auction.app.domains.auction.bids.dtos.BidRequest;
 import com.auction.app.domains.auction.bids.dtos.BidResponse;
 import com.auction.app.domains.auction.bids.dtos.PendingBid;
-import com.auction.app.domains.auction.bids.model.Bid;
-import com.auction.app.domains.auction.bids.model.BidStatus;
+import com.auction.app.domains.auction.bids.entities.Bid;
+import com.auction.app.domains.auction.bids.entities.BidStatus;
 import com.auction.app.domains.auction.bids.validator.BidValidatorService;
 import com.auction.app.domains.auction.exceptions.*;
 
@@ -31,12 +30,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.auction.app.domains.auction.auction.model.Auction;
+import com.auction.app.domains.auction.auction.entities.Auction;
 import com.auction.app.domains.auction.auction.AuctionRepository;
-import com.auction.app.domains.auction.auction.model.AuctionStatus;
-import com.auction.app.domains.users.users.model.User;
+import com.auction.app.domains.auction.auction.entities.AuctionStatus;
+import com.auction.app.domains.users.users.entities.User;
 import com.auction.app.domains.users.users.UserRepository;
-import com.auction.app.infrastructure.security.SecurityUtils;
+import com.auction.app.shared.security.SecurityUtils;
 
 import lombok.extern.slf4j.Slf4j;
 

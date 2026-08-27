@@ -1,5 +1,4 @@
 package com.auction.app.domains.auth.refreshToken;
-
 import jakarta.persistence.*;
 import lombok.*;
 

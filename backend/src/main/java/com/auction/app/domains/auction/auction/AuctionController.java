@@ -1,10 +1,9 @@
 package com.auction.app.domains.auction.auction;
-
 import com.auction.app.domains.auction.auction.dtos.AuctionFindingRequest;
 import com.auction.app.domains.auction.auction.dtos.AuctionRequest;
 import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
-import com.auction.app.domains.auction.auction.model.AuctionStatus;
-import com.auction.app.domains.products.model.Tag;
+import com.auction.app.domains.auction.auction.entities.AuctionStatus;
+import com.auction.app.domains.products.entities.Tag;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;

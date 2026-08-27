@@ -1,5 +1,4 @@
 package com.auction.app.domains.auction.auction.redis;
-
 import com.auction.app.domains.auction.auction.dtos.AuctionResponse;
 import com.auction.app.domains.auction.bids.dtos.PendingBid;
 

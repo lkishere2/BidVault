@@ -1,5 +1,4 @@
 package com.auction.app.domains.auth.auth.redis;
-
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import java.util.concurrent.TimeUnit;

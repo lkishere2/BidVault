@@ -1,9 +1,8 @@
 package com.auction.app.domains.auction.bids.dtos;
-
 import java.math.BigDecimal;
 import java.time.Instant;
 
-import com.auction.app.domains.auction.bids.model.Bid;
+import com.auction.app.domains.auction.bids.entities.Bid;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

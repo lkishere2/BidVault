@@ -1,12 +1,11 @@
 package com.auction.app.notifications;
-
 import com.auction.app.domains.notifications.NotificationRepository;
 import com.auction.app.domains.notifications.NotificationServiceImpl;
 import com.auction.app.domains.notifications.dtos.NotificationResponse;
-import com.auction.app.domains.notifications.model.Notification;
-import com.auction.app.domains.notifications.model.NotificationType;
+import com.auction.app.domains.notifications.entities.Notification;
+import com.auction.app.domains.notifications.entities.NotificationType;
 import com.auction.app.domains.users.connection.ConnectionRepository;
-import com.auction.app.domains.users.users.model.User;
+import com.auction.app.domains.users.users.entities.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

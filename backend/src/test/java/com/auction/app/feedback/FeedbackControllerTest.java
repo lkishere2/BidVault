@@ -1,10 +1,9 @@
 package com.auction.app.feedback;
-
 import com.auction.app.domains.feedback.FeedbackController;
 import com.auction.app.domains.feedback.FeedbackService;
 import com.auction.app.domains.feedback.dtos.FeedbackRequest;
 import com.auction.app.domains.feedback.dtos.FeedbackResponse;
-import com.auction.app.infrastructure.security.JwtAuthenticationFilter;
+import com.auction.app.shared.security.JwtAuthenticationFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

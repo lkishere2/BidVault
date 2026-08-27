@@ -1,5 +1,4 @@
 package com.auction.app.users;
-
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -32,8 +31,8 @@ import com.auction.app.domains.users.users.UserService;
 import com.auction.app.domains.users.users.dtos.PasswordRequest;
 import com.auction.app.domains.users.users.dtos.UserResponse;
 import com.auction.app.domains.users.users.dtos.UsernameRequest;
-import com.auction.app.infrastructure.exception.GlobalExceptionHandler;
-import com.auction.app.infrastructure.security.JwtAuthenticationFilter;
+import com.auction.app.shared.exception.GlobalExceptionHandler;
+import com.auction.app.shared.security.JwtAuthenticationFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(

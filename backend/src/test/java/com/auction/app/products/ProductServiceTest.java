@@ -1,5 +1,4 @@
 package com.auction.app.products;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -34,10 +33,10 @@ import com.auction.app.domains.products.ProductServiceImpl;
 import com.auction.app.domains.products.dtos.ProductRequest;
 import com.auction.app.domains.products.dtos.ProductResponse;
 import com.auction.app.domains.products.exceptions.ProductNotFoundException;
-import com.auction.app.domains.products.model.Product;
-import com.auction.app.domains.products.model.Tag;
-import com.auction.app.domains.users.users.model.User;
-import com.auction.app.infrastructure.security.TestSecurityUtils;
+import com.auction.app.domains.products.entities.Product;
+import com.auction.app.domains.products.entities.Tag;
+import com.auction.app.domains.users.users.entities.User;
+import com.auction.app.shared.security.TestSecurityUtils;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {

@@ -1,5 +1,4 @@
 package com.auction.app.transaction;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,13 +35,13 @@ import com.auction.app.domains.transaction.exceptions.InsufficientFundsException
 import com.auction.app.domains.transaction.exceptions.InvalidTransactionStateException;
 import com.auction.app.domains.transaction.exceptions.TransactionNotFoundException;
 import com.auction.app.domains.transaction.exceptions.UnauthorizedTransactionException;
-import com.auction.app.domains.transaction.model.Transaction;
-import com.auction.app.domains.transaction.model.TransactionStatus;
-import com.auction.app.domains.transaction.model.TransactionType;
+import com.auction.app.domains.transaction.entities.Transaction;
+import com.auction.app.domains.transaction.entities.TransactionStatus;
+import com.auction.app.domains.transaction.entities.TransactionType;
 import com.auction.app.domains.users.exceptions.UserNotFoundException;
 import com.auction.app.domains.users.users.UserRepository;
-import com.auction.app.domains.users.users.model.User;
-import com.auction.app.infrastructure.security.TestSecurityUtils;
+import com.auction.app.domains.users.users.entities.User;
+import com.auction.app.shared.security.TestSecurityUtils;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTest {

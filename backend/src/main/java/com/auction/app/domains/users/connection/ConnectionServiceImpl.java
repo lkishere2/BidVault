@@ -1,14 +1,13 @@
 package com.auction.app.domains.users.connection;
-
 import com.auction.app.domains.users.connection.dtos.UserStats;
-import com.auction.app.domains.users.connection.model.Connection;
+import com.auction.app.domains.users.connection.entities.Connection;
 import com.auction.app.domains.users.exceptions.UserNotFoundException;
 import com.auction.app.domains.users.exceptions.SelfFollowException;
 import com.auction.app.domains.notifications.NotificationService;
-import com.auction.app.domains.notifications.model.NotificationType;
-import com.auction.app.domains.users.users.model.User;
+import com.auction.app.domains.notifications.entities.NotificationType;
+import com.auction.app.domains.users.users.entities.User;
 import com.auction.app.domains.users.users.UserRepository;
-import com.auction.app.infrastructure.security.SecurityUtils;
+import com.auction.app.shared.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

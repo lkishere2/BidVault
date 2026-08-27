@@ -1,7 +1,6 @@
 package com.auction.app.domains.users.connection;
-
-import com.auction.app.domains.users.connection.model.Connection;
-import com.auction.app.domains.users.users.model.User;
+import com.auction.app.domains.users.connection.entities.Connection;
+import com.auction.app.domains.users.users.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

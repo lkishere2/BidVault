@@ -1,12 +1,11 @@
 package com.auction.app.domains.transaction;
-
-import com.auction.app.domains.transaction.model.*;
+import com.auction.app.domains.transaction.entities.*;
 import com.auction.app.domains.users.exceptions.UserNotFoundException;
 import com.auction.app.domains.transaction.dtos.*;
 import com.auction.app.domains.transaction.exceptions.*;
-import com.auction.app.domains.users.users.model.User;
+import com.auction.app.domains.users.users.entities.User;
 import com.auction.app.domains.users.users.UserRepository;
-import com.auction.app.infrastructure.security.SecurityUtils;
+import com.auction.app.shared.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

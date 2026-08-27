@@ -1,6 +1,5 @@
 package com.auction.app.domains.notifications;
-
-import com.auction.app.domains.notifications.model.Notification;
+import com.auction.app.domains.notifications.entities.Notification;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;

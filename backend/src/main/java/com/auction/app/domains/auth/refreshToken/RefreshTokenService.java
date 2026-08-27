@@ -1,6 +1,5 @@
 package com.auction.app.domains.auth.refreshToken;
-
-import com.auction.app.domains.users.users.model.User;
+import com.auction.app.domains.users.users.entities.User;
 import jakarta.servlet.http.HttpServletRequest;
 
 public interface RefreshTokenService {

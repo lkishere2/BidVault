@@ -1,12 +1,11 @@
 package com.auction.app.notifications;
-
 import com.auction.app.domains.notifications.NotificationController;
 import com.auction.app.domains.notifications.NotificationService;
 import com.auction.app.domains.notifications.dtos.NotificationResponse;
-import com.auction.app.domains.users.users.model.Role;
-import com.auction.app.infrastructure.exception.GlobalExceptionHandler;
-import com.auction.app.infrastructure.security.CachedUserDetails;
-import com.auction.app.infrastructure.security.JwtAuthenticationFilter;
+import com.auction.app.domains.users.users.entities.Role;
+import com.auction.app.shared.exception.GlobalExceptionHandler;
+import com.auction.app.shared.security.CachedUserDetails;
+import com.auction.app.shared.security.JwtAuthenticationFilter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

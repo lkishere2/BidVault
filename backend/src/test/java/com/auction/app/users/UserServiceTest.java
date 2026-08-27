@@ -1,5 +1,4 @@
 package com.auction.app.users;
-
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -29,9 +28,9 @@ import com.auction.app.domains.users.users.UserServiceImpl;
 import com.auction.app.domains.users.users.dtos.PasswordRequest;
 import com.auction.app.domains.users.users.dtos.UserResponse;
 import com.auction.app.domains.users.users.dtos.UsernameRequest;
-import com.auction.app.domains.users.users.model.Role;
-import com.auction.app.domains.users.users.model.User;
-import com.auction.app.infrastructure.security.TestSecurityUtils;
+import com.auction.app.domains.users.users.entities.Role;
+import com.auction.app.domains.users.users.entities.User;
+import com.auction.app.shared.security.TestSecurityUtils;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
