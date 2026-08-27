@@ -1,4 +1,4 @@
-package com.auction.app.connection;
+package com.auction.app.infrastructure.connection;
 
 import java.util.Map;
 import java.util.function.Function;
