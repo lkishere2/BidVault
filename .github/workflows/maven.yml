@@ -30,7 +30,7 @@ jobs:
         
     - name: Build with Maven
       working-directory: ./backend
-      run: mvn -B verify --file pom.xml
+      run: mvn -B verify --file pom.xml > "build_$(git rev-parse --short HEAD).txt"
       env:
         # Database
         DB_URL: ${{ secrets.DB_URL }}
